@@ -8,6 +8,8 @@ import {
   slugToUuid,
 } from "@/lib/profileServer";
 import { getServerSupabase } from "@/lib/supabase";
+import { sendWhatsApp } from "@/lib/whatsapp";
+import { requireSlug } from "@/lib/auth/session";
 import type { DietaryProfile, DietaryTag } from "@/lib/types";
 
 const VALID_TAGS: DietaryTag[] = [
@@ -183,4 +185,63 @@ export async function revertReplan(slug: string): Promise<{ ok: boolean }> {
   revalidatePath(`/${slug}/preferences`);
   revalidatePath(`/${slug}/semana`, "layout");
   return { ok: true };
+}
+
+/**
+ * Envía un WhatsApp de prueba a las credenciales guardadas del perfil.
+ * Útil después de configurar phone + callmebot_api_key — el user verifica
+ * que el setup funciona sin esperar al cron de las 7am.
+ *
+ * Trabaja sobre lo SAVED en DB, no sobre el form en pantalla. Por eso pide
+ * guardar primero (botón disabled hasta que la key existe).
+ */
+export async function sendTestMessage(
+  slug: string,
+): Promise<{ ok: boolean; error?: string }> {
+  await requireSlug();
+
+  if (!isProfileId(slug)) return { ok: false, error: "Perfil inválido" };
+
+  const uuid = await slugToUuid(slug);
+  if (!uuid) return { ok: false, error: "Perfil no encontrado" };
+
+  const sb = getServerSupabase();
+  const { data, error } = await sb
+    .from("profiles")
+    .select("display_name, phone_e164, callmebot_api_key, whatsapp_opt_in")
+    .eq("id", uuid)
+    .single();
+
+  if (error || !data) return { ok: false, error: "No pude leer el perfil" };
+
+  const phone = data.phone_e164 as string | null;
+  const apiKey = data.callmebot_api_key as string | null;
+  const optIn = data.whatsapp_opt_in as boolean | null;
+  const displayName = (data.display_name as string) || "";
+
+  if (!phone || !apiKey) {
+    return {
+      ok: false,
+      error: "Falta teléfono o API key. Guarda primero, luego prueba.",
+    };
+  }
+  if (!optIn) {
+    return {
+      ok: false,
+      error: "WhatsApp está apagado. Activa el opt-in y guarda.",
+    };
+  }
+
+  const text =
+    `🧪 dovo · test\n\n` +
+    `${displayName}, si ves esto tu setup funciona. ` +
+    `Los nudges automáticos llegan a partir de mañana 7am MX.`;
+
+  const res = await sendWhatsApp(phone, text, {
+    profileUuid: uuid,
+    templateName: "test_manual",
+    apiKey,
+  });
+
+  return res.ok ? { ok: true } : { ok: false, error: res.error ?? "Envío falló" };
 }

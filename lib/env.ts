@@ -41,10 +41,12 @@ export function getEnv(): Env {
   const result = EnvSchema.safeParse(process.env);
   if (!result.success) {
     const issues = result.error.issues
-      .map((i) => `  · ${i.path.join(".")}: ${i.message}`)
-      .join("\n");
-    console.error("❌ Env inválido:\n" + issues);
-    throw new Error("Env vars inválidas — revisa .env.local contra .env.example");
+      .map((i) => `${i.path.join(".")}: ${i.message}`)
+      .join(" | ");
+    console.error("❌ Env inválido:\n  " + issues.replace(/ \| /g, "\n  "));
+    // El mensaje del Error se incluye en el digest de Next, así te llega
+    // por el log de Vercel sin tener que adivinar qué var falló.
+    throw new Error(`ENV_INVALID: ${issues}`);
   }
   _cached = result.data;
   return _cached;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { savePreferences } from "./actions";
+import { savePreferences, sendTestMessage } from "./actions";
 import type { DietaryProfile, DietaryTag, NotificationSettings } from "@/lib/types";
 
 const TAG_OPTIONS: { id: DietaryTag; label: string; glyph: string }[] = [
@@ -34,6 +34,10 @@ export default function PreferencesForm({
   const [isPending, startTransition] = useTransition();
   const [tags, setTags] = useState<DietaryTag[]>(initial.dietaryTags);
   const [waOptIn, setWaOptIn] = useState<boolean>(notifications.whatsappOptIn);
+  const [testPending, startTest] = useTransition();
+  const [testResult, setTestResult] = useState<
+    { ok: true } | { ok: false; msg: string } | null
+  >(null);
 
   function toggleTag(t: DietaryTag) {
     setTags((curr) =>
@@ -225,6 +229,45 @@ export default function PreferencesForm({
               <li>Mándale: <code className="mono text-[11px] px-1 bg-[color:var(--color-bg-2,rgba(255,255,255,0.05))]">I allow callmebot to send me messages</code></li>
               <li>Te responde con tu <strong>API key</strong> (~6-8 dígitos). Pégala arriba.</li>
             </ol>
+          </div>
+        )}
+
+        {/* Test button — solo si ya hay credenciales guardadas + opt-in */}
+        {notifications.callmebotApiKey && notifications.phoneE164 && (
+          <div className="space-y-2 pt-2">
+            <button
+              type="button"
+              disabled={testPending || !waOptIn}
+              onClick={() => {
+                setTestResult(null);
+                startTest(async () => {
+                  const res = await sendTestMessage(slug);
+                  setTestResult(
+                    res.ok
+                      ? { ok: true }
+                      : { ok: false, msg: res.error ?? "Falló sin razón" },
+                  );
+                });
+              }}
+              className="mono text-[10px] tracking-widest uppercase px-3 py-2 border border-[color:var(--color-divider-strong)] hover:border-[color:var(--color-text)] transition disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ color: waOptIn ? color : "var(--color-text-3)" }}
+            >
+              {testPending ? "Enviando…" : "Enviar test →"}
+            </button>
+            {testResult && (
+              <p
+                className="mono text-[10px] uppercase tracking-widest"
+                style={{
+                  color: testResult.ok
+                    ? "var(--color-success)"
+                    : "var(--color-danger)",
+                }}
+              >
+                {testResult.ok
+                  ? "✓ Mensaje enviado. Revisa tu WhatsApp."
+                  : `✕ ${testResult.msg}`}
+              </p>
+            )}
           </div>
         )}
       </div>
