@@ -1,9 +1,41 @@
 import type { Metadata, Viewport } from "next";
+import { Syne, Space_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 
+/**
+ * Self-host de fuentes vía next/font.
+ * - Cero requests externos en runtime (todas las fuentes salen del mismo origen).
+ * - `display: 'swap'` evita FOIT; texto visible al instante con fuente del sistema
+ *   y se sustituye al cargar la real.
+ * - Cada peso/ital declarado se prepara como subset latin para reducir bytes.
+ * - Las CSS vars se inyectan en <html>; globals.css consume `var(--font-display)`.
+ */
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["400", "600", "800"],
+  variable: "--font-syne",
+  display: "swap",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  style: ["italic"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Mike & Andy · Carnet",
-  description: "Carnet de pareja · disciplina compartida",
+  title: "dovo · carnet de dúo",
+  description:
+    "dovo · disciplina compartida a dos tintas para parejas, amigos y novios",
   robots: "noindex, nofollow",
 };
 
@@ -19,19 +51,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,500;1,6..72,700&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="es"
+      className={`${syne.variable} ${spaceMono.variable} ${newsreader.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

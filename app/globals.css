@@ -25,10 +25,14 @@
   --color-overdue: #ef4444;
   --color-warn: #d4a73c;
 
-  /* Typography */
-  --font-display: "Syne", "Inter", system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, monospace;
-  --font-stamp: "Newsreader", "Times New Roman", serif;
+  /* Typography
+   * next/font inyecta --font-syne / --font-space-mono / --font-newsreader
+   * en <html>. Mantenemos el alias --font-display etc. para no tocar
+   * 50+ usos en el codebase; el var() con fallback cubre el caso
+   * (raro) en que la página renderee antes de hidratar las vars. */
+  --font-display: var(--font-syne, "Syne"), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-space-mono, "Space Mono"), ui-monospace, monospace;
+  --font-stamp: var(--font-newsreader, "Newsreader"), "Times New Roman", serif;
 }
 
 @layer base {
