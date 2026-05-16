@@ -47,3 +47,24 @@ const MONTH_LONG = [
 export function dateLong(d: Date = new Date()): string {
   return `${d.getDate()} ${MONTH_LONG[d.getMonth()]}`;
 }
+
+/** ISO YYYY-MM-DD para hoy en tiempo local. */
+export function todayISO(d: Date = new Date()): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Devuelve YYYY-MM-DD del lunes de la semana de `d`.
+ * Semana ISO (lunes = inicio). Se usa como `week_start` en shopping_check
+ * y prep_check para que las marcas se resetean en la nueva semana.
+ */
+export function mondayOf(d: Date = new Date()): string {
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dow = date.getDay(); // 0=dom .. 6=sab
+  const diffToMonday = dow === 0 ? -6 : 1 - dow;
+  date.setDate(date.getDate() + diffToMonday);
+  return todayISO(date);
+}

@@ -18,8 +18,9 @@ create table if not exists profiles (
   slug text unique not null,                 -- 'mike' | 'andy' — público
   display_name text not null,
   color text not null,                       -- accent hex
-  phone_e164 text,                           -- WhatsApp
+  phone_e164 text,                           -- WhatsApp personal del user (con código país)
   whatsapp_opt_in boolean default false,
+  callmebot_api_key text,                    -- API key per-user (callmebot.com — uno por número)
   baseline_kcal int,
   baseline_protein_g int,
   baseline_weight_kg numeric,

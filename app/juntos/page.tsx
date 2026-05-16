@@ -19,6 +19,7 @@ import {
   RoleDot,
   SectionLabel,
 } from "@/app/components/ui";
+import { Wordmark } from "@/app/components/brand";
 import PairRingsLazy from "@/app/three/PairRingsLazy";
 
 // `force-dynamic` evita prerender estático: esta página lee Supabase por
@@ -45,16 +46,7 @@ export default async function JuntosPage() {
             className="flex items-center gap-2.5"
           >
             <RoleDot who="both" />
-            <span
-              className="font-extrabold lowercase text-[color:var(--color-text)]"
-              style={{
-                fontFamily: "var(--font-display)",
-                letterSpacing: "-0.02em",
-                fontSize: "1.05rem",
-              }}
-            >
-              dovo
-            </span>
+            <Wordmark size="md" />
             <span className="mono text-[10px] tracking-widest text-[color:var(--color-accent)] hidden sm:inline">
               · juntos
             </span>

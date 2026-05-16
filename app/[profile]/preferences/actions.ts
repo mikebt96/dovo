@@ -92,9 +92,15 @@ export async function savePreferences(
   // Notification settings (WhatsApp opt-in + phone)
   const phoneRaw = (formData.get("phone_e164") as string | null)?.trim() ?? "";
   const phoneNormalized = phoneRaw.replace(/[^\d+]/g, "");
+  const callmebotKey = (
+    (formData.get("callmebot_api_key") as string | null) ?? ""
+  )
+    .trim()
+    .replace(/\s+/g, "");
   await updateNotificationSettings(slug, {
     phoneE164: phoneNormalized || undefined,
     whatsappOptIn: formData.get("whatsapp_opt_in") === "on",
+    callmebotApiKey: callmebotKey || undefined,
   });
 
   // Dispara AI re-plan async (fire-and-forget). Si falla, no rompe el guardado.

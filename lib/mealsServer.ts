@@ -1,7 +1,13 @@
 import { MEALS } from "./data/meals";
 import { getServerSupabase } from "./supabase";
 import { slugToUuid } from "./profileServer";
-import type { DayKey, Meal, MealChange, ProfileId } from "./types";
+import type {
+  DayKey,
+  Meal,
+  MealChange,
+  MealChangeWithDelta,
+  ProfileId,
+} from "./types";
 
 export interface EffectiveMeal extends Meal {
   /** True si esta meal viene de un re-plan AI (no el seed original). */

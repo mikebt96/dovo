@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
 import { getPrepFor } from "@/lib/data/prep";
+import { mondayOf } from "@/lib/dates";
+import { getPrepChecked, asRecord } from "@/lib/checksServer";
+import { toggleCheck } from "@/lib/actions/checks";
 import CheckList from "@/app/components/CheckList";
 import {
   Eyebrow,
@@ -21,6 +24,22 @@ export default async function PrepPage({
   const tasks = getPrepFor(profile.id);
   const accent =
     profile.id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
+
+  const week_start = mondayOf();
+  const initialChecked = asRecord(
+    await getPrepChecked(profile.id, week_start),
+  );
+
+  async function handleToggle(id: string, checked: boolean) {
+    "use server";
+    return toggleCheck({
+      table: "prep_check",
+      profile: profile!.id,
+      key: id,
+      week_start,
+      checked,
+    });
+  }
 
   const checkItems = tasks.map((t, i) => ({
     id: t.id,
@@ -83,10 +102,12 @@ export default async function PrepPage({
 
       <div className="mt-2">
         <CheckList
-          storageKey={`prep-${profile.id}`}
+          storageKey={`prep-${profile.id}-${week_start}`}
           items={checkItems}
           accent={accent}
           emptyMessage="Sin tareas de prep esta semana."
+          initialChecked={initialChecked}
+          onToggle={handleToggle}
         />
       </div>
     </div>

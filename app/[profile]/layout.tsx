@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
 import { GlassBar, RoleDot } from "@/app/components/ui";
+import { Wordmark } from "@/app/components/brand";
 
 const NAV: Array<{ slug: string; label: string }> = [
   { slug: "",            label: "Hoy" },
@@ -40,16 +41,7 @@ export default async function ProfileLayout({
             aria-label="dovo · inicio del perfil"
           >
             <RoleDot who={profile.id} />
-            <span
-              className="font-extrabold lowercase text-[color:var(--color-text)]"
-              style={{
-                fontFamily: "var(--font-display)",
-                letterSpacing: "-0.02em",
-                fontSize: "1.05rem",
-              }}
-            >
-              dovo
-            </span>
+            <Wordmark size="md" />
             <span
               className="hidden sm:inline mono text-[10px] tracking-widest"
               style={{ color: accent }}

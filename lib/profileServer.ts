@@ -65,13 +65,14 @@ export async function getNotificationSettings(
   const sb = getServerSupabase();
   const { data } = await sb
     .from("profiles")
-    .select("phone_e164, whatsapp_opt_in")
+    .select("phone_e164, whatsapp_opt_in, callmebot_api_key")
     .eq("slug", slug)
     .single();
   if (!data) return null;
   return {
     phoneE164: data.phone_e164 ?? undefined,
     whatsappOptIn: !!data.whatsapp_opt_in,
+    callmebotApiKey: data.callmebot_api_key ?? undefined,
   };
 }
 
@@ -83,6 +84,8 @@ export async function updateNotificationSettings(
   const row: Record<string, unknown> = {};
   if (patch.phoneE164 !== undefined) row.phone_e164 = patch.phoneE164 || null;
   if (patch.whatsappOptIn !== undefined) row.whatsapp_opt_in = patch.whatsappOptIn;
+  if (patch.callmebotApiKey !== undefined)
+    row.callmebot_api_key = patch.callmebotApiKey || null;
   if (Object.keys(row).length === 0) return;
   await sb.from("profiles").update(row).eq("slug", slug);
 }

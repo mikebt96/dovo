@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
 import { getShoppingFor, totalCost, CATEGORY_ORDER } from "@/lib/data/shopping";
-import { isoWeek, pad } from "@/lib/dates";
+import { isoWeek, mondayOf, pad } from "@/lib/dates";
 import { getDietaryProfile } from "@/lib/profileServer";
 import { getBestPrices, cheapestBasketTotal } from "@/lib/prices";
+import { getShoppingChecked, asRecord } from "@/lib/checksServer";
+import { toggleCheck } from "@/lib/actions/checks";
 import CheckList from "@/app/components/CheckList";
 import {
   BigStat,
@@ -31,6 +33,22 @@ export default async function SuperPage({
   const { profile: profileParam } = await params;
   const profile = getProfile(profileParam);
   if (!profile) notFound();
+
+  const week_start = mondayOf();
+  const initialChecked = asRecord(
+    await getShoppingChecked(profile.id, week_start),
+  );
+
+  async function handleToggle(id: string, checked: boolean) {
+    "use server";
+    return toggleCheck({
+      table: "shopping_check",
+      profile: profile!.id,
+      key: id,
+      week_start,
+      checked,
+    });
+  }
 
   const items = getShoppingFor(profile.id);
   const myItems = items.filter((i) => i.user === profile.id);
@@ -200,9 +218,11 @@ export default async function SuperPage({
               </SectionLabel>
               <div className="mt-2">
                 <CheckList
-                  storageKey={`super-${profile.id}-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                  storageKey={`super-${profile.id}-${week_start}-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                   items={checkItems}
                   accent={accent}
+                  initialChecked={initialChecked}
+                  onToggle={handleToggle}
                 />
               </div>
             </section>

@@ -8,7 +8,10 @@ import {
   alternativeActivityFor,
 } from "@/lib/data/training";
 import { getDay, DAYS } from "@/lib/data/days";
-import { isValidDayKey } from "@/lib/dates";
+import { isValidDayKey, mondayOf } from "@/lib/dates";
+import { getMealsChecked, asRecord } from "@/lib/checksServer";
+import { toggleCheck } from "@/lib/actions/checks";
+import type { DayKey } from "@/lib/types";
 import CheckList from "@/app/components/CheckList";
 import ExerciseLogger from "@/app/components/ExerciseLogger";
 import {
@@ -31,12 +34,31 @@ export default async function DayPage({
   if (!isValidDayKey(dayParam)) notFound();
 
   const day = getDay(dayParam)!;
-  const [meals, macros] = await Promise.all([
+
+  // El día visitado ('lun' | 'mar' | …) se mapea a la fecha REAL de ese
+  // día en la semana actual. Cuando cruzas la medianoche del próximo lunes,
+  // 'lun' apunta a la nueva semana automáticamente, sin estado pegajoso.
+  const date = dateForDayKey(day.key);
+
+  const [meals, macros, mealsCheckedSet] = await Promise.all([
     getEffectiveMealsFor(profile.id, day.key).catch(() => getMealsFor(profile.id, day.key)),
     getEffectiveDayMacros(profile.id, day.key).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
+    getMealsChecked(profile.id, date),
   ]);
+  const initialChecked = asRecord(mealsCheckedSet);
   const exercises = exercisesVisibleFor(profile.id, day.key);
   const altActivity = alternativeActivityFor(profile.id, day.key);
+
+  async function handleMealToggle(id: string, checked: boolean) {
+    "use server";
+    return toggleCheck({
+      table: "meals_log",
+      profile: profile!.id,
+      key: id,
+      date,
+      checked,
+    });
+  }
 
   const dayIdx = DAYS.findIndex((d) => d.key === day.key);
   const prevDay = dayIdx > 0 ? DAYS[dayIdx - 1] : null;
@@ -157,9 +179,11 @@ export default async function DayPage({
         </SectionLabel>
         <div className="mt-2">
           <CheckList
-            storageKey={`meals-${profile.id}-${day.key}`}
+            storageKey={`meals-${profile.id}-${date}`}
             items={mealItems}
             accent={accent}
+            initialChecked={initialChecked}
+            onToggle={handleMealToggle}
           />
         </div>
       </section>
@@ -261,4 +285,16 @@ export default async function DayPage({
       )}
     </div>
   );
+}
+
+// Mapea DayKey ('lun'|'mar'|…) a la fecha real de ese día en la semana en curso.
+// Útil para meals_log.date que es un YYYY-MM-DD absoluto.
+const DAY_OFFSET: Record<DayKey, number> = {
+  lun: 0, mar: 1, mie: 2, jue: 3, vie: 4, sab: 5, dom: 6,
+};
+
+function dateForDayKey(key: DayKey): string {
+  const monday = new Date(`${mondayOf()}T00:00:00`);
+  monday.setDate(monday.getDate() + DAY_OFFSET[key]);
+  return monday.toISOString().slice(0, 10);
 }

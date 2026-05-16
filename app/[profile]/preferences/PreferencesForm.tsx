@@ -200,14 +200,32 @@ export default function PreferencesForm({
             inputMode="tel"
           />
         </Field>
-        {waOptIn && !notifications.phoneE164 && (
-          <p
-            className="italic text-xs text-[color:var(--color-text-3)] leading-relaxed"
+        <Field label="CallMeBot API key" hint="Setup one-time (instrucciones abajo). Solo dígitos.">
+          <input
+            type="text"
+            name="callmebot_api_key"
+            defaultValue={notifications.callmebotApiKey ?? ""}
+            placeholder="1234567"
+            disabled={!waOptIn}
+            className={`${INPUT_MONO} disabled:opacity-40`}
+            inputMode="numeric"
+            pattern="\d+"
+          />
+        </Field>
+        {waOptIn && !notifications.callmebotApiKey && (
+          <div
+            className="text-xs text-[color:var(--color-text-2)] leading-relaxed space-y-1"
             style={{ fontFamily: "var(--font-serif)" }}
           >
-            Importante: WhatsApp Cloud API solo envía texto libre dentro de 24h
-            de tu última respuesta. Manda un mensaje a tu app primero.
-          </p>
+            <p className="font-bold not-italic" style={{ fontFamily: "inherit" }}>
+              Setup (30 segundos, una vez):
+            </p>
+            <ol className="list-decimal list-inside space-y-0.5 ml-1">
+              <li>Agrega el contacto <strong>+34 644 51 65 76</strong> a tu WA</li>
+              <li>Mándale: <code className="mono text-[11px] px-1 bg-[color:var(--color-bg-2,rgba(255,255,255,0.05))]">I allow callmebot to send me messages</code></li>
+              <li>Te responde con tu <strong>API key</strong> (~6-8 dígitos). Pégala arriba.</li>
+            </ol>
+          </div>
         )}
       </div>
 

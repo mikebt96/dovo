@@ -94,6 +94,7 @@ export interface DietaryProfile {
 export interface NotificationSettings {
   phoneE164?: string;             // E.164 con o sin '+'; el cliente WA normaliza
   whatsappOptIn: boolean;
+  callmebotApiKey?: string;       // emitida por CallMeBot tras opt-in manual; req. para enviar
 }
 
 // ---------- PRICE SCRAPING ----------
@@ -140,6 +141,15 @@ export interface MealChange {
   newIngredients: string;
   newPrepInstructions?: string;
   reason: string;                  // por qué la AI cambió esta meal
+  newKcal?: number;                // macros target nuevos (AI los compromete a ±15%)
+  newProteinG?: number;
+}
+
+/** Snapshot de macros del meal original, anexado a cada change para diff UI. */
+export interface MealChangeWithDelta extends MealChange {
+  originalKcal?: number;
+  originalProteinG?: number;
+  originalName?: string;           // útil para mostrar "antes → después"
 }
 
 export interface PrepTask {

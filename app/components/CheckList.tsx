@@ -14,9 +14,19 @@ export type OnToggleResult = { ok: true } | { ok: false; error: string };
 
 /**
  * CheckList Premium — minimal rows with thin progress bar at top.
- * Optimistic UI: local state updates instantly. If `onToggle` is provided,
- * a Server Action is fired in a transition; failures don't revert local
- * state — user sees their work and we log for retry.
+ *
+ * Hidratación (3 fuentes posibles, en orden de prioridad de write):
+ *   1. `initialChecked` (server) — pasado por el RSC, refleja DB real.
+ *   2. `localStorage[storageKey]` — checks offline o de sesión previa.
+ *   3. State local — mutaciones del usuario en esta sesión.
+ *
+ * Merge strategy al primer mount: union de los checks marcados de server
+ * y localStorage. Si una key está marcada en cualquiera de los dos, queda
+ * marcada. NO soportamos "desmarcado offline persistente" todavía (deuda).
+ *
+ * Optimistic write: el state cambia YA, localStorage se actualiza, y si
+ * `onToggle` existe, dispara la Server Action en useTransition. Si falla
+ * el server, NO revertimos local — el usuario ve su trabajo.
  */
 export default function CheckList({
   storageKey,
@@ -24,24 +34,32 @@ export default function CheckList({
   accent,
   emptyMessage,
   onToggle,
+  initialChecked,
 }: {
   storageKey: string;
   items: CheckListItem[];
   accent: string;
   emptyMessage?: string;
   onToggle?: (id: string, checked: boolean) => Promise<OnToggleResult>;
+  initialChecked?: Record<string, boolean>;
 }) {
-  const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [checked, setChecked] = useState<Record<string, boolean>>(
+    () => initialChecked ?? {},
+  );
   const [hydrated, setHydrated] = useState(false);
   const [, startTransition] = useTransition();
 
   useEffect(() => {
+    let local: Record<string, boolean> = {};
     try {
       const raw = localStorage.getItem(storageKey);
-      if (raw) setChecked(JSON.parse(raw));
+      if (raw) local = JSON.parse(raw);
     } catch {}
+    // Union: server (initialChecked) primero, local sobrescribe.
+    // En empate ambos marcan true → resultado true.
+    setChecked({ ...(initialChecked ?? {}), ...local });
     setHydrated(true);
-  }, [storageKey]);
+  }, [storageKey, initialChecked]);
 
   useEffect(() => {
     if (!hydrated) return;

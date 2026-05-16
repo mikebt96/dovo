@@ -64,10 +64,14 @@ FORMATO DE SALIDA: JSON estricto, sin markdown, sin prefacios. Schema:
       "newName": "Tacos de frijoles con aguacate",
       "newIngredients": "4 tortillas · 150g frijoles · aguacate · pico · limón · Tajín",
       "newPrepInstructions": "Calienta frijoles 90s. Arma 4 tacos. 3 min.",
+      "newKcal": 640,
+      "newProteinG": 38,
       "reason": "Sustituí panela y huevo (no-dairy + no-eggs). Mantuve kcal ±10%."
     }
   ]
 }
+
+REQUERIDO: incluye SIEMPRE newKcal y newProteinG numéricos. Si no los pones, el cambio se rechaza. Estima los macros calculando los ingredientes nuevos.
 
 Si NINGUNA comida necesita cambio: {"changes": []}.`;
 
@@ -213,8 +217,18 @@ async function notifyReplanIfOptedIn(
     triggeredBy,
   });
 
+  if (!settings.callmebotApiKey) {
+    // Opt-in incompleto: el user marcó WhatsApp pero no terminó el setup en
+    // CallMeBot. Log silencioso para diagnóstico, sin romper el flow.
+    console.warn(
+      `[wa] ${slug} opted in pero falta callmebot_api_key — skipping notify`
+    );
+    return;
+  }
+
   await sendWhatsApp(settings.phoneE164, body, {
     profileUuid: profileUuid ?? undefined,
     templateName: "replan_summary",
+    apiKey: settings.callmebotApiKey,
   });
 }
