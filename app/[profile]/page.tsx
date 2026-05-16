@@ -38,24 +38,25 @@ export default async function ProfileDashboard({
 
   const today = todayKey();
   const day = getDay(today)!;
-  const [meals, macros, myStreak, partnerStreak] = await Promise.all([
+  const [meals, macros, myStreak, partnerStreak, gamification] = await Promise.all([
     getEffectiveMealsFor(profile.id, today).catch(() => getMealsFor(profile.id, today)),
     getEffectiveDayMacros(profile.id, today).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
     computeStreak(profile.id),
     computeStreak(profile.partnerId),
+    getMyStats(profile.id),
   ]);
   const exercises = exercisesVisibleFor(profile.id, today);
   const altActivity = alternativeActivityFor(profile.id, today);
 
-  // XP/coins/level siguen siendo stubs hasta la siguiente slice (xp_events).
-  // Las rachas YA vienen reales de DB.
+  // Streaks: derivados de meals_log (más resilientes a reset DB).
+  // XP/coins/level: incrementales desde xp_events (escritos al marcar meal).
   const stats = {
-    level: 1,
-    xp: 0,
-    nextLevelXp: 500,
+    level: gamification.level,
+    xp: gamification.xp,
+    nextLevelXp: gamification.nextLevelXp,
     streak: myStreak.current,
     longestStreak: myStreak.longest,
-    coins: 0,
+    coins: gamification.coins,
     partnerStreak: partnerStreak.current,
     mealsDone: 0,
     workoutDone: 0,
