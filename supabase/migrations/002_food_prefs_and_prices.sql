@@ -74,7 +74,9 @@ create index if not exists idx_prices_postal
   on price_snapshots (postal_code);
 
 -- ---------- VIEW: LATEST PRICE PER PRODUCT × STORE × CP ----------
-create or replace view latest_prices as
+create or replace view latest_prices
+with (security_invoker = true)
+as
 select distinct on (product_id, store_id, postal_code)
   product_id,
   store_id,

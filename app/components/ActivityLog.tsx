@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { BigStat, SectionLabel } from "@/app/components/ui";
+import { logActivity, removeActivity } from "@/lib/actions/activity";
+import type { ProfileId } from "@/lib/types";
 
 type Activity = {
-  id: string;
+  id: string;            // local: "{timestamp}-{rand}" · server: número como string
+  serverId?: number;     // presente si fue persistida; sirve para borrar en DB
   date: string;
   type: string;
   durationMin: number;
@@ -23,15 +26,32 @@ const ACTIVITY_TYPES = [
   { value: "other", label: "🎯 Otra" },
 ];
 
+// Tipos válidos para activity_log.activity_type (debe coincidir con el server schema)
+const VALID_ACTIVITY_TYPES = [
+  "ballet", "pilates", "running", "swimming",
+  "cycling", "yoga", "walk", "other",
+] as const;
+
+type ServerActivityType = (typeof VALID_ACTIVITY_TYPES)[number];
+
+function toServerType(t: string): ServerActivityType {
+  return (VALID_ACTIVITY_TYPES as readonly string[]).includes(t)
+    ? (t as ServerActivityType)
+    : "other";
+}
+
 export default function ActivityLog({
   storageKey,
   accent,
   primarySport,
+  profileId,
 }: {
   storageKey: string;
   accent: string;
   primarySport?: string;
+  profileId?: ProfileId;  // si falta, queda solo en localStorage (modo v1)
 }) {
+  const [, startTransition] = useTransition();
   const [logs, setLogs] = useState<Activity[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [draft, setDraft] = useState({
@@ -58,20 +78,49 @@ export default function ActivityLog({
   }, [logs, storageKey, hydrated]);
 
   function add() {
+    const localId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const newEntry: Activity = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      id: localId,
       date: draft.date,
       type: draft.type,
       durationMin: parseInt(draft.durationMin) || 0,
       intensity: parseInt(draft.intensity) || 3,
       notes: draft.notes || undefined,
     };
+    // Optimistic: agregar local primero
     setLogs((prev) => [newEntry, ...prev]);
     setDraft((d) => ({ ...d, notes: "" }));
+
+    // Persistir si tenemos profileId; al volver, anotamos el server id
+    if (profileId) {
+      startTransition(async () => {
+        const res = await logActivity({
+          profile: profileId,
+          date: newEntry.date,
+          activity_type: toServerType(newEntry.type),
+          duration_min: newEntry.durationMin,
+          intensity: newEntry.intensity,
+          notes: newEntry.notes,
+        });
+        if (res.ok) {
+          setLogs((prev) =>
+            prev.map((l) => (l.id === localId ? { ...l, serverId: res.id } : l)),
+          );
+        }
+      });
+    }
   }
 
   function remove(id: string) {
+    const target = logs.find((l) => l.id === id);
+    // UI: quitar primero
     setLogs((prev) => prev.filter((l) => l.id !== id));
+    // Si está sincronizada con server, borrarla allá también
+    if (profileId && target?.serverId) {
+      startTransition(async () => {
+        await removeActivity({ profile: profileId, id: target.serverId! });
+      });
+    }
   }
 
   const sorted = [...logs].sort((a, b) => (a.date > b.date ? -1 : 1));

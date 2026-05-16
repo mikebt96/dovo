@@ -54,6 +54,7 @@ export default async function ActividadPage({
         storageKey={`activity-${profile.id}`}
         accent={accent}
         primarySport={profile.id === "andy" ? "ballet" : "running"}
+        profileId={profile.id}
       />
     </div>
   );

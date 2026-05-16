@@ -4,6 +4,7 @@ import { getProfile } from "@/lib/profile";
 import { DAYS } from "@/lib/data/days";
 import { exercisesVisibleFor, alternativeActivityFor } from "@/lib/data/training";
 import { getDayMacros } from "@/lib/data/meals";
+import { getWeekConsumption } from "@/lib/historyServer";
 import { todayKey, isoWeek, pad } from "@/lib/dates";
 import {
   Eyebrow,
@@ -22,6 +23,17 @@ export default async function SemanaPage({
   if (!profile) notFound();
   const today = todayKey();
   const week = pad(isoWeek(new Date()), 2);
+  const consumption = await getWeekConsumption(profile.id).catch(() => null);
+
+  // Target weekly = suma de macros plan de los 7 días
+  const planKcalWeek = DAYS.reduce(
+    (sum, d) => sum + getDayMacros(profile.id, d.key).kcal,
+    0,
+  );
+  const consumedPct =
+    planKcalWeek > 0 && consumption
+      ? Math.min(100, Math.round((consumption.kcalReal / planKcalWeek) * 100))
+      : 0;
 
   const accent =
     profile.id === "mike"
@@ -58,6 +70,90 @@ export default async function SemanaPage({
       </section>
 
       <HRule />
+
+      {consumption && consumption.mealsLogged > 0 && (
+        <section>
+          <SectionLabel
+            right={`${consumption.mealsLogged} comidas registradas`}
+          >
+            Llevas esta semana
+          </SectionLabel>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6">
+            <div>
+              <p
+                className="font-extrabold tabular leading-none"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(2rem, 5vw, 3rem)",
+                  color: accent,
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                {consumption.kcalReal}
+              </p>
+              <p className="mono text-[10px] tracking-widest uppercase text-[color:var(--color-text-3)] mt-1">
+                kcal reales · {consumedPct}% del plan
+              </p>
+            </div>
+            <div>
+              <p
+                className="font-extrabold tabular leading-none"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(2rem, 5vw, 3rem)",
+                  color: "var(--color-text)",
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                {consumption.proteinReal}
+                <span className="text-[0.5em] ml-1 text-[color:var(--color-text-3)]">
+                  g
+                </span>
+              </p>
+              <p className="mono text-[10px] tracking-widest uppercase text-[color:var(--color-text-3)] mt-1">
+                proteína acumulada
+              </p>
+            </div>
+            <div className="col-span-2 md:col-span-2">
+              <ul className="grid grid-cols-7 gap-1">
+                {DAYS.map((d) => {
+                  const bucket = consumption.byDay[d.key];
+                  const planMacros = getDayMacros(profile.id, d.key);
+                  const pct =
+                    planMacros.kcal > 0
+                      ? Math.min(100, (bucket.kcal / planMacros.kcal) * 100)
+                      : 0;
+                  return (
+                    <li key={d.key} className="text-center">
+                      <div
+                        className="h-12 bg-[color:var(--color-surface-1)] relative overflow-hidden mb-1"
+                        aria-label={`${d.key}: ${bucket.kcal} kcal de ${planMacros.kcal}`}
+                      >
+                        <div
+                          className="absolute bottom-0 left-0 right-0 transition-all"
+                          style={{
+                            height: `${pct}%`,
+                            background: accent,
+                            opacity: bucket.meals > 0 ? 0.85 : 0,
+                          }}
+                        />
+                      </div>
+                      <p className="mono text-[9px] tracking-widest uppercase text-[color:var(--color-text-3)]">
+                        {d.key}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mono text-[10px] tracking-widest uppercase text-[color:var(--color-text-3)] mt-2 text-center">
+                consumo real vs plan diario
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {consumption && consumption.mealsLogged > 0 && <HRule />}
 
       <SectionLabel right={`${DAYS.length} días`}>Plan completo</SectionLabel>
 

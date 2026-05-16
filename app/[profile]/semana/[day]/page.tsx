@@ -241,10 +241,11 @@ export default async function DayPage({
             {exercises.map((ex) => (
               <ExerciseLogger
                 key={ex.id}
-                storageKey={`ex-${profile.id}-${day.key}-${ex.id}`}
+                storageKey={`ex-${profile.id}-${date}-${ex.id}`}
                 exercise={ex}
                 profileId={profile.id}
                 accent={accent}
+                date={date}
               />
             ))}
           </div>

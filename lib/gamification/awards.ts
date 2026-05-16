@@ -9,6 +9,8 @@ import {
   COINS_PAIR_BONUS,
   XP_DAY_COMPLETE_BONUS,
   XP_PAIR_BONUS,
+  XP_PER_ACTIVITY,
+  XP_PER_EXERCISE,
   XP_PER_MEAL,
   levelFromXp,
 } from "./config";
@@ -188,6 +190,46 @@ export async function rewardMealCheck(args: {
     source: "meal",
     source_ref: `meal:${args.meal_id}:${args.date}`,
     payload: { kind: "meal", meal_id: args.meal_id },
+  });
+}
+
+/** Award por loggear 1 ejercicio (gym). Idempotente por exercise_id × date. */
+export async function rewardExerciseLog(args: {
+  profile_id: string;
+  exercise_id: string;
+  date: string;
+  total_volume_kg?: number;
+}): Promise<void> {
+  await awardXp({
+    profile_id: args.profile_id,
+    amount: XP_PER_EXERCISE,
+    source: "exercise",
+    source_ref: `exercise:${args.exercise_id}:${args.date}`,
+    payload: {
+      kind: "exercise",
+      exercise_id: args.exercise_id,
+      total_volume_kg: args.total_volume_kg,
+    },
+  });
+}
+
+/** Award por loggear 1 sesión de actividad (ballet/pilates/run/etc).
+ *  Idempotente por activity row uuid (cada sesión es única). */
+export async function rewardActivityLog(args: {
+  profile_id: string;
+  activity_log_id: number;
+  activity_type: string;
+}): Promise<void> {
+  await awardXp({
+    profile_id: args.profile_id,
+    amount: XP_PER_ACTIVITY,
+    source: "activity",
+    source_ref: `activity:${args.activity_log_id}`,
+    payload: {
+      kind: "activity" as const,
+      activity_id: String(args.activity_log_id),
+      activity_type: args.activity_type,
+    } as unknown as Record<string, unknown>,
   });
 }
 

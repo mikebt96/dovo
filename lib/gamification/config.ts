@@ -12,6 +12,8 @@
 
 // XP por evento
 export const XP_PER_MEAL = 10;
+export const XP_PER_EXERCISE = 25;              // 1 top set logueado en gym
+export const XP_PER_ACTIVITY = 25;              // 1 sesión ballet/pilates/etc
 export const XP_DAY_COMPLETE_BONUS = 50;
 export const XP_PAIR_BONUS = 25;
 export const XP_PENALTY_DEFAULT = -50;          // configurable por penalty.severity
