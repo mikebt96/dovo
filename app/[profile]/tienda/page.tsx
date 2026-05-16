@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
 import { REWARDS_SEED } from "@/lib/data/rewards";
+import { getMyStats } from "@/lib/gamification/stats";
 import {
   BigStat,
   Eyebrow,
@@ -10,6 +11,9 @@ import {
 } from "@/app/components/ui";
 import TrophyLazy from "@/app/three/TrophyLazy";
 import type { TrophyTier } from "@/app/three/scenes/Trophy";
+
+// Lee coins desde Supabase por request.
+export const dynamic = "force-dynamic";
 
 function bucketOf(costCoins: number): { label: string; tier: TrophyTier } {
   if (costCoins < 100) return { label: "Fáciles", tier: "easy" };
@@ -27,6 +31,14 @@ export default async function TiendaPage({
   const { profile: profileParam } = await params;
   const profile = getProfile(profileParam);
   if (!profile) notFound();
+
+  // Coins reales: mías + partner para mostrar pool del dúo.
+  const [myStats, partnerStats] = await Promise.all([
+    getMyStats(profile.id),
+    getMyStats(profile.partnerId),
+  ]);
+  const myCoins = myStats.coins;
+  const sharedCoins = myStats.coins + partnerStats.coins;
 
   // Group by bucket
   const grouped = REWARDS_SEED.reduce<
@@ -83,8 +95,8 @@ export default async function TiendaPage({
 
       {/* Balance */}
       <section className="grid grid-cols-2 gap-x-8 gap-y-8 max-w-2xl">
-        <BigStat label="Tu balance" value={0} unit="coins" sub="ganadas esta temporada" accent="var(--color-warning)" />
-        <BigStat label="Balance compartido" value={0} unit="coins" sub="acumulado del dúo" />
+        <BigStat label="Tu balance" value={myCoins} unit="coins" sub="ganadas esta temporada" accent="var(--color-warning)" />
+        <BigStat label="Balance compartido" value={sharedCoins} unit="coins" sub="acumulado del dúo" />
       </section>
 
       <HRule />

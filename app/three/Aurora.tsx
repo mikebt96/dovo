@@ -23,9 +23,9 @@ export default function Aurora({ intensity = 1 }: { intensity?: number }) {
     () => ({
       uTime: { value: 0 },
       uResolution: { value: new THREE.Vector2(size.width, size.height) },
-      uColorMike: { value: new THREE.Color("#6bf5ff").multiplyScalar(0.35) },
-      uColorAndy: { value: new THREE.Color("#ff6b9d").multiplyScalar(0.32) },
-      uColorBoth: { value: new THREE.Color("#c8f135").multiplyScalar(0.18) },
+      uColorMike: { value: new THREE.Color("#6bf5ff").multiplyScalar(0.55) },
+      uColorAndy: { value: new THREE.Color("#ff6b9d").multiplyScalar(0.50) },
+      uColorBoth: { value: new THREE.Color("#c8f135").multiplyScalar(0.30) },
       uIntensity: { value: intensity },
       uFidelity: { value: fidelity },
     }),

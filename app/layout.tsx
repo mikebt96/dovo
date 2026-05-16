@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Space_Mono, Newsreader } from "next/font/google";
 import BackgroundWrapper from "@/app/components/BackgroundWrapper";
+import ServiceWorkerRegister from "@/app/components/ServiceWorkerRegister";
 import "./globals.css";
 
 /**
@@ -69,6 +70,7 @@ export default function RootLayout({
     >
       <body>
         <BackgroundWrapper />
+        <ServiceWorkerRegister />
         {children}
       </body>
     </html>

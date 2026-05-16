@@ -35,7 +35,7 @@ export default function SceneBackground() {
         camera={{ position: [0, 0, 1], near: 0.01, far: 10 }}
         style={{ width: "100vw", height: "100vh" }}
       >
-        <Aurora intensity={tier === "high" ? 1 : tier === "mid" ? 0.85 : 0.6} />
+        <Aurora intensity={tier === "high" ? 1.6 : tier === "mid" ? 1.3 : 0.95} />
       </Canvas>
     </div>
   );

@@ -28,7 +28,7 @@ export default async function DuoPage({
   if (!profile) notFound();
   const partner = PROFILES[profile.partnerId];
 
-  // Rachas reales. XP/coins/level seguirán como stubs hasta la slice de xp_events.
+  // Todo real desde DB: streaks de meals_log, deudas y catálogo de pair_debts/penalties.
   const [mike, andy, debts, penalties] = await Promise.all([
     computeStreak("mike"),
     computeStreak("andy"),
@@ -37,8 +37,8 @@ export default async function DuoPage({
   ]);
   const pendingDebts = debts.filter((d) => d.status === "pending");
   const resolvedDebts = debts.filter((d) => d.status !== "pending").slice(0, 5);
-  const mikeStats = { streak: mike.current, longest: mike.longest, level: 1, xp: 0, coins: 0 };
-  const andyStats = { streak: andy.current, longest: andy.longest, level: 1, xp: 0, coins: 0 };
+  const mikeStats = { streak: mike.current, longest: mike.longest };
+  const andyStats = { streak: andy.current, longest: andy.longest };
   const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
 
   const groupedPenalties = PENALTIES_SEED.reduce<
