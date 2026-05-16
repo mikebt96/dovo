@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>dovo · partner platform · trato API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --ink-soft: #1c1c1c;
+    --papel: #f5f1ea;
+    --papel-dark: #e6e0d5;
+    --papel-darker: #cdc5b5;
+    --lana: #4a5d3a;
+    --lana-light: #6b7d59;
+    --rule: rgba(10,10,10,0.08);
+
+    --strava: #fc5200;
+    --platzi: #98ca3f;
+    --nu: #820ad1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--papel);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .syne { font-family: 'Syne', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .lowercase { text-transform: lowercase; }
+
+  .page {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 64px 48px 120px;
+  }
+
+  /* MASTHEAD */
+  header.masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--ink);
+    margin-bottom: 80px;
+  }
+  .wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 38px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .masthead-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    opacity: 0.65;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--ink);
+    opacity: 0.5;
+  }
+  h2.section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 56px;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    margin-bottom: 16px;
+  }
+  .section-lead {
+    font-size: 17px;
+    max-width: 720px;
+    opacity: 0.78;
+    margin-bottom: 64px;
+    line-height: 1.55;
+  }
+  .section-lead strong {
+    font-weight: 500;
+    background: linear-gradient(to bottom, transparent 60%, rgba(74,93,58,0.25) 60%);
+  }
+
+  /* HERO PRIMITIVA */
+  .primitiva-hero {
+    background: var(--ink);
+    color: var(--papel);
+    padding: 80px 64px;
+    margin-bottom: 96px;
+    position: relative;
+    overflow: hidden;
+  }
+  .primitiva-quote {
+    font-family: 'Syne', sans-serif;
+    font-weight: 500;
+    font-size: 48px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    max-width: 880px;
+    text-transform: lowercase;
+  }
+  .primitiva-quote em {
+    font-style: normal;
+    color: var(--lana-light);
+  }
+  .primitiva-meta {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(245,241,234,0.18);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .primitiva-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 8px;
+  }
+  .primitiva-stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .primitiva-stat-val em {
+    font-style: normal;
+    color: var(--lana-light);
+  }
+
+  /* PARTNER FILMSTRIP */
+  .filmstrip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+    margin-bottom: 120px;
+  }
+  @media (max-width: 1080px) {
+    .filmstrip { grid-template-columns: 1fr; gap: 64px; }
+  }
+  .frame { display: flex; flex-direction: column; }
+  .frame-caption { margin-bottom: 20px; }
+  .frame-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 6px;
+  }
+  .frame-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .frame-sub {
+    font-size: 13px;
+    opacity: 0.65;
+    line-height: 1.5;
+  }
+  .partner-tag {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .partner-tag.strava { background: var(--strava); color: white; }
+  .partner-tag.platzi { background: var(--platzi); color: var(--ink); }
+  .partner-tag.nu { background: var(--nu); color: white; }
+
+  /* PHONE */
+  .phone {
+    background: var(--ink);
+    border-radius: 38px;
+    padding: 8px;
+    aspect-ratio: 9 / 19.5;
+    position: relative;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 30px 60px -20px rgba(10,10,10,0.25);
+  }
+  .phone-screen {
+    background: var(--papel);
+    border-radius: 30px;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .notch {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 22px;
+    background: var(--ink);
+    border-radius: 999px;
+    z-index: 10;
+  }
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* PARTNER APP BAR */
+  .app-bar {
+    padding: 14px 18px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+  }
+  .app-name {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+  .app-name.strava { color: var(--strava); }
+  .app-name.platzi { color: var(--platzi); }
+  .app-name.nu { color: var(--nu); }
+  .app-bar-icons {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    opacity: 0.6;
+  }
+
+  .app-body {
+    flex: 1;
+    padding: 18px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* STRAVA UI bits */
+  .strava-feed-item {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+  }
+  .strava-feed-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--papel-darker);
+    flex-shrink: 0;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+  }
+  .feed-name {
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  .feed-time {
+    font-size: 11px;
+    opacity: 0.55;
+  }
+  .feed-stat-row {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .feed-stat strong {
+    font-weight: 700;
+    font-size: 14px;
+    display: block;
+  }
+
+  /* trato widget (DOVO embedded) */
+  .trato-widget {
+    border: 1.5px solid var(--ink);
+    padding: 14px 14px 12px;
+    margin-top: auto;
+    background: var(--papel);
+    position: relative;
+  }
+  .trato-widget-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 6px;
+  }
+  .trato-widget-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .trato-widget-desc {
+    font-size: 11px;
+    opacity: 0.7;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+  .trato-widget-cta {
+    background: var(--ink);
+    color: var(--papel);
+    padding: 10px;
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: lowercase;
+    letter-spacing: -0.01em;
+  }
+  .powered-by {
+    margin-top: 8px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+  .powered-by strong {
+    font-weight: 700;
+    color: var(--ink);
+    opacity: 1;
+  }
+
+  /* PLATZI UI bits */
+  .platzi-banner {
+    background: var(--platzi);
+    color: var(--ink);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+  }
+  .platzi-banner-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .platzi-banner-title {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+  .platzi-course-card {
+    padding: 12px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .course-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--platzi);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .course-title {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .course-meta {
+    font-size: 10px;
+    opacity: 0.6;
+  }
+
+  /* NU UI bits */
+  .nu-card {
+    background: linear-gradient(135deg, var(--nu) 0%, #5b099a 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .nu-card-label {
+    font-size: 10px;
+    opacity: 0.85;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .nu-card-balance {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .nu-card-actions {
+    display: flex;
+    gap: 12px;
+    font-size: 10px;
+    opacity: 0.85;
+  }
+  .nu-action-item {
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .nu-action-icon {
+    color: var(--nu);
+    font-weight: 700;
+  }
+
+  /* DASHBOARD */
+  .dashboard-section { margin-bottom: 120px; }
+  .dashboard {
+    background: var(--ink);
+    color: var(--papel);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -30px rgba(10,10,10,0.4);
+  }
+  .dash-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: rgba(245,241,234,0.04);
+    border-bottom: 1px solid rgba(245,241,234,0.08);
+  }
+  .dash-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(245,241,234,0.2);
+  }
+  .dash-dot:nth-child(1) { background: #ff5f57; }
+  .dash-dot:nth-child(2) { background: #febc2e; }
+  .dash-dot:nth-child(3) { background: #28c840; }
+  .dash-url {
+    margin-left: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    opacity: 0.6;
+  }
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 540px;
+  }
+  .dash-side {
+    background: rgba(245,241,234,0.03);
+    border-right: 1px solid rgba(245,241,234,0.08);
+    padding: 24px 20px;
+  }
+  .dash-side-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.04em;
+    margin-bottom: 4px;
+  }
+  .dash-side-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    margin-bottom: 28px;
+  }
+  .dash-nav-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.4;
+    margin-bottom: 10px;
+    margin-top: 18px;
+  }
+  .dash-nav-item {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  .dash-nav-item.active {
+    background: rgba(245,241,234,0.08);
+    opacity: 1;
+    font-weight: 500;
+  }
+  .dash-main {
+    padding: 32px 36px;
+  }
+  .dash-h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+  }
+  .dash-h1-sub {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-bottom: 28px;
+  }
+  .dash-h1-partner {
+    display: inline-block;
+    background: var(--strava);
+    color: white;
+    padding: 3px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    border: 1px solid rgba(245,241,234,0.12);
+    padding: 18px 16px;
+  }
+  .kpi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+  .kpi-delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--lana-light);
+  }
+  .kpi-delta.neg { color: #d97a5a; }
+
+  .dash-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 14px;
+  }
+  .dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+  .dash-table th, .dash-table td {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(245,241,234,0.08);
+  }
+  .dash-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    font-weight: 400;
+  }
+  .dash-table td.mono { font-family: 'JetBrains Mono', monospace; }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 3px;
+  }
+  .status-pill.active { background: rgba(107,125,89,0.25); color: var(--lana-light); }
+  .status-pill.done { background: rgba(245,241,234,0.08); opacity: 0.6; }
+
+  /* INTEGRATION CODE */
+  .integration-section { margin-bottom: 120px; }
+  .integration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .integration-grid { grid-template-columns: 1fr; }
+  }
+  .integration-copy h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 36px;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .integration-copy p {
+    font-size: 15px;
+    opacity: 0.75;
+    margin-bottom: 16px;
+  }
+  .integration-steps {
+    list-style: none;
+    margin-top: 24px;
+  }
+  .integration-steps li {
+    padding: 14px 0;
+    border-top: 1px solid var(--ink);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: baseline;
+  }
+  .integration-steps li:last-child { border-bottom: 1px solid var(--ink); }
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    opacity: 0.55;
+  }
+  .step-desc {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .step-desc strong {
+    font-weight: 500;
+  }
+
+  .code-block {
+    background: var(--ink);
+    color: var(--papel);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -25px rgba(10,10,10,0.4);
+  }
+  .code-titlebar {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(245,241,234,0.08);
+    background: rgba(245,241,234,0.03);
+  }
+  .code-filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+  .code-body {
+    padding: 24px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  .code-body .c-keyword { color: #c792ea; }
+  .code-body .c-string { color: var(--lana-light); }
+  .code-body .c-number { color: #f8b88b; }
+  .code-body .c-comment { color: rgba(245,241,234,0.4); font-style: italic; }
+  .code-body .c-var { color: #82aaff; }
+  .code-body .c-fn { color: #ffcb6b; }
+
+  /* BUSINESS MODEL */
+  .model-section { margin-top: 32px; }
+  .model-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 900px) { .model-grid { grid-template-columns: 1fr; } }
+  .model-card {
+    border: 1px solid var(--ink);
+    padding: 28px 24px;
+    background: var(--papel);
+  }
+  .model-card.dark {
+    background: var(--ink);
+    color: var(--papel);
+  }
+  .model-card-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 10px;
+  }
+  .model-card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    text-transform: lowercase;
+  }
+  .model-card-desc {
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+    opacity: 0.78;
+  }
+  .model-card-revenue {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    color: var(--lana);
+  }
+  .model-card.dark .model-card-revenue {
+    color: var(--lana-light);
+    border-top-color: rgba(245,241,234,0.15);
+  }
+
+  /* FOOTER */
+  footer.foot {
+    margin-top: 96px;
+    padding-top: 32px;
+    border-top: 1px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div>
+      <div class="wordmark">dovo</div>
+      <div style="margin-top: 8px; font-size: 13px; opacity: 0.6;">partner platform · la trato API</div>
+    </div>
+    <div class="masthead-meta">
+      mockup · 2026.05.16<br/>
+      v0.2 · investor view
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="section-label">00 · el pivot</div>
+  <h2 class="section-title syne lowercase">no es una app.<br/>es la primitiva del trato.</h2>
+  <p class="section-lead">
+    dovo deja de competir con strava, platzi y nu — y pasa a vivir <strong>adentro de cada una de ellas</strong>. la trato API expone el motor de tratos (custodia, escrow, cumplimiento, payout) como infraestructura plug-and-play. cualquier app con dos usuarios que comparten un goal puede meter "hacer un trato" en su UX en 4 líneas de código.
+  </p>
+
+  <div class="primitiva-hero">
+    <div class="primitiva-quote syne">
+      "como <em>stripe</em> fue para pagos<br/>y <em>plaid</em> para datos bancarios,<br/>dovo es para <em>compromiso entre dos</em>."
+    </div>
+    <div class="primitiva-meta">
+      <div>
+        <div class="primitiva-stat-label">categoría</div>
+        <div class="primitiva-stat-val">behavioral <em>commitment infrastructure</em></div>
+      </div>
+      <div>
+        <div class="primitiva-stat-label">tipo de play</div>
+        <div class="primitiva-stat-val">api-first <em>b2b platform</em></div>
+      </div>
+      <div>
+        <div class="primitiva-stat-label">múltiplo arr esperado</div>
+        <div class="primitiva-stat-val">30 — 50× <em>(infra)</em></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILMSTRIP DE PARTNERS -->
+  <div class="section-label">01 · cómo se ve adentro de otras apps</div>
+  <h2 class="section-title syne lowercase">tu botón.<br/>la app de ellos.</h2>
+  <p class="section-lead">
+    tres ejemplos de cómo se integra la trato API en apps que ya tienen audiencia y un caso de uso natural. el partner gana retention y engagement; dovo gana volumen de tratos sin gastar en adquisición.
+  </p>
+
+  <div class="filmstrip">
+
+    <!-- STRAVA -->
+    <div class="frame">
+      <div class="frame-caption">
+        <div class="frame-num">partner 01</div>
+        <div class="frame-title syne lowercase">strava</div>
+        <div class="frame-sub">en el feed de actividad: "haz un trato con tu gym buddy para los próximos 30 días".</div>
+        <span class="partner-tag strava">vertical · fitness</span>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="notch"></div>
+          <div class="status-bar"><span>9:41</span><span>• • •</span></div>
+          <div class="app-bar">
+            <div class="app-name strava">STRAVA</div>
+            <div class="app-bar-icons">⌕  ◎</div>
+          </div>
+          <div class="app-body">
+            <div class="strava-feed-item">
+              <div class="strava-feed-header">
+                <div class="avatar">A</div>
+                <div>
+                  <div class="feed-name">andy m.</div>
+                  <div class="feed-time">morning run · hoy 7:14</div>
+                </div>
+              </div>
+              <div class="feed-stat-row">
+                <div class="feed-stat"><strong>5.2 km</strong>distance</div>
+                <div class="feed-stat"><strong>28:14</strong>tiempo</div>
+                <div class="feed-stat"><strong>5:25</strong>pace</div>
+              </div>
+            </div>
+
+            <div class="strava-feed-item">
+              <div class="strava-feed-header">
+                <div class="avatar">M</div>
+                <div>
+                  <div class="feed-name">mike b.</div>
+                  <div class="feed-time">evening ride · ayer</div>
+                </div>
+              </div>
+              <div class="feed-stat-row">
+                <div class="feed-stat"><strong>18.4 km</strong>distance</div>
+                <div class="feed-stat"><strong>52:08</strong>tiempo</div>
+              </div>
+            </div>
+
+            <div class="trato-widget">
+              <div class="trato-widget-eyebrow">⌃ challenge entre dúos</div>
+              <div class="trato-widget-title">hagan un trato con andy</div>
+              <div class="trato-widget-desc">30 días, 3 actividades por semana cada uno, $500 mxn c/u. si fallan, su lana va al otro.</div>
+              <div class="trato-widget-cta">hacer un trato</div>
+              <div class="powered-by">powered by <strong>dovo</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLATZI -->
+    <div class="frame">
+      <div class="frame-caption">
+        <div class="frame-num">partner 02</div>
+        <div class="frame-title syne lowercase">platzi</div>
+        <div class="frame-sub">después de inscribir un curso: "estudia con un amigo y métele lana al compromiso".</div>
+        <span class="partner-tag platzi">vertical · educación</span>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="notch"></div>
+          <div class="status-bar"><span>9:41</span><span>• • •</span></div>
+          <div class="app-bar">
+            <div class="app-name platzi">platzi</div>
+            <div class="app-bar-icons">⌕ ☰</div>
+          </div>
+          <div class="app-body">
+            <div class="platzi-banner">
+              <div class="platzi-banner-eyebrow">tu ruta · 24% completa</div>
+              <div class="platzi-banner-title">desarrollo web full stack</div>
+            </div>
+
+            <div class="platzi-course-card">
+              <div class="course-thumb">JS</div>
+              <div>
+                <div class="course-title">curso de javascript avanzado</div>
+                <div class="course-meta">8h · 42 clases · módulo 3</div>
+              </div>
+            </div>
+            <div class="platzi-course-card">
+              <div class="course-thumb">RX</div>
+              <div>
+                <div class="course-title">curso de react 19</div>
+                <div class="course-meta">6h · 38 clases · próximo</div>
+              </div>
+            </div>
+
+            <div class="trato-widget">
+              <div class="trato-widget-eyebrow">⌃ acompañado terminas</div>
+              <div class="trato-widget-title">trato de 30 días con un amigo</div>
+              <div class="trato-widget-desc">1 clase diaria cada uno. $300 mxn de apuesta. el que falle paga el café del otro la semana siguiente.</div>
+              <div class="trato-widget-cta">invitar a hacer trato</div>
+              <div class="powered-by">powered by <strong>dovo</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NU -->
+    <div class="frame">
+      <div class="frame-caption">
+        <div class="frame-num">partner 03</div>
+        <div class="frame-title syne lowercase">nu méxico</div>
+        <div class="frame-sub">en la app del banco: "ahorren juntos con skin-in-the-game, con custodia nu y yield real".</div>
+        <span class="partner-tag nu">vertical · fintech</span>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="notch"></div>
+          <div class="status-bar"><span>9:41</span><span>• • •</span></div>
+          <div class="app-bar">
+            <div class="app-name nu" style="font-size: 22px;">Nu</div>
+            <div class="app-bar-icons">⊙  ◐</div>
+          </div>
+          <div class="app-body">
+            <div class="nu-card">
+              <div class="nu-card-label">saldo cuenta</div>
+              <div class="nu-card-balance">$18,420.50</div>
+              <div class="nu-card-actions">transferir · pagar · invertir</div>
+            </div>
+
+            <div class="nu-action-item">
+              <span>tu tarjeta de crédito</span>
+              <span class="nu-action-icon">›</span>
+            </div>
+            <div class="nu-action-item">
+              <span>cajitas</span>
+              <span class="nu-action-icon">›</span>
+            </div>
+
+            <div class="trato-widget">
+              <div class="trato-widget-eyebrow">⌃ nuevo · ahorro con apuesta</div>
+              <div class="trato-widget-title">cajita compartida con apuesta</div>
+              <div class="trato-widget-desc">ahorra para algo con alguien. lana segura en nu, yield 10.8%. si uno falla, el otro se queda lo suyo.</div>
+              <div class="trato-widget-cta">abrir cajita con apuesta</div>
+              <div class="powered-by">powered by <strong>dovo</strong> · custodia nu</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PARTNER DASHBOARD -->
+  <div class="dashboard-section">
+    <div class="section-label">02 · lo que un partner ve</div>
+    <h2 class="section-title syne lowercase">consola del partner.<br/>strava entra a ver sus tratos.</h2>
+    <p class="section-lead">
+      cuando un partner integra la trato API, recibe acceso a un dashboard donde ve volumen, retention que generó, revenue compartido, salud de la integración. lo mismo que stripe te da cuando integras checkout. esto es lo que firma un BD lead de strava o un product manager de nu.
+    </p>
+
+    <div class="dashboard">
+      <div class="dash-titlebar">
+        <span class="dash-dot"></span><span class="dash-dot"></span><span class="dash-dot"></span>
+        <span class="dash-url">platform.dovo.app/dashboard/strava</span>
+      </div>
+      <div class="dash-grid">
+        <aside class="dash-side">
+          <div class="dash-side-logo">dovo</div>
+          <div class="dash-side-sub">partner console</div>
+
+          <div class="dash-nav-section">vista</div>
+          <div class="dash-nav-item active">overview</div>
+          <div class="dash-nav-item">tratos activos</div>
+          <div class="dash-nav-item">revenue share</div>
+          <div class="dash-nav-item">cohortes</div>
+
+          <div class="dash-nav-section">integración</div>
+          <div class="dash-nav-item">API keys</div>
+          <div class="dash-nav-item">webhooks</div>
+          <div class="dash-nav-item">branding del widget</div>
+          <div class="dash-nav-item">documentos</div>
+        </aside>
+
+        <div class="dash-main">
+          <div class="dash-h1 syne lowercase">overview <span class="dash-h1-partner">strava · live</span></div>
+          <div class="dash-h1-sub">últimos 30 días · todos los mercados</div>
+
+          <div class="kpi-grid">
+            <div class="kpi">
+              <div class="kpi-label">tratos creados</div>
+              <div class="kpi-value">14,820</div>
+              <div class="kpi-delta">+24% mom</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">lana en bóveda</div>
+              <div class="kpi-value">$8.4M</div>
+              <div class="kpi-delta">mxn · +18% mom</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">tasa cumplimiento</div>
+              <div class="kpi-value">71%</div>
+              <div class="kpi-delta">+3pts vs prom</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">revenue share</div>
+              <div class="kpi-value">$284k</div>
+              <div class="kpi-delta">a strava · mxn</div>
+            </div>
+          </div>
+
+          <div class="dash-section-title">tratos recientes desde strava</div>
+          <table class="dash-table">
+            <thead>
+              <tr>
+                <th>trato</th>
+                <th>dúo</th>
+                <th>apuesta</th>
+                <th>avance</th>
+                <th>estatus</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>30d · run 3×/sem</td>
+                <td class="mono">@andym × @mikeb</td>
+                <td class="mono">$500 c/u</td>
+                <td class="mono">14/30</td>
+                <td><span class="status-pill active">activo</span></td>
+              </tr>
+              <tr>
+                <td>60d · ride 100km/sem</td>
+                <td class="mono">@luiscr × @paulah</td>
+                <td class="mono">$2,000 c/u</td>
+                <td class="mono">42/60</td>
+                <td><span class="status-pill active">activo</span></td>
+              </tr>
+              <tr>
+                <td>14d · 10k pasos</td>
+                <td class="mono">@dany × @rod</td>
+                <td class="mono">$300 c/u</td>
+                <td class="mono">14/14</td>
+                <td><span class="status-pill done">cumplido</span></td>
+              </tr>
+              <tr>
+                <td>90d · maratón training</td>
+                <td class="mono">@nat × @sam</td>
+                <td class="mono">$5,000 c/u</td>
+                <td class="mono">8/90</td>
+                <td><span class="status-pill active">activo</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRATION CODE -->
+  <div class="integration-section">
+    <div class="section-label">03 · qué tan rápido integran</div>
+    <h2 class="section-title syne lowercase">cuatro líneas.<br/>siete minutos.</h2>
+    <p class="section-lead">
+      una de las razones por las que stripe ganó pagos: era el SDK más rápido de integrar. dovo copia esa jugada. el dev de strava no quiere construir custodia regulada, KYC, dispute resolution, payout — quiere un botón.
+    </p>
+
+    <div class="integration-grid">
+      <div class="integration-copy">
+        <h3 class="syne lowercase">cómo lo integra strava</h3>
+        <ol class="integration-steps">
+          <li>
+            <span class="step-num">01</span>
+            <span class="step-desc"><strong>npm install</strong> el SDK de dovo (10 segundos)</span>
+          </li>
+          <li>
+            <span class="step-num">02</span>
+            <span class="step-desc">copia tu <strong>API key</strong> del partner console</span>
+          </li>
+          <li>
+            <span class="step-num">03</span>
+            <span class="step-desc">renderiza el <strong>&lt;TratoButton /&gt;</strong> donde quieras en tu UI</span>
+          </li>
+          <li>
+            <span class="step-num">04</span>
+            <span class="step-desc">configura un <strong>webhook</strong> para recibir eventos de tratos cumplidos / fallidos</span>
+          </li>
+          <li>
+            <span class="step-num">05</span>
+            <span class="step-desc">dovo se encarga del resto: custodia, yield, KYC, payouts, disputes, compliance</span>
+          </li>
+        </ol>
+      </div>
+
+      <div class="code-block">
+        <div class="code-titlebar">
+          <span class="code-filename">strava-app/feed.tsx</span>
+          <span class="code-lang">typescript</span>
+        </div>
+        <div class="code-body"><span class="c-keyword">import</span> { <span class="c-var">TratoButton</span> } <span class="c-keyword">from</span> <span class="c-string">'@dovo/react'</span>
+
+<span class="c-keyword">export function</span> <span class="c-fn">FeedItem</span>({ user, friend }) {
+  <span class="c-keyword">return</span> (
+    &lt;<span class="c-var">TratoButton</span>
+      <span class="c-var">apiKey</span>={<span class="c-var">env</span>.<span class="c-var">DOVO_KEY</span>}
+      <span class="c-var">duo</span>={[user.<span class="c-var">id</span>, friend.<span class="c-var">id</span>]}
+      <span class="c-var">goal</span>=<span class="c-string">"run 3× / week"</span>
+      <span class="c-var">duration</span>=<span class="c-string">"30d"</span>
+      <span class="c-var">defaultStake</span>={<span class="c-number">500</span>}
+      <span class="c-var">onCumplido</span>={<span class="c-var">handlePayout</span>}
+    /&gt;
+  )
+}
+
+<span class="c-comment">// dovo se encarga de custodia, yield, KYC,</span>
+<span class="c-comment">// payouts y compliance. strava solo renderiza.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUSINESS MODEL -->
+  <div class="model-section">
+    <div class="section-label">04 · cómo gana dovo (y por qué un VC paga 30×)</div>
+    <h2 class="section-title syne lowercase">tres revenue streams.<br/>un solo motor.</h2>
+    <p class="section-lead">
+      el mismo SDK que strava integra para "trato fitness" lo integra platzi para "trato educativo" y nu para "ahorro compartido". una sola pieza de infraestructura → múltiples mercados → ingresos compuestos sin tener que construir cada vertical.
+    </p>
+
+    <div class="model-grid">
+
+      <div class="model-card">
+        <div class="model-card-eyebrow">stream 01</div>
+        <div class="model-card-title syne">platform fee</div>
+        <div class="model-card-desc">cada trato creado vía la API: $10–30 mxn flat. apps freemium pagan menos, enterprise paga más. el 80% del revenue temprano.</div>
+        <div class="model-card-revenue">→ $0.5–1.5 mxn × millones de tratos</div>
+      </div>
+
+      <div class="model-card dark">
+        <div class="model-card-eyebrow">stream 02</div>
+        <div class="model-card-title syne">custody revenue</div>
+        <div class="model-card-desc">dovo comparte el float que generan las bóvedas con los partners bancarios (nu, klar). aplica fee de gestión sobre el AUM total bajo custodia.</div>
+        <div class="model-card-revenue">→ 0.8–1.2% sobre AUM</div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-card-eyebrow">stream 03</div>
+        <div class="model-card-title syne">trato score API</div>
+        <div class="model-card-desc">año 2+: fintechs, dating apps, aseguradoras pagan por consultar el score de cumplimiento de un usuario como signal de underwriting alternativo. moat de datos.</div>
+        <div class="model-card-revenue">→ por consulta · contratos anuales</div>
+      </div>
+
+    </div>
+
+    <div style="background: var(--ink); color: var(--papel); padding: 48px; margin-top: 16px;">
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.55; margin-bottom: 16px;">
+        narrativa para el deck
+      </div>
+      <div class="syne lowercase" style="font-weight: 500; font-size: 32px; letter-spacing: -0.03em; line-height: 1.15; max-width: 880px;">
+        "dovo es la capa de <em style="font-style: normal; color: var(--lana-light);">commitment infrastructure</em> de latinoamérica. cada app con dos usuarios que comparten un objetivo es un canal de distribución gratis para nosotros. cada banco regulado en mx es un partner de custodia. cada trato cumplido alimenta un dataset único e irreplicable. el moat compone con el tiempo."
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <span>dovo · partner platform · v0.2</span>
+    <span>investor view · 2026.05.16</span>
+    <span>file://~/dovo/mockups/partner-platform.html</span>
+  </footer>
+
+</div>
+</body>
+</html>

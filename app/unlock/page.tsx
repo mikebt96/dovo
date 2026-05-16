@@ -10,6 +10,8 @@ import {
 import { Eyebrow } from "@/app/components/ui";
 import { Logo } from "@/app/components/brand";
 
+export const metadata = { title: "acceso" };
+
 const COOKIE_OPTS = {
   httpOnly: true,
   sameSite: "strict" as const,

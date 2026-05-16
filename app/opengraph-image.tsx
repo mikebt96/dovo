@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 import { COLOR } from "@/lib/brand";
 
+// Edge runtime requerido: next/og + SVG inline tiene issues en Node.
+// Vercel CDN cachea el output → cold start ~300ms, cached <50ms.
 export const runtime = "edge";
 export const alt = "dovo · disciplina compartida";
 export const size = { width: 1200, height: 630 };

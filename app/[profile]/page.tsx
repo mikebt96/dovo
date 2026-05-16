@@ -22,6 +22,8 @@ import {
 import ActivityRingLazy from "@/app/three/ActivityRingLazy";
 import { computeStreak } from "@/lib/streaks";
 import { getMyStats } from "@/lib/gamification/stats";
+import { getCheckedSet } from "@/lib/queries/checks";
+import { getExercisesLogged } from "@/lib/queries/exercises";
 
 // La página lee streaks desde Supabase por request, y getEnv() necesita
 // vars solo presentes en runtime, no en build.
@@ -38,18 +40,40 @@ export default async function ProfileDashboard({
 
   const today = todayKey();
   const day = getDay(today)!;
-  const [meals, macros, myStreak, partnerStreak, gamification] = await Promise.all([
+  const [
+    meals,
+    macros,
+    myStreak,
+    partnerStreak,
+    gamification,
+    checkedMeals,
+    loggedExercises,
+  ] = await Promise.all([
     getEffectiveMealsFor(profile.id, today).catch(() => getMealsFor(profile.id, today)),
     getEffectiveDayMacros(profile.id, today).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
     computeStreak(profile.id),
     computeStreak(profile.partnerId),
     getMyStats(profile.id),
+    getCheckedSet({ profile: profile.id, table: "meals_log", date: today }),
+    getExercisesLogged(profile.id, today),
   ]);
   const exercises = exercisesVisibleFor(profile.id, today);
   const altActivity = alternativeActivityFor(profile.id, today);
 
-  // Streaks: derivados de meals_log (más resilientes a reset DB).
-  // XP/coins/level: incrementales desde xp_events (escritos al marcar meal).
+  // mealsDone: cuántas comidas planeadas para hoy ya están marcadas (intersect).
+  // Esto evita inflar el count con comidas viejas / comidas de otro día que
+  // estén en meals_log con la misma fecha por bugs de seed.
+  const mealsDone = meals.filter((m) => checkedMeals[m.id]).length;
+
+  // workoutDone: 1 si TODOS los ejercicios visibles de hoy tienen log.
+  // En días de descanso o actividad alterna (ballet/pilates), exercises está
+  // vacío y workoutDone se queda en 0 — el activity log se trackea aparte.
+  const workoutDone =
+    exercises.length > 0 && exercises.every((ex) => loggedExercises[ex.id]?.done)
+      ? 1
+      : 0;
+
+  // Streaks: derivados de meals_log. XP/coins/level: incrementales desde xp_events.
   const stats = {
     level: gamification.level,
     xp: gamification.xp,
@@ -58,8 +82,8 @@ export default async function ProfileDashboard({
     longestStreak: myStreak.longest,
     coins: gamification.coins,
     partnerStreak: partnerStreak.current,
-    mealsDone: 0,
-    workoutDone: 0,
+    mealsDone,
+    workoutDone,
   };
 
   const accent =

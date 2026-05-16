@@ -35,7 +35,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ),
-  title: "dovo",
+  title: {
+    default: "dovo",
+    template: "%s · dovo",
+  },
   description:
     "Disciplina compartida en dúo. Tu plan semanal, sus rachas, sus recompensas reales.",
   robots: "noindex, nofollow",

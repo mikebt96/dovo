@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { COLOR } from "@/lib/brand";
 
+// Edge runtime para consistencia con opengraph-image (mismo motor).
 export const runtime = "edge";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";

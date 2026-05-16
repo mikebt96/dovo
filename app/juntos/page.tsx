@@ -28,6 +28,8 @@ import { computeStreak } from "@/lib/streaks";
 // en build time. Sin esto el build falla al intentar SSG /juntos.
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "juntos" };
+
 export default async function JuntosPage() {
   const today = todayKey();
   const day = getDay(today)!;

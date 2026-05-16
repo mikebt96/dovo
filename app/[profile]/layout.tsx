@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
 import { GlassBar, RoleDot } from "@/app/components/ui";
 import { Wordmark } from "@/app/components/brand";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ profile: string }>;
+}): Promise<Metadata> {
+  const { profile: profileParam } = await params;
+  const profile = getProfile(profileParam);
+  return { title: profile?.displayName?.toLowerCase() ?? "perfil" };
+}
 
 const NAV: Array<{ slug: string; label: string }> = [
   { slug: "",            label: "Hoy" },
