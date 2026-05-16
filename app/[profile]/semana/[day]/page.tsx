@@ -40,12 +40,11 @@ export default async function DayPage({
   // 'lun' apunta a la nueva semana automáticamente, sin estado pegajoso.
   const date = dateForDayKey(day.key);
 
-  const [meals, macros, mealsCheckedSet] = await Promise.all([
+  const [meals, macros, initialChecked] = await Promise.all([
     getEffectiveMealsFor(profile.id, day.key).catch(() => getMealsFor(profile.id, day.key)),
     getEffectiveDayMacros(profile.id, day.key).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
-    getMealsChecked(profile.id, date),
+    getCheckedSet({ profile: profile.id, table: "meals_log", date }),
   ]);
-  const initialChecked = asRecord(mealsCheckedSet);
   const exercises = exercisesVisibleFor(profile.id, day.key);
   const altActivity = alternativeActivityFor(profile.id, day.key);
 

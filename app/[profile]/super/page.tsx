@@ -5,7 +5,7 @@ import { getShoppingFor, totalCost, CATEGORY_ORDER } from "@/lib/data/shopping";
 import { isoWeek, mondayOf, pad } from "@/lib/dates";
 import { getDietaryProfile } from "@/lib/profileServer";
 import { getBestPrices, cheapestBasketTotal } from "@/lib/prices";
-import { getShoppingChecked, asRecord } from "@/lib/checksServer";
+import { getCheckedSet } from "@/lib/queries/checks";
 import { toggleCheck } from "@/lib/actions/checks";
 import CheckList from "@/app/components/CheckList";
 import {
@@ -35,9 +35,11 @@ export default async function SuperPage({
   if (!profile) notFound();
 
   const week_start = mondayOf();
-  const initialChecked = asRecord(
-    await getShoppingChecked(profile.id, week_start),
-  );
+  const initialChecked = await getCheckedSet({
+    profile: profile.id,
+    table: "shopping_check",
+    week_start,
+  });
 
   async function handleToggle(id: string, checked: boolean) {
     "use server";
