@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
 import { REWARDS_SEED } from "@/lib/data/rewards";
-import { getMyStats } from "@/lib/gamification/stats";
+import { getRewardsView, type RewardRow } from "@/lib/queries/rewards";
 import {
   BigStat,
   Eyebrow,
@@ -11,8 +11,9 @@ import {
 } from "@/app/components/ui";
 import TrophyLazy from "@/app/three/TrophyLazy";
 import type { TrophyTier } from "@/app/three/scenes/Trophy";
+import ClaimButton, { type ClaimStatus } from "./ClaimButton";
 
-// Lee coins desde Supabase por request.
+// Lee coins + catálogo + vouchers desde Supabase por request.
 export const dynamic = "force-dynamic";
 
 function bucketOf(costCoins: number): { label: string; tier: TrophyTier } {
@@ -21,6 +22,24 @@ function bucketOf(costCoins: number): { label: string; tier: TrophyTier } {
   if (costCoins < 600) return { label: "Grandes", tier: "big" };
   if (costCoins < 1500) return { label: "Épicos", tier: "epic" };
   return { label: "Legendarios", tier: "legendary" };
+}
+
+/**
+ * Fallback al seed estático cuando la DB no tiene rewards aún (ej. dev sin
+ * `npm run seed`). Sintetiza RewardRow[] con id negativo para que las
+ * funciones de estado sigan funcionando — claim button quedará disabled
+ * porque la action las rechazará por id inválido.
+ */
+function fallbackFromSeed(): RewardRow[] {
+  return REWARDS_SEED.map((r, i) => ({
+    id: -(i + 1),
+    name: r.name,
+    description: r.description ?? null,
+    category: r.category ?? null,
+    costCoins: r.costCoins,
+    requiresBoth: r.requiresBoth,
+    active: true,
+  }));
 }
 
 export default async function TiendaPage({
@@ -32,17 +51,44 @@ export default async function TiendaPage({
   const profile = getProfile(profileParam);
   if (!profile) notFound();
 
-  // Coins reales: mías + partner para mostrar pool del dúo.
-  const [myStats, partnerStats] = await Promise.all([
-    getMyStats(profile.id),
-    getMyStats(profile.partnerId),
-  ]);
-  const myCoins = myStats.coins;
-  const sharedCoins = myStats.coins + partnerStats.coins;
+  const view = await getRewardsView(profile.id);
+  const rewards = view.rewards.length > 0 ? view.rewards : fallbackFromSeed();
+  const claimsByReward = new Map<number, number>(); // reward_id → unredeemed claim_id (más reciente)
+  for (const c of view.myUnredeemed) {
+    if (!claimsByReward.has(c.rewardId)) claimsByReward.set(c.rewardId, c.id);
+  }
 
-  // Group by bucket
-  const grouped = REWARDS_SEED.reduce<
-    Record<TrophyTier, { label: string; rewards: typeof REWARDS_SEED }>
+  const accent =
+    profile.id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
+
+  function statusFor(r: RewardRow): {
+    status: ClaimStatus;
+    claimId?: number;
+    shortfall?: number;
+  } {
+    // Voucher pendiente — UI te invita a marcarlo usado
+    const claimId = claimsByReward.get(r.id);
+    if (claimId !== undefined) {
+      return { status: "claimed_unredeemed", claimId };
+    }
+    // Block si requires_both + partner sin coins
+    if (r.requiresBoth && view.partnerCoinsBalance < r.costCoins) {
+      return {
+        status: "duo_blocked",
+        shortfall: r.costCoins - view.partnerCoinsBalance,
+      };
+    }
+    if (view.coinsBalance < r.costCoins) {
+      return {
+        status: "unaffordable",
+        shortfall: r.costCoins - view.coinsBalance,
+      };
+    }
+    return { status: "affordable" };
+  }
+
+  const grouped = rewards.reduce<
+    Record<TrophyTier, { label: string; rewards: RewardRow[] }>
   >(
     (acc, r) => {
       const b = bucketOf(r.costCoins);
@@ -50,13 +96,10 @@ export default async function TiendaPage({
       acc[b.tier].rewards.push(r);
       return acc;
     },
-    {} as Record<TrophyTier, { label: string; rewards: typeof REWARDS_SEED }>
+    {} as Record<TrophyTier, { label: string; rewards: RewardRow[] }>,
   );
 
   const tierOrder: TrophyTier[] = ["easy", "mid", "big", "epic", "legendary"];
-
-  const accent =
-    profile.id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
 
   return (
     <div className="space-y-12 pb-20">
@@ -95,9 +138,36 @@ export default async function TiendaPage({
 
       {/* Balance */}
       <section className="grid grid-cols-2 gap-x-8 gap-y-8 max-w-2xl">
-        <BigStat label="Tu balance" value={myCoins} unit="coins" sub="ganadas esta temporada" accent="var(--color-warning)" />
-        <BigStat label="Balance compartido" value={sharedCoins} unit="coins" sub="acumulado del dúo" />
+        <BigStat
+          label="Tu balance"
+          value={view.coinsBalance}
+          unit="coins"
+          sub="ganadas esta temporada"
+          accent="var(--color-warning)"
+        />
+        <BigStat
+          label="Balance compartido"
+          value={view.coinsBalance + view.partnerCoinsBalance}
+          unit="coins"
+          sub="acumulado del dúo"
+        />
       </section>
+
+      {/* Vouchers pendientes */}
+      {view.myUnredeemed.length > 0 && (
+        <>
+          <HRule />
+          <section>
+            <SectionLabel right={`${view.myUnredeemed.length}`}>
+              Vouchers en tu wallet
+            </SectionLabel>
+            <p className="mt-2 text-sm text-[color:var(--color-text-3)] max-w-2xl leading-relaxed">
+              Ya los reclamaste — falta usarlos. Cuando lo hagas, márcalos
+              abajo en el catálogo.
+            </p>
+          </section>
+        </>
+      )}
 
       <HRule />
 
@@ -110,7 +180,6 @@ export default async function TiendaPage({
           return (
             <section key={tier}>
               <div className="grid grid-cols-1 lg:grid-cols-[180px_1fr] gap-6 items-start">
-                {/* 3D trophy preview */}
                 <div className="w-full">
                   <TrophyLazy tier={tier} />
                   <p className="mono text-[10px] tracking-[0.22em] uppercase text-[color:var(--color-text-3)] text-center mt-1">
@@ -122,47 +191,70 @@ export default async function TiendaPage({
                   <SectionLabel right={`${bucket.rewards.length} premios`}>
                     {bucket.label}
                     <span className="ml-3 mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
-                      desde {Math.min(...bucket.rewards.map(r => r.costCoins))} coins
+                      desde {Math.min(...bucket.rewards.map((r) => r.costCoins))} coins
                     </span>
                   </SectionLabel>
                   <ul className="mt-2 divide-y divide-[color:var(--color-divider)]">
-                    {bucket.rewards.map((r, i) => (
-                      <li
-                        key={i}
-                        className="py-4 flex items-start justify-between gap-4"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm leading-tight flex items-center gap-2 flex-wrap">
-                            <span>{r.name}</span>
-                            {r.requiresBoth && (
-                              <span className="inline-flex items-center gap-1 mono text-[9px] tracking-widest uppercase text-[color:var(--color-accent)]">
-                                <RoleDot who="both" className="!w-1.5 !h-1.5" />
-                                compartido
+                    {bucket.rewards.map((r) => {
+                      const { status, claimId, shortfall } = statusFor(r);
+                      const isFromDb = r.id > 0;
+                      return (
+                        <li
+                          key={r.id}
+                          className="py-4 flex items-start justify-between gap-4"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm leading-tight flex items-center gap-2 flex-wrap">
+                              <span>{r.name}</span>
+                              {r.requiresBoth && (
+                                <span className="inline-flex items-center gap-1 mono text-[9px] tracking-widest uppercase text-[color:var(--color-accent)]">
+                                  <RoleDot who="both" className="!w-1.5 !h-1.5" />
+                                  compartido
+                                </span>
+                              )}
+                            </p>
+                            {r.description && (
+                              <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
+                                {r.description}
+                              </p>
+                            )}
+                            {r.category && (
+                              <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] mt-2 uppercase">
+                                {r.category}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
+                            <div>
+                              <p
+                                className="font-extrabold text-xl tabular leading-none"
+                                style={{ color: "var(--color-warning)" }}
+                              >
+                                {r.costCoins}
+                              </p>
+                              <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+                                coins
+                              </p>
+                            </div>
+                            {isFromDb ? (
+                              <ClaimButton
+                                rewardId={r.id}
+                                profile={profile.id}
+                                status={status}
+                                claimId={claimId}
+                                costCoins={r.costCoins}
+                                shortfall={shortfall}
+                                accent={accent}
+                              />
+                            ) : (
+                              <span className="mono text-[9px] tracking-widest text-[color:var(--color-text-4)]">
+                                seed · npm run seed
                               </span>
                             )}
-                          </p>
-                          {r.description && (
-                            <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
-                              {r.description}
-                            </p>
-                          )}
-                          <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] mt-2 uppercase">
-                            {r.category}
-                          </p>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p
-                            className="font-extrabold text-xl tabular"
-                            style={{ color: "var(--color-warning)" }}
-                          >
-                            {r.costCoins}
-                          </p>
-                          <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
-                            coins
-                          </p>
-                        </div>
-                      </li>
-                    ))}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </div>
@@ -172,7 +264,7 @@ export default async function TiendaPage({
       </div>
 
       <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center mt-8">
-        catálogo editable en fase 2
+        catálogo editable en fase 2 · vouchers idempotentes
       </p>
     </div>
   );

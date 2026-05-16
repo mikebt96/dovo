@@ -24,6 +24,7 @@ import { computeStreak } from "@/lib/streaks";
 import { getMyStats } from "@/lib/gamification/stats";
 import { getCheckedSet } from "@/lib/queries/checks";
 import { getExercisesLogged } from "@/lib/queries/exercises";
+import { hasActivityLogged } from "@/lib/queries/activity";
 
 // La página lee streaks desde Supabase por request, y getEnv() necesita
 // vars solo presentes en runtime, no en build.
@@ -48,6 +49,7 @@ export default async function ProfileDashboard({
     gamification,
     checkedMeals,
     loggedExercises,
+    activityLoggedToday,
   ] = await Promise.all([
     getEffectiveMealsFor(profile.id, today).catch(() => getMealsFor(profile.id, today)),
     getEffectiveDayMacros(profile.id, today).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
@@ -56,22 +58,22 @@ export default async function ProfileDashboard({
     getMyStats(profile.id),
     getCheckedSet({ profile: profile.id, table: "meals_log", date: today }),
     getExercisesLogged(profile.id, today),
+    hasActivityLogged(profile.id, today),
   ]);
   const exercises = exercisesVisibleFor(profile.id, today);
   const altActivity = alternativeActivityFor(profile.id, today);
 
-  // mealsDone: cuántas comidas planeadas para hoy ya están marcadas (intersect).
-  // Esto evita inflar el count con comidas viejas / comidas de otro día que
-  // estén en meals_log con la misma fecha por bugs de seed.
+  // mealsDone: comidas planeadas para hoy que ya están marcadas (intersect).
+  // Evita inflar el count con comidas viejas con la misma fecha.
   const mealsDone = meals.filter((m) => checkedMeals[m.id]).length;
 
-  // workoutDone: 1 si TODOS los ejercicios visibles de hoy tienen log.
-  // En días de descanso o actividad alterna (ballet/pilates), exercises está
-  // vacío y workoutDone se queda en 0 — el activity log se trackea aparte.
-  const workoutDone =
-    exercises.length > 0 && exercises.every((ex) => loggedExercises[ex.id]?.done)
-      ? 1
-      : 0;
+  // workoutDone: 1 si el entreno del día se completó. Dos rutas posibles:
+  //  · día de gym → todos los exercises planeados tienen log en exercises_log
+  //  · día de actividad alterna (ballet/pilates/running) → ≥1 sesión en activity_log
+  const gymDone =
+    exercises.length > 0 && exercises.every((ex) => loggedExercises[ex.id]?.done);
+  const altDone = !!altActivity && activityLoggedToday;
+  const workoutDone = gymDone || altDone ? 1 : 0;
 
   // Streaks: derivados de meals_log. XP/coins/level: incrementales desde xp_events.
   const stats = {
