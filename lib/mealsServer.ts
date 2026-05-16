@@ -85,7 +85,7 @@ export interface ReplanSummary {
   triggeredBy: string;
   generatedAt: string;
   changeCount: number;
-  changes: MealChange[];
+  changes: MealChangeWithDelta[];
 }
 
 /** Histórico para el panel "Últimos cambios AI" en preferences. */
@@ -104,8 +104,20 @@ export async function getReplanHistory(
     .order("generated_at", { ascending: false })
     .limit(limit);
 
+  // Index `MEALS` por id para join in-memory eficiente.
+  const mealsById = new Map(MEALS.map((m) => [m.id, m]));
+
   return (data ?? []).map((row) => {
-    const changes = (row.meals_changed as MealChange[] | null) ?? [];
+    const rawChanges = (row.meals_changed as MealChange[] | null) ?? [];
+    const changes: MealChangeWithDelta[] = rawChanges.map((c) => {
+      const original = mealsById.get(c.originalId);
+      return {
+        ...c,
+        originalKcal: original?.kcal,
+        originalProteinG: original?.proteinG,
+        originalName: original?.name,
+      };
+    });
     return {
       id: row.id,
       triggeredBy: row.triggered_by,

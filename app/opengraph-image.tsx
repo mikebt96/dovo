@@ -9,7 +9,19 @@ const INK = "#0e0d11";
 const CREAM = "#f4ede0";
 const MUTE = "#6e6358";
 
+// Fuentes oficiales del sistema dovo, servidas desde Google Fonts (GitHub raw).
+// next/og soporta TTF — la variable-weight de Syne incluye el peso 800.
+const SYNE_URL =
+  "https://github.com/google/fonts/raw/main/ofl/syne/Syne%5Bwght%5D.ttf";
+const SPACE_MONO_URL =
+  "https://github.com/google/fonts/raw/main/ofl/spacemono/SpaceMono-Regular.ttf";
+
 export default async function Image() {
+  const [syne, spaceMono] = await Promise.all([
+    fetch(SYNE_URL).then((r) => r.arrayBuffer()),
+    fetch(SPACE_MONO_URL).then((r) => r.arrayBuffer()),
+  ]);
+
   return new ImageResponse(
     (
       <div
@@ -38,11 +50,11 @@ export default async function Image() {
           </svg>
           <div
             style={{
+              fontFamily: "SpaceMono",
               fontSize: 18,
               letterSpacing: "0.32em",
               textTransform: "uppercase",
               color: MUTE,
-              fontFamily: "monospace",
             }}
           >
             v1 · privado
@@ -53,8 +65,9 @@ export default async function Image() {
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div
             style={{
-              fontSize: 360,
+              fontFamily: "Syne",
               fontWeight: 800,
+              fontSize: 360,
               textTransform: "lowercase",
               letterSpacing: "-0.05em",
               color: INK,
@@ -66,11 +79,11 @@ export default async function Image() {
           </div>
           <div
             style={{
+              fontFamily: "SpaceMono",
               fontSize: 32,
               letterSpacing: "0.22em",
               textTransform: "lowercase",
               color: MUTE,
-              fontFamily: "monospace",
               display: "flex",
             }}
           >
@@ -79,6 +92,12 @@ export default async function Image() {
         </div>
       </div>
     ),
-    { ...size },
+    {
+      ...size,
+      fonts: [
+        { name: "Syne", data: syne, style: "normal", weight: 800 },
+        { name: "SpaceMono", data: spaceMono, style: "normal", weight: 400 },
+      ],
+    },
   );
 }

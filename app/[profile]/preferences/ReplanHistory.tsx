@@ -141,9 +141,17 @@ export default function ReplanHistory({
           <ul className="divide-y divide-[color:var(--color-divider)]">
             {latest.changes.slice(0, 5).map((c, i) => (
               <li key={i} className="py-4">
-                <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mb-1">
-                  {c.originalId}
-                </p>
+                <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
+                  <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+                    {c.originalId}
+                  </p>
+                  <MacroDelta change={c} />
+                </div>
+                {c.originalName && c.originalName !== c.newName && (
+                  <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] mb-1 line-through">
+                    {c.originalName}
+                  </p>
+                )}
                 <p className="font-bold text-sm">{c.newName}</p>
                 <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
                   {c.newIngredients}
