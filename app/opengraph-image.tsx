@@ -1,13 +1,12 @@
 import { ImageResponse } from "next/og";
+import { COLOR } from "@/lib/brand";
 
 export const runtime = "edge";
 export const alt = "dovo · disciplina compartida";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const INK = "#0e0d11";
-const CREAM = "#f4ede0";
-const MUTE = "#6e6358";
+const { ink: INK, cream: CREAM, mute: MUTE } = COLOR;
 
 // Fuentes oficiales del sistema dovo, servidas desde Google Fonts (GitHub raw).
 // next/og soporta TTF — la variable-weight de Syne incluye el peso 800.

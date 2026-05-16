@@ -1,11 +1,11 @@
 import { ImageResponse } from "next/og";
+import { COLOR } from "@/lib/brand";
 
 export const runtime = "edge";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-const INK = "#0e0d11";
-const CREAM = "#f4ede0";
+const { ink: INK, cream: CREAM } = COLOR;
 
 // iOS home screen icon — aplica máscara redonda automática,
 // por eso aquí solo se centra el mark sobre BG crema (sin borderRadius).

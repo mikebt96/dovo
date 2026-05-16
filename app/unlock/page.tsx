@@ -8,6 +8,7 @@ import {
   verifySlug,
 } from "@/lib/auth/session";
 import { Eyebrow } from "@/app/components/ui";
+import { Logo } from "@/app/components/brand";
 
 const COOKIE_OPTS = {
   httpOnly: true,
