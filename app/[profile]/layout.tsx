@@ -12,6 +12,7 @@ const NAV: Array<{ slug: string; label: string }> = [
   { slug: "actividad",   label: "Actividad" },
   { slug: "tienda",      label: "Recompensas" },
   { slug: "duo",         label: "Dúo" },
+  { slug: "review",      label: "Review" },
   { slug: "foto",        label: "Fotos · 🔒" },
   { slug: "preferences", label: "Ajustes" },
 ];

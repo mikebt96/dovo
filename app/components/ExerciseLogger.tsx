@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { Exercise, ProfileId } from "@/lib/types";
 import { logExercise } from "@/lib/actions/exercise";
 
@@ -27,6 +27,7 @@ export default function ExerciseLogger({
   const [expanded, setExpanded] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [, startTransition] = useTransition();
+  const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     try {
@@ -43,11 +44,19 @@ export default function ExerciseLogger({
     } catch {}
   }, [entry, storageKey, hydrated]);
 
-  // Sync a DB cuando cambia `done`. El top_set vigente al momento se persiste.
-  // Strategy: localStorage = caché optimista, server = source of truth eventual.
+  // Sync a DB. Strategy:
+  //   - `done` toggle → persist inmediato (el row debe existir/borrar YA).
+  //   - top_set typing → persist con debounce 600ms SOLO si done=true.
+  //     Sin done, escribir top_set borraría el row (el action delete cuando
+  //     done=false). El usuario tiene que cerrar el ciclo: marcar done antes
+  //     de loguear pesos. Si edita después de done, capturamos cambios.
   // Si server falla, NO revertimos local (consistente con CheckList).
-  function persistToServer(next: LogEntry) {
+  function persistImmediate(next: LogEntry) {
     if (!date) return;
+    if (persistTimer.current) {
+      clearTimeout(persistTimer.current);
+      persistTimer.current = null;
+    }
     startTransition(async () => {
       await logExercise({
         profile: profileId,
@@ -59,6 +68,29 @@ export default function ExerciseLogger({
       });
     });
   }
+
+  function persistDebounced(next: LogEntry) {
+    if (!date || !next.done) return; // sin done no persistimos cambios de top set
+    if (persistTimer.current) clearTimeout(persistTimer.current);
+    persistTimer.current = setTimeout(() => {
+      startTransition(async () => {
+        await logExercise({
+          profile: profileId,
+          date,
+          exercise_id: exercise.id,
+          done: next.done,
+          top_set: next.topSet,
+          notes: next.notes,
+        });
+      });
+    }, 600);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (persistTimer.current) clearTimeout(persistTimer.current);
+    };
+  }, []);
 
   const sugWeight =
     profileId === "mike" ? exercise.weightMike : exercise.weightAndy;
@@ -78,7 +110,7 @@ export default function ExerciseLogger({
           onChange={(e) => {
             setEntry((prev) => {
               const next = { ...prev, done: e.target.checked };
-              persistToServer(next);
+              persistImmediate(next);
               return next;
             });
           }}
@@ -138,10 +170,14 @@ export default function ExerciseLogger({
             value={entry.topSet?.weight ?? ""}
             placeholder={sugWeight?.replace(/\D+$/g, "") ?? "kg"}
             onChange={(v) =>
-              setEntry((p) => ({
-                ...p,
-                topSet: { ...(p.topSet ?? {}), weight: v },
-              }))
+              setEntry((p) => {
+                const next = {
+                  ...p,
+                  topSet: { ...(p.topSet ?? {}), weight: v },
+                };
+                persistDebounced(next);
+                return next;
+              })
             }
           />
           <LogInput
@@ -149,10 +185,14 @@ export default function ExerciseLogger({
             value={entry.topSet?.reps ?? ""}
             placeholder={exercise.repsRange.split("-")[1] ?? "10"}
             onChange={(v) =>
-              setEntry((p) => ({
-                ...p,
-                topSet: { ...(p.topSet ?? {}), reps: v },
-              }))
+              setEntry((p) => {
+                const next = {
+                  ...p,
+                  topSet: { ...(p.topSet ?? {}), reps: v },
+                };
+                persistDebounced(next);
+                return next;
+              })
             }
           />
           <LogInput
@@ -160,10 +200,14 @@ export default function ExerciseLogger({
             value={entry.topSet?.rpe ?? ""}
             placeholder="8"
             onChange={(v) =>
-              setEntry((p) => ({
-                ...p,
-                topSet: { ...(p.topSet ?? {}), rpe: v },
-              }))
+              setEntry((p) => {
+                const next = {
+                  ...p,
+                  topSet: { ...(p.topSet ?? {}), rpe: v },
+                };
+                persistDebounced(next);
+                return next;
+              })
             }
           />
         </div>
