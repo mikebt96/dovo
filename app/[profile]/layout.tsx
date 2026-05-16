@@ -1,6 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
+import { folioDate, isoWeek, pad, folioSerial } from "@/lib/dates";
+
+const NAV: Array<{ slug: string; roman: string; label: string }> = [
+  { slug: "",          roman: "I",   label: "Hoy" },
+  { slug: "super",     roman: "II",  label: "Súper" },
+  { slug: "prep",      roman: "III", label: "Prep" },
+  { slug: "semana",    roman: "IV",  label: "Semana" },
+  { slug: "actividad", roman: "V",   label: "Actividad" },
+  { slug: "tienda",      roman: "VI",   label: "Tienda" },
+  { slug: "pareja",      roman: "VII",  label: "Pareja" },
+  { slug: "preferences", roman: "VIII", label: "Prefs" },
+];
 
 export default async function ProfileLayout({
   children,
@@ -13,81 +25,104 @@ export default async function ProfileLayout({
   const profile = getProfile(profileParam);
   if (!profile) notFound();
 
+  const now = new Date();
+  const issue = pad(isoWeek(now), 2);
+  const serial = folioSerial(profile.id);
+  const accent =
+    profile.id === "mike"
+      ? "var(--color-plate-mike)"
+      : "var(--color-plate-andy)";
+
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top bar */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-card)] sticky top-0 z-10 backdrop-blur">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link
-            href={`/${profile.id}`}
-            className="flex items-center gap-3"
-          >
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ background: profile.color }}
-            />
-            <span
-              className="font-extrabold tracking-tight"
-              style={{ color: profile.color }}
+      {/* Folio band — sticky */}
+      <header className="sticky top-0 z-10 bg-[color:var(--color-bg)]/95 backdrop-blur border-b border-[color:var(--color-rule-strong)]">
+        <div className="max-w-5xl mx-auto px-4 pt-3 pb-1 flex items-center justify-between mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)]">
+          <span className="flex items-center gap-3">
+            <span aria-hidden="true">⊕</span>
+            <Link
+              href={`/${profile.id}`}
+              className="text-[color:var(--color-ink)] font-bold tabular"
             >
-              {profile.displayName}
+              N.º {serial}
+            </Link>
+            <span className="hidden sm:inline">· {folioDate(now)} · ED. W{issue}</span>
+          </span>
+          <span className="flex items-center gap-3">
+            <span
+              className="font-bold tracking-[0.25em]"
+              style={{ color: accent }}
+            >
+              {profile.displayName.toUpperCase()}
             </span>
-          </Link>
-          <Link
-            href="/"
-            className="mono text-[10px] text-[var(--color-muted)] hover:text-[var(--color-text)] transition"
-          >
-            cambiar perfil
-          </Link>
+            <Link
+              href="/"
+              className="hover:text-[color:var(--color-ink)] transition"
+            >
+              ↻ cambiar
+            </Link>
+            <span aria-hidden="true">⊕</span>
+          </span>
         </div>
-        <nav className="max-w-5xl mx-auto px-4 pb-2 overflow-x-auto">
-          <ul className="flex gap-1 text-xs">
-            <NavLink href={`/${profile.id}`} label="Hoy" />
-            <NavLink href="/juntos" label="Juntos" highlight />
-            <NavLink href={`/${profile.id}/super`} label="Súper" />
-            <NavLink href={`/${profile.id}/prep`} label="Prep dom" />
-            <NavLink href={`/${profile.id}/semana`} label="Semana" />
-            <NavLink href={`/${profile.id}/actividad`} label="Actividad" />
-            <NavLink href={`/${profile.id}/tienda`} label="Tienda" />
-            <NavLink href={`/${profile.id}/pareja`} label="Pareja" />
+
+        <nav className="max-w-5xl mx-auto px-4 pb-3 overflow-x-auto">
+          <ul className="flex items-baseline gap-5 text-xs whitespace-nowrap">
+            {NAV.map((n) => (
+              <NavItem
+                key={n.slug}
+                href={`/${profile.id}${n.slug ? `/${n.slug}` : ""}`}
+                roman={n.roman}
+                label={n.label}
+                accent={accent}
+              />
+            ))}
           </ul>
         </nav>
       </header>
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
         {children}
       </main>
 
-      <footer className="border-t border-[var(--color-border)] py-4">
-        <p className="mono text-[10px] text-[var(--color-dim)] text-center">
-          {profile.displayName} · v1 · personal
+      <footer className="border-t border-[color:var(--color-rule-strong)] py-5 mt-12">
+        <p className="mono text-[10px] tracking-widest text-[color:var(--color-ink-dim)] text-center">
+          <span aria-hidden="true">⊕</span> IMPRENTA PRIVADA · ED. W{issue} ·
+          TIRADA DE DOS <span aria-hidden="true">⊕</span>
         </p>
       </footer>
     </div>
   );
 }
 
-function NavLink({
+function NavItem({
   href,
+  roman,
   label,
-  highlight,
+  accent,
 }: {
   href: string;
+  roman: string;
   label: string;
-  highlight?: boolean;
+  accent: string;
 }) {
   return (
     <li>
       <Link
         href={href}
-        className="mono uppercase tracking-wider text-[10px] px-3 py-2 inline-block transition"
-        style={
-          highlight
-            ? { color: "var(--color-accent)" }
-            : { color: "var(--color-muted)" }
-        }
+        className="group inline-flex items-baseline gap-1.5 py-2 text-[color:var(--color-ink-mute)] hover:text-[color:var(--color-ink)] transition"
       >
-        {label}
+        <span
+          className="mono text-[10px] tracking-widest transition-colors group-hover:text-[color:var(--color-overprint)]"
+          style={{ color: accent }}
+        >
+          {roman}
+        </span>
+        <span
+          className="font-bold tracking-tight"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {label}
+        </span>
       </Link>
     </li>
   );

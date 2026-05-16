@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mike & Andy · Plan",
-  description: "Plan semanal con gamificación de pareja",
+  title: "Mike & Andy · Carnet",
+  description: "Carnet de pareja · disciplina compartida",
   robots: "noindex, nofollow",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0d0d0f",
+  themeColor: "#0e0d11",
   width: "device-width",
   initialScale: 1,
 };
@@ -28,7 +28,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,500;1,6..72,700&family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
           rel="stylesheet"
         />
       </head>

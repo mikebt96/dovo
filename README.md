@@ -17,7 +17,7 @@ Plan semanal de pareja con disciplina compartida, castigos consensuales y premio
 ## Quickstart
 
 ```bash
-cd ~/mikeAndy
+cd ~/dovo
 npm install
 cp .env.example .env.local        # opcional para v1 estático
 npm run dev

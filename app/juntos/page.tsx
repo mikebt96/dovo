@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PROFILES } from "@/lib/profile";
-import { getMealsFor, getDayMacros } from "@/lib/data/meals";
+import { getEffectiveMealsFor, getEffectiveDayMacros } from "@/lib/mealsServer";
 import {
   exercisesVisibleFor,
   alternativeActivityFor,
@@ -385,12 +385,14 @@ function Bar({
   );
 }
 
-function DayCard({ id }: { id: ProfileId }) {
+async function DayCard({ id }: { id: ProfileId }) {
   const today = todayKey();
   const day = getDay(today)!;
   const p = PROFILES[id];
-  const meals = getMealsFor(id, today);
-  const macros = getDayMacros(id, today);
+  const [meals, macros] = await Promise.all([
+    getEffectiveMealsFor(id, today),
+    getEffectiveDayMacros(id, today),
+  ]);
   const exercises = exercisesVisibleFor(id, today);
   const alt = alternativeActivityFor(id, today);
 

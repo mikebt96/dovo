@@ -44,69 +44,95 @@ export default function ExerciseLogger({
 
   return (
     <div
-      className={`rounded border bg-[var(--color-card-2)] overflow-hidden transition ${
+      className="ticket-flat overflow-hidden transition-all"
+      style={
         entry.done
-          ? "border-[var(--color-green)]/50 opacity-80"
-          : "border-[var(--color-border)]"
-      }`}
+          ? {
+              borderColor: "var(--color-paid)",
+              opacity: 0.85,
+            }
+          : undefined
+      }
     >
       <div className="px-4 py-3">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            checked={entry.done}
-            onChange={(e) =>
-              setEntry((prev) => ({ ...prev, done: e.target.checked }))
+        <div className="flex items-start gap-4">
+          {/* Stamped check */}
+          <button
+            type="button"
+            onClick={() =>
+              setEntry((prev) => ({ ...prev, done: !prev.done }))
             }
-            className="mt-1 w-5 h-5 rounded border-2 cursor-pointer flex-shrink-0 appearance-none"
-            style={
-              entry.done
-                ? {
-                    background: "var(--color-green)",
-                    borderColor: "var(--color-green)",
-                  }
-                : { borderColor: "var(--color-border)" }
-            }
-          />
+            className="mt-1 w-6 h-6 flex items-center justify-center flex-shrink-0 border-2 transition-all"
+            style={{
+              borderColor: entry.done
+                ? "var(--color-paid)"
+                : "var(--color-rule-strong)",
+              background: entry.done ? "var(--color-paid)" : "transparent",
+              boxShadow: entry.done
+                ? "1px 1px 0 var(--color-rule-strong)"
+                : "none",
+            }}
+            aria-pressed={entry.done}
+            aria-label={entry.done ? "Marcar como pendiente" : "Marcar como hecho"}
+          >
+            {entry.done && (
+              <span className="text-[0.8rem] font-black text-black">✓</span>
+            )}
+          </button>
+
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2 mb-1">
               <p
                 className={`font-bold text-sm leading-tight ${
-                  entry.done ? "line-through opacity-70" : ""
+                  entry.done ? "line-through opacity-75" : ""
                 }`}
               >
-                {exercise.order}. {exercise.name}
+                <span className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)] mr-1.5">
+                  {String(exercise.order).padStart(2, "0")}
+                </span>
+                {exercise.name}
                 {exercise.starred && (
-                  <span className="ml-1.5 text-[var(--color-accent)]">★</span>
+                  <span
+                    className="ml-1.5"
+                    style={{ color: "var(--color-overprint)" }}
+                  >
+                    ★
+                  </span>
                 )}
               </p>
               <span
-                className="mono text-[10px] whitespace-nowrap flex-shrink-0"
-                style={{ color: "var(--color-accent)" }}
+                className="mono text-[10px] tabular whitespace-nowrap flex-shrink-0 tracking-widest"
+                style={{ color: "var(--color-overprint)" }}
               >
                 {exercise.sets} × {exercise.repsRange}
               </span>
             </div>
-            <p className="text-xs text-[var(--color-muted)] mt-1 leading-relaxed">
+            <p
+              className="text-xs text-[color:var(--color-ink-mute)] mt-1 leading-relaxed italic"
+              style={{ fontFamily: "var(--font-stamp)" }}
+            >
               {exercise.description}
             </p>
             {sugWeight && (
-              <p className="mono text-[10px] mt-2" style={{ color: accent }}>
-                Peso sugerido: {sugWeight}
+              <p
+                className="mono text-[10px] mt-2 tracking-widest"
+                style={{ color: accent }}
+              >
+                PESO SUGERIDO · {sugWeight}
               </p>
             )}
             <button
               type="button"
               onClick={() => setExpanded((e) => !e)}
-              className="mono text-[10px] mt-2 text-[var(--color-muted)] hover:text-[var(--color-accent)] transition"
+              className="mono text-[10px] mt-2 tracking-widest text-[color:var(--color-ink-mute)] hover:text-[color:var(--color-overprint)] transition"
             >
-              {expanded ? "× cerrar" : "+ loguear top set"}
+              {expanded ? "× CERRAR" : "+ LOGUEAR TOP SET"}
             </button>
           </div>
         </div>
 
         {expanded && (
-          <div className="mt-3 pt-3 border-t border-[var(--color-border)] grid grid-cols-3 gap-2">
+          <div className="mt-3 pt-3 border-t border-dashed border-[color:var(--color-rule-strong)] grid grid-cols-3 gap-2">
             <LogInput
               label="Peso"
               value={entry.topSet?.weight ?? ""}
@@ -160,7 +186,7 @@ function LogInput({
 }) {
   return (
     <label className="block">
-      <span className="mono text-[10px] text-[var(--color-muted)] block mb-1">
+      <span className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)] block mb-1">
         {label}
       </span>
       <input
@@ -169,7 +195,7 @@ function LogInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded px-2 py-1.5 text-sm mono focus:outline-none focus:border-[var(--color-accent)] transition"
+        className="w-full bg-[color:var(--color-bg)] border border-[color:var(--color-rule-strong)] px-2 py-1.5 text-sm mono tabular focus:outline-none focus:border-[color:var(--color-overprint)] transition"
       />
     </label>
   );

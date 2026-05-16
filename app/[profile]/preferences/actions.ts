@@ -1,0 +1,135 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { isProfileId } from "@/lib/profile";
+import { updateDietaryProfile, slugToUuid } from "@/lib/profileServer";
+import { getServerSupabase } from "@/lib/supabase";
+import type { DietaryProfile, DietaryTag } from "@/lib/types";
+
+const VALID_TAGS: DietaryTag[] = [
+  "vegetarian",
+  "vegan",
+  "pescatarian",
+  "keto",
+  "paleo",
+  "no-gluten",
+  "no-dairy",
+  "no-eggs",
+];
+
+function csvToArray(input: FormDataEntryValue | null): string[] {
+  if (typeof input !== "string") return [];
+  return input
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0);
+}
+
+/**
+ * Detecta contradicciones entre dietary_tags y liked_ingredients.
+ * Modo "solo avisar": nunca bloquea; el form muestra warnings y el segundo
+ * click guarda con `force_save=1`.
+ */
+export async function validatePrefsConflicts(
+  prefs: DietaryProfile
+): Promise<string[]> {
+  const warnings: string[] = [];
+  const likes = prefs.likedIngredients.map((s) => s.toLowerCase());
+  const tags = new Set<DietaryTag>(prefs.dietaryTags);
+
+  const flag = (tag: DietaryTag, forbidden: string[], label: string) => {
+    if (!tags.has(tag)) return;
+    const hits = likes.filter((l) => forbidden.some((f) => l.includes(f)));
+    if (hits.length)
+      warnings.push(`Dieta ${label} pero te gusta: ${hits.join(", ")}.`);
+  };
+
+  flag("vegan",      ["queso", "leche", "huevo", "miel", "carne", "pollo", "atún"], "vegana");
+  flag("vegetarian", ["pollo", "carne", "atún", "pescado", "jamón"],                "vegetariana");
+  flag("no-gluten",  ["pan", "harina", "seitán", "trigo", "galleta"],               "sin gluten");
+  flag("no-dairy",   ["queso", "leche", "yogurt", "crema", "mantequilla"],          "sin lácteos");
+  flag("no-eggs",    ["huevo", "mayonesa"],                                         "sin huevo");
+  return warnings;
+}
+
+export async function savePreferences(
+  slug: string,
+  formData: FormData
+): Promise<{ ok: true } | { ok: false; warnings: string[] }> {
+  if (!isProfileId(slug)) return { ok: false, warnings: ["Perfil inválido"] };
+
+  // Parse form
+  const dietaryTags = (formData.getAll("dietary_tags") as string[]).filter(
+    (t): t is DietaryTag => VALID_TAGS.includes(t as DietaryTag)
+  );
+
+  const patch: Partial<DietaryProfile> = {
+    postalCode: (formData.get("postal_code") as string | null)?.trim() || undefined,
+    dietaryTags,
+    allergens: csvToArray(formData.get("allergens")),
+    dislikedIngredients: csvToArray(formData.get("disliked_ingredients")),
+    likedIngredients: csvToArray(formData.get("liked_ingredients")),
+    dislikedTextures: csvToArray(formData.get("disliked_textures")),
+    maxMealKcal: formData.get("max_meal_kcal")
+      ? Number(formData.get("max_meal_kcal"))
+      : undefined,
+    notesForAi: ((formData.get("notes_for_ai") as string | null) ?? "").trim() || undefined,
+  };
+
+  // Validación de conflictos (TODO_USER)
+  const warnings = await validatePrefsConflicts(patch as DietaryProfile);
+  const forceSave = formData.get("force_save") === "1";
+  if (warnings.length > 0 && !forceSave) {
+    return { ok: false, warnings };
+  }
+
+  await updateDietaryProfile(slug, patch);
+
+  // Dispara AI re-plan async (fire-and-forget). Si falla, no rompe el guardado.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  fetch(`${baseUrl}/api/replan-meals`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-internal-secret": process.env.CRON_SECRET ?? "",
+    },
+    body: JSON.stringify({ slug, triggeredBy: "prefs_changed" }),
+  }).catch((err) => {
+    console.warn("[replan-meals] fire-and-forget failed:", err);
+  });
+
+  revalidatePath(`/${slug}`);
+  revalidatePath(`/${slug}/preferences`);
+  revalidatePath(`/${slug}/super`);
+  return { ok: true };
+}
+
+/**
+ * Revertir al plan original: inserta una fila de meal_replans vacía con
+ * `triggered_by='manual_revert'`. La lookup "más reciente" en mealsServer
+ * verá un changes vacío y devolverá MEALS del seed sin overrides.
+ */
+export async function revertReplan(slug: string): Promise<{ ok: boolean }> {
+  if (!isProfileId(slug)) return { ok: false };
+
+  const uuid = await slugToUuid(slug);
+  if (!uuid) return { ok: false };
+
+  const sb = getServerSupabase();
+  const { error } = await sb.from("meal_replans").insert({
+    profile_id: uuid,
+    triggered_by: "manual_revert",
+    meals_changed: [],
+    prefs_snapshot: {},
+  });
+
+  if (error) {
+    console.warn("[revertReplan] error:", error.message);
+    return { ok: false };
+  }
+
+  revalidatePath(`/${slug}`);
+  revalidatePath(`/${slug}/preferences`);
+  revalidatePath(`/${slug}/semana`, "layout");
+  return { ok: true };
+}
