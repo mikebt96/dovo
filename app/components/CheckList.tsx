@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 type CheckListItem = {
   id: string;
@@ -9,25 +9,36 @@ type CheckListItem = {
   meta?: React.ReactNode;
 };
 
+export type OnToggleResult = { ok: true } | { ok: false; error: string };
+
 /**
  * Carnet checklist — block progress + dashed list rows.
  * El "check" pinta sobreimpresión lima (overprint) sobre la fila marcada,
  * con tipografía tachada y sello opcional. No es un checkbox de UI estándar:
  * intencionalmente parece anotación manual sobre papel.
+ *
+ * Dual-write opcional: si se pasa `onToggle`, además de persistir en
+ * localStorage (optimistic UI), se dispara el Server Action en una
+ * transition. Si el server falla, NO revertimos local — el usuario
+ * ve su trabajo y registramos el error para retry futuro.
  */
 export default function CheckList({
   storageKey,
   items,
   accent,
   emptyMessage,
+  onToggle,
 }: {
   storageKey: string;
   items: CheckListItem[];
   accent: string;
   emptyMessage?: string;
+  onToggle?: (id: string, checked: boolean) => Promise<OnToggleResult>;
 }) {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [hydrated, setHydrated] = useState(false);
+  const [syncErrors, setSyncErrors] = useState<Record<string, string>>({});
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     try {
@@ -45,12 +56,30 @@ export default function CheckList({
   }, [checked, storageKey, hydrated]);
 
   function toggle(id: string) {
+    let nextChecked = false;
     setChecked((prev) => {
       const next = { ...prev };
-      if (next[id]) delete next[id];
-      else next[id] = true;
+      if (next[id]) {
+        delete next[id];
+        nextChecked = false;
+      } else {
+        next[id] = true;
+        nextChecked = true;
+      }
       return next;
     });
+
+    if (onToggle) {
+      startTransition(async () => {
+        const result = await onToggle(id, nextChecked);
+        setSyncErrors((prev) => {
+          const next = { ...prev };
+          if (result.ok) delete next[id];
+          else next[id] = result.error;
+          return next;
+        });
+      });
+    }
   }
 
   if (items.length === 0)
