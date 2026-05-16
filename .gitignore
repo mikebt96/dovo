@@ -1,0 +1,26 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+.env
+.env.local
+.env*.local
+
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+.vercel/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Test + coverage
+coverage/
+.swc/
+
+# Local-only artifacts
+tmp/
+*.local

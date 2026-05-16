@@ -1,0 +1,94 @@
+export type ProfileId = "mike" | "andy";
+export type DayKey = "lun" | "mar" | "mie" | "jue" | "vie" | "sab" | "dom";
+
+export interface Profile {
+  id: ProfileId;
+  displayName: string;
+  color: string;
+  baselineKcal: number;
+  baselineProteinG: number;
+}
+
+export interface Meal {
+  id: string;                     // 'lun-mk-1'
+  day: DayKey;
+  user: ProfileId;
+  slot: number;                   // 1-4
+  time: string;                   // '7:00 AM'
+  slotName: string;               // 'Desayuno' | 'Comida' | 'Post-gym' | 'Cena'
+  name: string;
+  ingredients: string;
+  prepInstructions?: string;
+  kcal: number;
+  proteinG: number;
+}
+
+export interface ExerciseSet {
+  reps: number;
+  weightKg?: number;
+  rpe?: number;
+}
+
+export interface Exercise {
+  id: string;                     // 'e-lun-2'
+  day: DayKey;
+  order: number;
+  name: string;
+  description: string;
+  sets: number;
+  repsRange: string;              // '10-12'
+  isCircuit?: boolean;
+  isSuperset?: boolean;
+  starred?: boolean;
+  starredFor?: ProfileId;         // ⭐ glúteo Andy, etc.
+  weightMike?: string;
+  weightAndy?: string;
+}
+
+export interface DayPlan {
+  key: DayKey;
+  label: string;                  // 'Lunes'
+  focus: string;
+  hasTraining: boolean;
+  trainingTogether: boolean;      // false on Mar/Jue/Sab (Mike solo, Andy ballet)
+  trainingTitle?: string;
+  trainingDuration?: string;
+  warmup?: string;
+  cardio?: string;
+  notes?: string;
+}
+
+export interface ShoppingItem {
+  id: string;
+  user: ProfileId | "shared";
+  store: "walmart" | "vegetariana";
+  category: string;
+  name: string;
+  subtitle?: string;
+  qty: string;
+  priceMxn: number;
+}
+
+export interface PrepTask {
+  id: string;
+  user: ProfileId | "shared";
+  order: number;
+  title: string;
+  duration: string;
+  content: string;
+}
+
+export interface RewardSeed {
+  name: string;
+  description?: string;
+  category: "ropa" | "cine" | "gym_gear" | "suplementos" | "experiencia" | "custom";
+  costCoins: number;
+  requiresBoth: boolean;
+}
+
+export interface PenaltySeed {
+  name: string;
+  description?: string;
+  category: "domestico" | "convivencia" | "economico" | "disciplina";
+  severity: 1 | 2 | 3;
+}

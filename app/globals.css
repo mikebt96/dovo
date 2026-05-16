@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d0d0f;
+  --color-card: #141416;
+  --color-card-2: #1a1a1d;
+  --color-card-3: #1f1f23;
+  --color-border: #2a2a2e;
+  --color-accent: #c8f135;
+  --color-mike: #6bf5ff;
+  --color-andy: #ff6b9d;
+  --color-green: #4ade80;
+  --color-orange: #fbbf24;
+  --color-red: #ef4444;
+  --color-text: #e8e8e8;
+  --color-muted: #888888;
+  --color-dim: #555555;
+
+  --font-display: "Syne", system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  *::selection {
+    background: var(--color-accent);
+    color: #000;
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.55rem;
+    border-radius: 2px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card-2);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+}
