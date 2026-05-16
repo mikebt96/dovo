@@ -1,26 +1,18 @@
 -- =============================================================
--- Migration 002: Dietary preferences + multi-store price scraping
+-- Migration 002: Multi-store price scraping + AI meal replanning
+--
+-- Dietary preferences (postal_code, allergens, etc) ya están en
+-- el schema consolidado (supabase/schema.sql) como columnas de profiles.
+-- Esta migration cubre solo las tablas dependientes.
 -- =============================================================
-
--- ---------- USER DIETARY PROFILE ----------
--- Granular: tags (vegan/vegetarian/keto/etc) + likes/dislikes + allergens
-alter table profiles
-  add column if not exists postal_code text,
-  add column if not exists dietary_tags text[] default '{}',          -- ['vegetarian','no-gluten','no-dairy']
-  add column if not exists allergens text[] default '{}',             -- ['peanuts','shellfish','eggs']
-  add column if not exists disliked_ingredients text[] default '{}',  -- ['cilantro','aceitunas']
-  add column if not exists liked_ingredients text[] default '{}',     -- ['tofu','plátano','aguacate']
-  add column if not exists disliked_textures text[] default '{}',     -- ['gomoso','crujiente']
-  add column if not exists max_meal_kcal int,
-  add column if not exists notes_for_ai text;                          -- "no me gusta cocinar más de 10 min"
 
 -- ---------- STORES ----------
 create table if not exists stores (
-  id text primary key,                    -- 'walmart' | 'soriana' | 'chedraui' | 'sumesa'
+  id text primary key,                       -- 'walmart' | 'soriana' | 'chedraui' | 'sumesa'
   display_name text not null,
   logo_url text,
   base_url text not null,
-  scraper_kind text not null,             -- 'api' | 'html' | 'apify'
+  scraper_kind text not null,                -- 'api' | 'html' | 'apify'
   active boolean default true,
   created_at timestamptz default now()
 );
@@ -33,14 +25,13 @@ insert into stores (id, display_name, base_url, scraper_kind) values
 on conflict (id) do nothing;
 
 -- ---------- CANONICAL PRODUCTS ----------
--- Lo que aparece en la shopping list. Independiente de cada tienda.
 create table if not exists products (
-  id text primary key,                    -- 'huevo-18', 'tofu-firme-400g'
+  id text primary key,                       -- 'huevo-18', 'tofu-firme-400g'
   canonical_name text not null,
-  category text not null,                 -- 'Proteínas base' | 'Lácteos' | etc
-  unit text not null,                     -- 'piezas' | 'g' | 'ml' | 'L'
-  unit_qty numeric not null,              -- 18, 400, 1000
-  tags text[] default '{}',               -- ['vegetarian','vegan','no-gluten','dairy','egg']
+  category text not null,
+  unit text not null,                        -- 'piezas' | 'g' | 'ml' | 'L'
+  unit_qty numeric not null,
+  tags text[] default '{}',
   is_vegetarian boolean default true,
   is_vegan boolean default false,
   contains_dairy boolean default false,
@@ -50,28 +41,27 @@ create table if not exists products (
 );
 
 -- ---------- PRODUCT ALIASES PER STORE ----------
--- Mapping: cómo se llama "Huevo 18pz" en Walmart vs en Soriana
 create table if not exists product_store_aliases (
   id bigserial primary key,
   product_id text not null references products(id) on delete cascade,
-  store_id text not null references stores(id),
-  store_product_id text,                  -- SKU/id en la tienda
-  query_term text not null,               -- término para buscar en su API
-  matched_name text,                      -- nombre exacto que devolvió la tienda
+  store_id text not null references stores(id) on delete cascade,
+  store_product_id text,                     -- SKU/id en la tienda
+  query_term text not null,
+  matched_name text,
   unique (product_id, store_id)
 );
 
 -- ---------- PRICE SNAPSHOTS ----------
--- Histórico de precios. NO sobrescribir — append-only para tracking de tendencias.
+-- Append-only para tracking de tendencias. NUNCA UPDATE.
 create table if not exists price_snapshots (
   id bigserial primary key,
   product_id text not null references products(id) on delete cascade,
-  store_id text not null references stores(id),
-  postal_code text,                       -- CP usado en el scrape; null = nacional
+  store_id text not null references stores(id) on delete cascade,
+  postal_code text,                          -- null = nacional
   price_mxn numeric not null,
-  price_per_unit numeric,                 -- price_mxn / unit_qty (para comparar)
+  price_per_unit numeric,                    -- price_mxn / products.unit_qty
   in_stock boolean default true,
-  promo_label text,                       -- "2x1" | "20% off" | null
+  promo_label text,                          -- "2x1" | "20% off" | null
   source_url text,
   scraped_at timestamptz default now()
 );
@@ -101,24 +91,29 @@ order by product_id, store_id, postal_code, scraped_at desc;
 -- ---------- SCRAPE RUNS (observability) ----------
 create table if not exists scrape_runs (
   id bigserial primary key,
-  store_id text references stores(id),
+  store_id text references stores(id) on delete set null,
   postal_code text,
   started_at timestamptz default now(),
   finished_at timestamptz,
-  status text,                            -- 'running' | 'ok' | 'partial' | 'failed'
+  status text,                               -- 'running' | 'ok' | 'partial' | 'failed'
   products_total int default 0,
   products_ok int default 0,
   products_failed int default 0,
   error text
 );
 
+create index if not exists idx_scrape_runs_status on scrape_runs (status, started_at desc);
+
 -- ---------- AI MEAL REPLAN HISTORY ----------
 -- Cuando user cambia prefs, guardamos el re-plan generado por Claude.
+-- Append-only: nunca se actualiza, sirve para auditoría + undo.
 create table if not exists meal_replans (
   id bigserial primary key,
-  user_id text not null references profiles(id),
-  triggered_by text not null,             -- 'prefs_changed' | 'manual'
-  meals_changed jsonb not null,           -- [{original_id, new_name, new_ingredients, reason}]
-  prefs_snapshot jsonb not null,          -- copy of profile prefs at time of replan
+  profile_id uuid not null references profiles(id) on delete cascade,
+  triggered_by text not null,                -- 'prefs_changed' | 'manual'
+  meals_changed jsonb not null,              -- MealReplanChanges (Zod)
+  prefs_snapshot jsonb not null,             -- DietaryPrefsSnapshot (Zod)
   generated_at timestamptz default now()
 );
+
+create index if not exists idx_meal_replans_profile on meal_replans (profile_id, generated_at desc);
