@@ -26,7 +26,7 @@ export default async function PrepPage({
     profile.id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
 
   const week_start = mondayOf();
-  const initialChecked = asRecord(
+  const initialChecked = await asRecord(
     await getPrepChecked(profile.id, week_start),
   );
 

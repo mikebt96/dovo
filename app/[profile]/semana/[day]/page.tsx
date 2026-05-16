@@ -10,6 +10,7 @@ import {
 import { getDay, DAYS } from "@/lib/data/days";
 import { isValidDayKey, mondayOf } from "@/lib/dates";
 import { getCheckedSet } from "@/lib/queries/checks";
+import { getExercisesLogged } from "@/lib/queries/exercises";
 import { toggleCheck } from "@/lib/actions/checks";
 import type { DayKey } from "@/lib/types";
 import CheckList from "@/app/components/CheckList";
@@ -40,10 +41,11 @@ export default async function DayPage({
   // 'lun' apunta a la nueva semana automáticamente, sin estado pegajoso.
   const date = dateForDayKey(day.key);
 
-  const [meals, macros, initialChecked] = await Promise.all([
+  const [meals, macros, initialChecked, exerciseLogs] = await Promise.all([
     getEffectiveMealsFor(profile.id, day.key).catch(() => getMealsFor(profile.id, day.key)),
     getEffectiveDayMacros(profile.id, day.key).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
     getCheckedSet({ profile: profile.id, table: "meals_log", date }),
+    getExercisesLogged(profile.id, date),
   ]);
   const exercises = exercisesVisibleFor(profile.id, day.key);
   const altActivity = alternativeActivityFor(profile.id, day.key);
@@ -246,6 +248,7 @@ export default async function DayPage({
                 profileId={profile.id}
                 accent={accent}
                 date={date}
+                initialEntry={exerciseLogs[ex.id]}
               />
             ))}
           </div>

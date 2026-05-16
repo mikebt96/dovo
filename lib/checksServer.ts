@@ -3,14 +3,14 @@ import { getServerSupabase } from "./supabase";
 import { slugToUuid } from "./profileServer";
 import type { ProfileId } from "./types";
 
-// Este NO es un Server Actions file ("use server" estaría prohibido aquí
-// porque exportamos helpers sync como `asRecord`). Las mutaciones viven
-// en lib/actions/checks.ts; aquí solo readers + utils.
+// Helpers de servidor para gestión de checks (lectura y utilidades).
+// Las mutaciones viven en lib/actions/checks.ts.
+
 
 /**
  * Convierte una lista de IDs en un Record de checks para el componente CheckList.
  */
-export function asRecord(ids: string[]): Record<string, boolean> {
+export async function asRecord(ids: string[]): Promise<Record<string, boolean>> {
   const record: Record<string, boolean> = {};
   ids.forEach((id) => {
     record[id] = true;

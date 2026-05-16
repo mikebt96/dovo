@@ -88,7 +88,7 @@ export default function UploadForm({
               className="block w-full text-xs text-[color:var(--color-text-2)] file:mr-3 file:py-2 file:px-3 file:border file:border-[color:var(--color-divider-strong)] file:bg-transparent file:text-[color:var(--color-text)] file:mono file:tracking-widest file:uppercase file:text-[10px] file:cursor-pointer hover:file:border-[color:var(--color-text)] cursor-pointer"
             />
             <p className="mono text-[10px] text-[color:var(--color-text-4)] mt-2 leading-relaxed">
-              jpg / png / webp · ≤ 4 MB · privada (solo tú y tu pareja con PIN)
+              jpg / png / webp · ≤ 4 MB · privada (solo tú y el otro con PIN)
             </p>
           </label>
         </div>

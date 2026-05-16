@@ -7,111 +7,119 @@ import {
   RoleDot,
 } from "@/app/components/ui";
 import { Logo } from "@/app/components/brand";
-import IridescentOrbLazy from "@/app/three/IridescentOrbLazy";
+import BlobHeroLazy from "@/app/three/BlobHeroLazy";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col relative">
-      {/* Top minimal nav */}
-      <div className="px-6 pt-6 flex items-center justify-between mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
-        <Logo layout="horizontal" size="md" />
-        <span className="hidden sm:inline">disciplina compartida</span>
-        <span>v1</span>
-      </div>
+    <main className="min-h-screen flex flex-col relative bg-[color:var(--color-bg)]">
+      {/* === HERO FULL-BLEED — blob 3D al fondo === */}
+      <section className="relative min-h-screen w-full overflow-hidden">
+        {/* Animated Blob Background (z-0) */}
+        <BlobHeroLazy />
 
-      {/* === HERO PRINCIPAL — IridescentOrb + pair-stats strip === */}
-      <section className="relative flex-1 flex flex-col items-center justify-center px-6 pt-6 pb-10">
-        {/* Soft radial behind orb — lifts the surface */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-1/3 -z-10 mx-auto h-[520px] max-w-3xl pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(200,241,53,0.10) 0%, rgba(107,245,255,0.08) 35%, rgba(255,107,157,0.06) 60%, transparent 80%)",
-            filter: "blur(40px)",
-          }}
-        />
+        {/* Content Overlay (z-10) */}
+        <div className="relative z-10 flex min-h-screen flex-col">
+          {/* Top minimal nav */}
+          <div className="px-6 pt-6 flex items-center justify-between mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+            <Logo layout="horizontal" size="md" />
+            <span className="hidden sm:inline">disciplina compartida</span>
+            <span>v1</span>
+          </div>
 
-        <div className="w-full max-w-5xl">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-12 items-center mb-14">
-            <div>
-              <Eyebrow className="mb-5">
-                <span className="flex items-center gap-1.5">
-                  <RoleDot who="both" />
-                  <span>Disciplina · de dos · en uno</span>
-                </span>
+          {/* Hero Content centered */}
+          <div className="flex flex-1 items-center justify-center px-6">
+            <div className="mx-auto max-w-5xl text-center">
+              <Eyebrow className="justify-center mb-8">
+                <RoleDot who="both" />
+                <span>De dos · en uno</span>
               </Eyebrow>
+
+              {/* Main wordmark — sólo "dovo", el blob hace el resto */}
               <h1
-                className="font-extrabold lowercase tracking-tight leading-[0.82] text-[color:var(--color-text)]"
+                className="font-extrabold lowercase leading-[0.85] tracking-tight text-white"
                 style={{
                   fontFamily: "var(--font-display)",
-                  fontSize: "clamp(3.5rem, 11vw, 7.5rem)",
-                  letterSpacing: "-0.045em",
+                  fontSize: "clamp(6rem, 18vw, 14rem)",
+                  letterSpacing: "-0.05em",
+                  textShadow: "0 6px 60px rgba(0,0,0,0.7)",
                 }}
               >
-                no se cumple
-                <br />
-                solo. se cumple
-                <br />
-                <span style={{ color: "var(--color-accent)" }}>en dúo.</span>
+                dovo
               </h1>
+
               <p
-                className="mt-7 text-[color:var(--color-text-2)] leading-relaxed max-w-md"
-                style={{ fontSize: "1.05rem" }}
+                className="mt-8 mx-auto max-w-xl text-lg md:text-xl text-white/85 leading-relaxed"
+                style={{
+                  textShadow: "0 2px 16px rgba(0,0,0,0.7)",
+                }}
               >
-                Tu plan semanal de comidas y entreno, sincronizado con tu pareja.
-                Las rachas se ganan juntos. Los premios son reales — y las
-                consecuencias también.
+                No se cumple solo. Se cumple en dúo.
+                <br />
+                <span className="text-white/60 text-base md:text-lg">
+                  Plan semanal de comidas y entreno sincronizado con el otro.
+                </span>
               </p>
 
-              <div className="mt-8 flex items-center gap-3 flex-wrap">
-                <BracketLink href="/mike">Entrar como Mike →</BracketLink>
-                <BracketLink href="/andy">Entrar como Andy →</BracketLink>
+              {/* CTA buttons */}
+              <div className="mt-12 flex items-center justify-center gap-3 flex-wrap">
+                <Link href="/mike" className="btn-ink">
+                  Entrar como Mike →
+                </Link>
+                <Link href="/andy" className="btn-ink">
+                  Entrar como Andy →
+                </Link>
+              </div>
+              <div className="mt-4 flex items-center justify-center">
                 <BracketLink href="/juntos">Vista compartida →</BracketLink>
               </div>
             </div>
-
-            {/* === ORBE IRIDISCENTE — el centro visual === */}
-            <div className="w-full lg:w-[440px] mx-auto">
-              <IridescentOrbLazy height="440px" size={1.55} />
-            </div>
           </div>
 
-          {/* === PAIR-STATS STRIP === */}
+          {/* === PAIR STATS STRIP — footer del hero === */}
           <PairStatsStrip />
+        </div>
 
-          <HRule />
+        {/* Noise overlay (z-30) — añade textura sutil sobre el blob */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-30 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "url('data:image/svg+xml,%3Csvg viewBox=\"0 0 200 200\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cfilter id=\"n\"%3E%3CfeTurbulence type=\"fractalNoise\" baseFrequency=\"0.9\" numOctaves=\"3\" stitchTiles=\"stitch\"/%3E%3C/filter%3E%3Crect width=\"100%25\" height=\"100%25\" filter=\"url(%23n)\"/%3E%3C/svg%3E')",
+          }}
+        />
+      </section>
 
-          {/* === PROFILES SELECTOR — segunda lectura, no la principal === */}
-          <div className="mt-12 mb-6 flex items-baseline justify-between">
-            <Eyebrow>O entra a tu plan</Eyebrow>
-            <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)]">
-              tu sesión queda en este dispositivo
-            </span>
-          </div>
+      {/* === SECTION SECUNDARIA — selector detallado === */}
+      <section className="relative z-10 max-w-5xl mx-auto w-full px-6 py-16">
+        <div className="mb-6 flex items-baseline justify-between">
+          <Eyebrow>O entra a tu plan</Eyebrow>
+          <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)]">
+            tu sesión queda en este dispositivo
+          </span>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 border-t border-[color:var(--color-divider-strong)]">
-            <ProfileEntry
-              href="/mike"
-              who="mike"
-              name="Mike"
-              kcal={2400}
-              protein={155}
-              disciplines={["Gym", "Caminadora"]}
-            />
-            <ProfileEntry
-              href="/andy"
-              who="andy"
-              name="Andy"
-              kcal={1750}
-              protein={115}
-              disciplines={["Gym", "Ballet", "Pilates"]}
-            />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 border-t border-[color:var(--color-divider-strong)]">
+          <ProfileEntry
+            href="/mike"
+            who="mike"
+            name="Mike"
+            kcal={2400}
+            protein={155}
+            disciplines={["Gym", "Caminadora"]}
+          />
+          <ProfileEntry
+            href="/andy"
+            who="andy"
+            name="Andy"
+            kcal={1750}
+            protein={115}
+            disciplines={["Gym", "Ballet", "Pilates"]}
+          />
         </div>
       </section>
 
-      <footer className="px-6 py-6 mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center">
+      <footer className="relative z-10 px-6 py-6 mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center">
         dovo · privado · no compartas el link
       </footer>
     </main>
@@ -119,90 +127,104 @@ export default function HomePage() {
 }
 
 /**
- * Pair-stats strip — surface premium con 3 columnas:
- *  · perfil Mike (role-dot + nombre + macros)
- *  · streak compartido (centro, lima)
- *  · perfil Andy (mirror)
- *
- * Va justo debajo del orbe; lectura inmediata de "esta app es para dos".
+ * PairStatsStrip — footer del hero. Glass surface con 3 columnas:
+ *   · Mike (role-dot cyan, avatar gradient, status)
+ *   · Pair streak grande lima al centro
+ *   · Andy (mirror)
  */
 function PairStatsStrip() {
   return (
-    <section className="surface relative px-6 py-7 md:py-8 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-10 items-center">
-      <ProfileMini who="mike" name="Mike" kcal={2400} protein={155} />
+    <div className="relative z-20 border-t border-white/10 bg-[color:var(--color-bg)]/85 backdrop-blur-xl">
+      <div className="mx-auto max-w-4xl px-6 py-7 md:py-8">
+        <div className="flex items-center justify-between gap-4">
+          {/* Mike */}
+          <ProfileAvatar who="mike" name="Mike" status="activo" />
 
-      <div className="flex flex-col items-center text-center px-4">
-        <Eyebrow className="mb-2">
-          <RoleDot who="both" />
-          <span>Pair streak</span>
-        </Eyebrow>
-        <p
-          className="font-extrabold tabular tracking-tight leading-none"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(3rem, 7vw, 4.5rem)",
-            color: "var(--color-accent)",
-            letterSpacing: "-0.04em",
-          }}
-        >
-          0
-        </p>
-        <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mt-1.5">
-          días seguidos · empieza hoy
-        </p>
+          {/* Shared streak */}
+          <div className="flex flex-col items-center text-center">
+            <p
+              className="font-extrabold tabular leading-none"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(2.5rem, 6vw, 3.5rem)",
+                color: "var(--color-accent)",
+                letterSpacing: "-0.04em",
+              }}
+            >
+              0
+            </p>
+            <p className="mono text-[10px] tracking-widest uppercase text-white/55 mt-1">
+              días seguidos
+            </p>
+          </div>
+
+          {/* Andy mirror */}
+          <ProfileAvatar who="andy" name="Andy" status="activo" mirror />
+        </div>
       </div>
-
-      <ProfileMini who="andy" name="Andy" kcal={1750} protein={115} mirror />
-    </section>
+    </div>
   );
 }
 
-function ProfileMini({
+function ProfileAvatar({
   who,
   name,
-  kcal,
-  protein,
+  status,
   mirror = false,
 }: {
   who: "mike" | "andy";
   name: string;
-  kcal: number;
-  protein: number;
+  status: string;
   mirror?: boolean;
 }) {
-  const accent =
-    who === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
+  const isMike = who === "mike";
+  const accentHex = isMike ? "#6bf5ff" : "#ff6b9d";
+
+  const avatar = (
+    <div className="relative flex-shrink-0">
+      <div
+        className="h-12 w-12 md:h-14 md:w-14 rounded-full"
+        style={{
+          background: `linear-gradient(135deg, ${accentHex} 0%, ${accentHex}55 100%)`,
+        }}
+      />
+      <div
+        className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2"
+        style={{
+          background: accentHex,
+          borderColor: "var(--color-bg)",
+        }}
+      />
+    </div>
+  );
+
+  const label = (
+    <div className={mirror ? "text-right" : "text-left"}>
+      <p className="text-sm font-semibold text-white lowercase tracking-tight">
+        {name.toLowerCase()}
+      </p>
+      <p className="text-xs text-white/55 mono tracking-widest uppercase">
+        {status}
+      </p>
+    </div>
+  );
+
   return (
     <Link
       href={`/${who}`}
-      className={`group flex items-baseline gap-4 ${
-        mirror ? "md:justify-end" : ""
-      }`}
+      className="flex items-center gap-3 md:gap-4 hover:opacity-90 transition"
     >
-      <div className={mirror ? "text-right order-2" : ""}>
-        <Eyebrow className={mirror ? "justify-end" : ""}>
-          <RoleDot who={who} />
-          <span style={{ color: accent }}>{name.toLowerCase()}</span>
-        </Eyebrow>
-        <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mt-2 tabular">
-          {kcal.toLocaleString("en-US")} kcal · {protein}g P
-        </p>
-      </div>
-      <p
-        className={`font-extrabold lowercase tracking-tight leading-none transition-transform ${
-          mirror
-            ? "order-1 group-hover:-translate-x-1"
-            : "group-hover:translate-x-1"
-        }`}
-        style={{
-          color: accent,
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(2rem, 4vw, 3rem)",
-          letterSpacing: "-0.04em",
-        }}
-      >
-        {name.toLowerCase()}
-      </p>
+      {mirror ? (
+        <>
+          {label}
+          {avatar}
+        </>
+      ) : (
+        <>
+          {avatar}
+          {label}
+        </>
+      )}
     </Link>
   );
 }

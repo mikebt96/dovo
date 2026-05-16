@@ -12,6 +12,8 @@ import {
 } from "@/app/components/ui";
 import PairRingsLazy from "@/app/three/PairRingsLazy";
 import { computeStreak } from "@/lib/streaks";
+import { listDebts, listActivePenalties } from "@/lib/queries/debts";
+import DebtRowItem from "./DebtRow";
 
 // Streaks reales desde DB en cada request.
 export const dynamic = "force-dynamic";
@@ -27,10 +29,14 @@ export default async function DuoPage({
   const partner = PROFILES[profile.partnerId];
 
   // Rachas reales. XP/coins/level seguirán como stubs hasta la slice de xp_events.
-  const [mike, andy] = await Promise.all([
+  const [mike, andy, debts, penalties] = await Promise.all([
     computeStreak("mike"),
     computeStreak("andy"),
+    listDebts(),
+    listActivePenalties(),
   ]);
+  const pendingDebts = debts.filter((d) => d.status === "pending");
+  const resolvedDebts = debts.filter((d) => d.status !== "pending").slice(0, 5);
   const mikeStats = { streak: mike.current, longest: mike.longest, level: 1, xp: 0, coins: 0 };
   const andyStats = { streak: andy.current, longest: andy.longest, level: 1, xp: 0, coins: 0 };
   const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
@@ -119,27 +125,57 @@ export default async function DuoPage({
 
       {/* Debts */}
       <section>
-        <SectionLabel right="al día">Deudas pendientes</SectionLabel>
-        <div className="mt-6 py-10 text-center">
-          <p
-            className="font-extrabold lowercase tracking-tight leading-none"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.5rem, 6vw, 4rem)",
-              color: "var(--color-success)",
-              letterSpacing: "-0.04em",
-            }}
-          >
-            limpio.
-          </p>
-          <p
-            className="mt-3 italic text-[color:var(--color-text-3)] leading-relaxed max-w-md mx-auto"
-            style={{ fontFamily: "var(--font-serif)", fontSize: "1.02rem" }}
-          >
-            Cuando alguno del dúo rompa racha, aquí aparece lo que le debe al otro.
-            Pago en especie — consensual, finito.
-          </p>
-        </div>
+        <SectionLabel
+          right={
+            pendingDebts.length === 0
+              ? "al día"
+              : `${pendingDebts.length} pendiente${pendingDebts.length === 1 ? "" : "s"}`
+          }
+        >
+          Deudas
+        </SectionLabel>
+
+        {pendingDebts.length === 0 ? (
+          <div className="mt-6 py-10 text-center">
+            <p
+              className="font-extrabold lowercase tracking-tight leading-none"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(2.5rem, 6vw, 4rem)",
+                color: "var(--color-success)",
+                letterSpacing: "-0.04em",
+              }}
+            >
+              limpio.
+            </p>
+            <p
+              className="mt-3 italic text-[color:var(--color-text-3)] leading-relaxed max-w-md mx-auto"
+              style={{ fontFamily: "var(--font-serif)", fontSize: "1.02rem" }}
+            >
+              Cuando alguno del dúo rompa racha, aquí aparece lo que le debe al otro.
+              Pago en especie — consensual, finito.
+            </p>
+          </div>
+        ) : (
+          <ul className="mt-6 space-y-3">
+            {pendingDebts.map((d) => (
+              <DebtRowItem key={d.id} debt={d} penalties={penalties} />
+            ))}
+          </ul>
+        )}
+
+        {resolvedDebts.length > 0 && (
+          <details className="mt-6">
+            <summary className="mono text-[10px] tracking-widest uppercase text-[color:var(--color-text-3)] cursor-pointer hover:text-[color:var(--color-text)] transition">
+              historial resuelto ({resolvedDebts.length})
+            </summary>
+            <ul className="mt-4 space-y-3">
+              {resolvedDebts.map((d) => (
+                <DebtRowItem key={d.id} debt={d} penalties={penalties} />
+              ))}
+            </ul>
+          </details>
+        )}
       </section>
 
       <HRule />

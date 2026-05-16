@@ -7,7 +7,7 @@ import * as THREE from "three";
 /**
  * HeroCover — escena del home selector.
  * Dos orbs (cyan = Mike, magenta = Andy) orbitando un núcleo lime.
- * El núcleo brilla cuando ambos orbs están cerca → metáfora de pareja.
+ * El núcleo brilla cuando ambos orbs están cerca → metáfora de dúo.
  */
 export default function HeroCover() {
   const groupRef = useRef<THREE.Group>(null);

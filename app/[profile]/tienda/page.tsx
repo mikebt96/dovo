@@ -73,7 +73,7 @@ export default async function TiendaPage({
           Tu disciplina convertida en cosas reales. Lo que diga{" "}
           <span className="inline-flex items-center gap-1.5">
             <RoleDot who="both" />
-            <span className="font-bold">pareja</span>
+            <span className="font-bold">compartido</span>
           </span>{" "}
           requiere que ambos hayan acumulado las coins.
         </p>
@@ -84,7 +84,7 @@ export default async function TiendaPage({
       {/* Balance */}
       <section className="grid grid-cols-2 gap-x-8 gap-y-8 max-w-2xl">
         <BigStat label="Tu balance" value={0} unit="coins" sub="ganadas esta temporada" accent="var(--color-warning)" />
-        <BigStat label="Balance pareja" value={0} unit="coins" sub="acumulado del dúo" />
+        <BigStat label="Balance compartido" value={0} unit="coins" sub="acumulado del dúo" />
       </section>
 
       <HRule />
@@ -125,7 +125,7 @@ export default async function TiendaPage({
                             {r.requiresBoth && (
                               <span className="inline-flex items-center gap-1 mono text-[9px] tracking-widest uppercase text-[color:var(--color-accent)]">
                                 <RoleDot who="both" className="!w-1.5 !h-1.5" />
-                                pareja
+                                compartido
                               </span>
                             )}
                           </p>

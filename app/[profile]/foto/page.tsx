@@ -63,7 +63,7 @@ export default async function FotoPage({
           style={{ fontSize: "1.05rem" }}
         >
           Tracking visual semanal. Claude Vision analiza pose, definición y
-          asimetrías. Datos privados — solo tú y tu pareja con el PIN.
+          asimetrías. Datos privados — solo tú y el otro con el PIN.
         </p>
       </section>
 

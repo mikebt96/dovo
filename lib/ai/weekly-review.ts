@@ -23,7 +23,7 @@ import type { ProfileId } from "@/lib/types";
 
 const MODEL = "claude-sonnet-4-6";
 
-const SYSTEM_PROMPT = `Eres un coach personal de pareja en CDMX. Revisas cada domingo la semana que terminó: comidas marcadas, entrenamientos, actividades extra (ballet/pilates/running), peso, fotos de progreso y rachas.
+const SYSTEM_PROMPT = `Eres un coach personal de dúo en CDMX. Revisas cada domingo la semana que terminó: comidas marcadas, entrenamientos, actividades extra (ballet/pilates/running), peso, fotos de progreso y rachas.
 
 Tu salida tiene 3 partes:
 

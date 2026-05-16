@@ -76,7 +76,7 @@ app/
     semana/[day]/page.tsx      # Detalle del día (meals + entreno)
     actividad/page.tsx         # Log ballet/pilates/running
     tienda/page.tsx            # Catálogo de premios
-    pareja/page.tsx            # Streaks + deudas + castigos
+    duo/page.tsx               # Streaks + deudas + castigos
   components/
     CheckList.tsx              # Lista checkable con localStorage
     ExerciseLogger.tsx         # Log de peso/reps/RPE por ejercicio
