@@ -22,6 +22,7 @@ import {
 import { Wordmark } from "@/app/components/brand";
 import PairRingsLazy from "@/app/three/PairRingsLazy";
 import { computeStreak } from "@/lib/streaks";
+import { getMyStats } from "@/lib/gamification/stats";
 
 // `force-dynamic` evita prerender estático: esta página lee Supabase por
 // request (via mealsServer/streaks/getEnv), que requiere env vars no presentes
@@ -34,13 +35,27 @@ export default async function JuntosPage() {
   const today = todayKey();
   const day = getDay(today)!;
 
-  // Rachas reales desde meals_log. XP/coins/level siguen stubs (próx slice).
-  const [mike, andy] = await Promise.all([
+  // Todo real desde DB: streaks de meals_log, XP/coins/level de xp_events.
+  const [mike, andy, mikeGami, andyGami] = await Promise.all([
     computeStreak("mike"),
     computeStreak("andy"),
+    getMyStats("mike"),
+    getMyStats("andy"),
   ]);
-  const mikeStats = { level: 1, xp: 0, streak: mike.current, coins: 0, longest: mike.longest };
-  const andyStats = { level: 1, xp: 0, streak: andy.current, coins: 0, longest: andy.longest };
+  const mikeStats = {
+    level: mikeGami.level,
+    xp: mikeGami.xp,
+    streak: mike.current,
+    coins: mikeGami.coins,
+    longest: mike.longest,
+  };
+  const andyStats = {
+    level: andyGami.level,
+    xp: andyGami.xp,
+    streak: andy.current,
+    coins: andyGami.coins,
+    longest: andy.longest,
+  };
   const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
 
   return (

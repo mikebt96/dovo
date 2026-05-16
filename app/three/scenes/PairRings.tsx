@@ -37,8 +37,12 @@ export default function PairRings({
   const tubeRadius = ringRadius * 0.065;
   const segments = 96;
 
-  const mikeArc = Math.PI * 2 * Math.max(0.001, Math.min(1, mikeProgress));
-  const andyArc = Math.PI * 2 * Math.max(0.001, Math.min(1, andyProgress));
+  // Floor visual: progress=0 mostraba arc casi vacío ("ring roto").
+  // Forzamos un mínimo de 8% del círculo (~29°) para que SIEMPRE se
+  // lea como anillo cyan/magenta presente, incluso antes del primer día.
+  const MIN_VISIBLE_ARC = 0.08;
+  const mikeArc = Math.PI * 2 * Math.max(MIN_VISIBLE_ARC, Math.min(1, mikeProgress));
+  const andyArc = Math.PI * 2 * Math.max(MIN_VISIBLE_ARC, Math.min(1, andyProgress));
 
   return (
     <group ref={groupRef}>

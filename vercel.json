@@ -19,6 +19,10 @@
     {
       "path": "/api/cron/nudge-closing",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 2 * * 1"
     }
   ]
 }
