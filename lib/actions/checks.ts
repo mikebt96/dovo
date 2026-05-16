@@ -4,6 +4,7 @@ import "server-only";
 import { z } from "zod";
 import { getServerSupabase } from "@/lib/supabase";
 import { slugToUuid } from "@/lib/profileServer";
+import { getEffectiveMealById } from "@/lib/mealsServer";
 import { requireSlug } from "@/lib/auth/session";
 
 /**
@@ -61,10 +62,32 @@ export async function toggleCheck(input: ToggleInput): Promise<ToggleResult> {
   if (data.checked) {
     // INSERT idempotente (upsert con onConflict)
     if (data.table === "meals_log") {
+      // Snapshot inmutable del meal CONSUMIDO al momento del check.
+      // Si la AI rediseña después, este log queda fiel a lo que el user reportó.
+      const { meal, replanId } = await getEffectiveMealById(
+        data.profile,
+        data.key,
+      );
+      const snapshot = meal
+        ? {
+            name: meal.name,
+            ingredients: meal.ingredients,
+            kcal: meal.kcal,
+            proteinG: meal.proteinG,
+            replanned: meal.replanned,
+          }
+        : null;
       const { error } = await sb
         .from("meals_log")
         .upsert(
-          { profile_id, date: data.date, meal_id: data.key, completed: true },
+          {
+            profile_id,
+            date: data.date,
+            meal_id: data.key,
+            completed: true,
+            meal_snapshot: snapshot,
+            replan_id: replanId,
+          },
           { onConflict: "profile_id,date,meal_id" },
         );
       if (error) return { ok: false, error: error.message };

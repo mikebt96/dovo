@@ -52,6 +52,54 @@ export async function getEffectiveMealsFor(
   });
 }
 
+/**
+ * Devuelve un meal específico por id con overrides AI aplicados, junto al
+ * id del replan que lo generó (o null si vino del seed).
+ *
+ * Lo usa `toggleCheck` al marcar una meal como completada para capturar
+ * el snapshot inmutable del contenido al momento del click.
+ */
+export async function getEffectiveMealById(
+  slug: ProfileId,
+  mealId: string
+): Promise<{ meal: EffectiveMeal | null; replanId: number | null }> {
+  const original = MEALS.find((m) => m.id === mealId);
+  if (!original) return { meal: null, replanId: null };
+
+  const fallback = { meal: { ...original, replanned: false }, replanId: null };
+
+  const uuid = await slugToUuid(slug);
+  if (!uuid) return fallback;
+
+  const sb = getServerSupabase();
+  const { data } = await sb
+    .from("meal_replans")
+    .select("id, meals_changed")
+    .eq("profile_id", uuid)
+    .order("generated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return fallback;
+  const changes = (data.meals_changed as MealChange[] | null) ?? [];
+  const c = changes.find((x) => x.originalId === mealId);
+  if (!c) return fallback;
+
+  return {
+    meal: {
+      ...original,
+      name: c.newName,
+      ingredients: c.newIngredients,
+      prepInstructions: c.newPrepInstructions ?? original.prepInstructions,
+      kcal: c.newKcal ?? original.kcal,
+      proteinG: c.newProteinG ?? original.proteinG,
+      replanned: true,
+      replanReason: c.reason,
+    },
+    replanId: data.id as number,
+  };
+}
+
 export async function getEffectiveDayMacros(slug: ProfileId, day: DayKey) {
   const meals = await getEffectiveMealsFor(slug, day);
   return {

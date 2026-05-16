@@ -54,12 +54,17 @@ create table if not exists meals_log (
   completed boolean default true,
   hunger_after int,                          -- 1=hambre, 5=lleno
   notes text,
+  -- Snapshot inmutable del meal AL MOMENTO del check. Si la AI rediseña
+  -- después vía meal_replans, este log queda fiel a lo reportado.
+  meal_snapshot jsonb,
+  replan_id bigint,                          -- FK lazy (puede ser null si vino del seed)
   created_at timestamptz default now(),
   unique (profile_id, date, meal_id)
 );
 
 create index if not exists idx_meals_profile_date on meals_log (profile_id, date desc);
 create index if not exists idx_meals_date on meals_log (date desc);
+create index if not exists idx_meals_log_replan on meals_log (replan_id);
 
 create table if not exists exercises_log (
   id bigserial primary key,

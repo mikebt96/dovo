@@ -6,6 +6,17 @@ export function todayKey(): DayKey {
   return DAY_KEYS[new Date().getDay()];
 }
 
+/** DayKey ('lun' | 'mar' | …) para una fecha cualquiera. */
+export function dayKeyOf(d: Date): DayKey {
+  return DAY_KEYS[d.getDay()];
+}
+
+/** Parse 'YYYY-MM-DD' a Date local (00:00). Robusto vs `new Date("YYYY-MM-DD")` que asume UTC. */
+export function parseISODate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function dayLabel(key: DayKey): string {
   return ({
     lun: "Lunes",

@@ -1,9 +1,11 @@
-"use server";
-
 import "server-only";
 import { getServerSupabase } from "./supabase";
 import { slugToUuid } from "./profileServer";
-import { ProfileId } from "./types";
+import type { ProfileId } from "./types";
+
+// Este NO es un Server Actions file ("use server" estaría prohibido aquí
+// porque exportamos helpers sync como `asRecord`). Las mutaciones viven
+// en lib/actions/checks.ts; aquí solo readers + utils.
 
 /**
  * Convierte una lista de IDs en un Record de checks para el componente CheckList.

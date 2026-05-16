@@ -50,10 +50,13 @@ export default async function UnlockPage({
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
       <form action={unlock} className="surface w-full max-w-md p-10 space-y-7">
-        <header className="space-y-3">
-          <Eyebrow>
-            <span>dovo · acceso</span>
-          </Eyebrow>
+        <header className="space-y-5">
+          <div className="flex items-center justify-between">
+            <Logo layout="horizontal" size="md" />
+            <Eyebrow>
+              <span>acceso</span>
+            </Eyebrow>
+          </div>
           <h1
             className="font-extrabold lowercase tracking-tight leading-[0.88]"
             style={{
@@ -119,7 +122,7 @@ export default async function UnlockPage({
         </button>
 
         <p className="mono text-[10px] tracking-wider text-[color:var(--color-text-3)] leading-relaxed pt-2 border-t border-[color:var(--color-divider)]">
-          Este link es único entre tú y tu pareja. No lo compartas en chats ni
+          Este link es único entre tú y el otro. No lo compartas en chats ni
           redes. El PIN protege fotos, peso y otros datos sensibles.
         </p>
       </form>
