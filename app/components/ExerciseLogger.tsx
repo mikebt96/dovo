@@ -16,25 +16,38 @@ export default function ExerciseLogger({
   profileId,
   accent,
   date,
+  initialEntry,
 }: {
   storageKey: string;
   exercise: Exercise;
   profileId: ProfileId;
   accent: string;
   date?: string;                  // YYYY-MM-DD; si falta, queda solo en localStorage
+  initialEntry?: LogEntry;        // snapshot del server (exercises_log) — gana sobre localStorage
 }) {
-  const [entry, setEntry] = useState<LogEntry>({ done: false });
+  const [entry, setEntry] = useState<LogEntry>(initialEntry ?? { done: false });
   const [expanded, setExpanded] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [, startTransition] = useTransition();
   const persistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Hidratación: server (initialEntry) gana, localStorage llena gaps.
+  // Si initialEntry tiene done=true, ese es el estado canónico.
+  // Si initialEntry está vacío y localStorage tiene algo, usar localStorage
+  // (sesión optimista previa que server aún no ha confirmado).
   useEffect(() => {
     try {
       const raw = localStorage.getItem(storageKey);
-      if (raw) setEntry(JSON.parse(raw));
+      const local: LogEntry | null = raw ? JSON.parse(raw) : null;
+      if (initialEntry?.done) {
+        setEntry(initialEntry);
+      } else if (local) {
+        setEntry(local);
+      }
     } catch {}
     setHydrated(true);
+    // initialEntry es SSR snapshot — no se re-evalúa
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
   useEffect(() => {
