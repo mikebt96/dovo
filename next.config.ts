@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  async redirects() {
+    return [
+      {
+        // Legacy slug — la página se renombró a /duo en el rebrand.
+        source: "/:profile/pareja",
+        destination: "/:profile/duo",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

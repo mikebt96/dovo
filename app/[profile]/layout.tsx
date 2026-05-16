@@ -11,7 +11,7 @@ const NAV: Array<{ slug: string; label: string }> = [
   { slug: "prep",        label: "Domingo" },
   { slug: "actividad",   label: "Actividad" },
   { slug: "tienda",      label: "Recompensas" },
-  { slug: "pareja",      label: "Pareja" },
+  { slug: "duo",         label: "Dúo" },
   { slug: "preferences", label: "Ajustes" },
 ];
 

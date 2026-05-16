@@ -11,8 +11,12 @@ import {
   SectionLabel,
 } from "@/app/components/ui";
 import PairRingsLazy from "@/app/three/PairRingsLazy";
+import { computeStreak } from "@/lib/streaks";
 
-export default async function ParejaPage({
+// Streaks reales desde DB en cada request.
+export const dynamic = "force-dynamic";
+
+export default async function DuoPage({
   params,
 }: {
   params: Promise<{ profile: string }>;
@@ -22,9 +26,13 @@ export default async function ParejaPage({
   if (!profile) notFound();
   const partner = PROFILES[profile.partnerId];
 
-  // Stub stats — Phase 3 wired to DB
-  const mikeStats = { streak: 0, longest: 0, level: 1, xp: 0, coins: 0 };
-  const andyStats = { streak: 0, longest: 0, level: 1, xp: 0, coins: 0 };
+  // Rachas reales. XP/coins/level seguirán como stubs hasta la slice de xp_events.
+  const [mike, andy] = await Promise.all([
+    computeStreak("mike"),
+    computeStreak("andy"),
+  ]);
+  const mikeStats = { streak: mike.current, longest: mike.longest, level: 1, xp: 0, coins: 0 };
+  const andyStats = { streak: andy.current, longest: andy.longest, level: 1, xp: 0, coins: 0 };
   const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
 
   const groupedPenalties = PENALTIES_SEED.reduce<

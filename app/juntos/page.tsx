@@ -21,19 +21,24 @@ import {
 } from "@/app/components/ui";
 import { Wordmark } from "@/app/components/brand";
 import PairRingsLazy from "@/app/three/PairRingsLazy";
+import { computeStreak } from "@/lib/streaks";
 
 // `force-dynamic` evita prerender estático: esta página lee Supabase por
-// request (via mealsServer/getEnv), que requiere env vars no presentes en
-// build time. Sin esto el build falla al intentar SSG /juntos.
+// request (via mealsServer/streaks/getEnv), que requiere env vars no presentes
+// en build time. Sin esto el build falla al intentar SSG /juntos.
 export const dynamic = "force-dynamic";
 
 export default async function JuntosPage() {
   const today = todayKey();
   const day = getDay(today)!;
 
-  // Stub stats — fase 3 desde DB
-  const mikeStats = { level: 1, xp: 0, streak: 0, coins: 0, longest: 0 };
-  const andyStats = { level: 1, xp: 0, streak: 0, coins: 0, longest: 0 };
+  // Rachas reales desde meals_log. XP/coins/level siguen stubs (próx slice).
+  const [mike, andy] = await Promise.all([
+    computeStreak("mike"),
+    computeStreak("andy"),
+  ]);
+  const mikeStats = { level: 1, xp: 0, streak: mike.current, coins: 0, longest: mike.longest };
+  const andyStats = { level: 1, xp: 0, streak: andy.current, coins: 0, longest: andy.longest };
   const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
 
   return (

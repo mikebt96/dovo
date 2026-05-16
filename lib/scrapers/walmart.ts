@@ -1,22 +1,24 @@
 import type { CanonicalProduct } from "../types";
-import { pricePerUnit, scoreMatch, type ScrapedPrice, type StoreScraper } from "./base";
+import {
+  pricePerUnit,
+  scoreMatch,
+  SCRAPER_TIMEOUT_MS,
+  SCRAPER_UA,
+  type ScrapedPrice,
+  type StoreScraper,
+} from "./base";
 
 /**
  * Walmart MX scraper.
  *
- * Usa el endpoint público de búsqueda del frontend (next-data style) que devuelve JSON.
+ * Usa el endpoint público de búsqueda (next-data style) que devuelve JSON.
  * NO requiere auth ni token. Sí respeta un user-agent normal.
  *
- * Endpoint discovered:
- *   GET https://www.walmart.com.mx/api/page/search?q={query}&page=1
+ * Endpoint: GET https://www.walmart.com.mx/api/page/search?q={query}&page=1
  *
- * Si Walmart cambia su API, los selectores fallan graceful (devolvemos null y el caller
- * registra el error en `scrape_runs`).
+ * Si Walmart cambia su API, los selectores fallan graceful (devolvemos null
+ * y el caller lo registra en `scrape_runs`).
  */
-
-const UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
-  "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 interface WalmartProduct {
   id: string;
@@ -41,13 +43,12 @@ export const walmartScraper: StoreScraper = {
     try {
       const res = await fetch(url, {
         headers: {
-          "User-Agent": UA,
+          "User-Agent": SCRAPER_UA,
           Accept: "application/json",
           "Accept-Language": "es-MX,es;q=0.9",
           ...(opts.postalCode ? { "x-postal-code": opts.postalCode } : {}),
         },
-        // 8s timeout — algunas búsquedas tardan
-        signal: AbortSignal.timeout(8_000),
+        signal: AbortSignal.timeout(SCRAPER_TIMEOUT_MS),
       });
       if (!res.ok) {
         console.warn(`[walmart] ${product.id} HTTP ${res.status}`);

@@ -1,5 +1,13 @@
 import type { StoreId, CanonicalProduct } from "../types";
 
+/** Timeout HTTP estándar para scrapers. 10s acomoda tiendas lentas sin colgar el cron. */
+export const SCRAPER_TIMEOUT_MS = 10_000;
+
+/** User-Agent compartido — desktop Chrome estable, evita mitigaciones anti-bot básicas. */
+export const SCRAPER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+  "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
 export interface ScrapedPrice {
   productId: string;
   storeId: StoreId;

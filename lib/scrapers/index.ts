@@ -36,7 +36,3 @@ export const SCRAPERS: Record<string, StoreScraper> = {
   chedraui: chedrauiScraper,
   sumesa: sumesaScraper,
 };
-
-export function getScraper(storeId: string): StoreScraper | null {
-  return SCRAPERS[storeId] ?? null;
-}

@@ -6,14 +6,14 @@ import {
   HRule,
   RoleDot,
 } from "@/app/components/ui";
-import { Wordmark } from "@/app/components/brand";
+import { Logo } from "@/app/components/brand";
 import HeroCoverLazy from "@/app/three/HeroCoverLazy";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col relative">
       <div className="px-6 pt-6 flex items-center justify-between mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
-        <Wordmark size="md" />
+        <Logo layout="horizontal" size="md" />
         <span className="hidden sm:inline">Disciplina compartida</span>
         <span>v1</span>
       </div>

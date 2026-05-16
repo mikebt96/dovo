@@ -37,7 +37,7 @@ Abre http://localhost:3000
 ✅ Página `/semana` y `/semana/[day]` con checks + log de pesos
 ✅ Página `/actividad` para ballet/pilates/running/etc
 ✅ Página `/tienda` con catálogo de premios (read-only por ahora)
-✅ Página `/pareja` con streaks + catálogo de castigos (read-only)
+✅ Página `/duo` con streaks + catálogo de castigos (read-only)
 
 ## Pendiente (sigue Fase 2)
 

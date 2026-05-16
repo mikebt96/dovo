@@ -80,7 +80,6 @@ export async function savePreferences(
     notesForAi: ((formData.get("notes_for_ai") as string | null) ?? "").trim() || undefined,
   };
 
-  // Validación de conflictos (TODO_USER)
   const warnings = await validatePrefsConflicts(patch as DietaryProfile);
   const forceSave = formData.get("force_save") === "1";
   if (warnings.length > 0 && !forceSave) {

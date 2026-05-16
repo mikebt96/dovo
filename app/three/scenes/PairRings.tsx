@@ -7,7 +7,7 @@ import * as THREE from "three";
 /**
  * PairRings — dos torus entrelazados (cyan = Mike, magenta = Andy).
  * Cuando ambos cumplen, se entrelazan más cerca y un anillo lima sutil
- * aparece sobreimpreso. Hero de /pareja y /juntos.
+ * aparece sobreimpreso. Hero de /duo y /juntos.
  */
 export default function PairRings({
   mikeProgress = 0.5,

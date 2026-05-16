@@ -6,6 +6,8 @@ import { getServerSupabase } from "@/lib/supabase";
 import { slugToUuid } from "@/lib/profileServer";
 import { getEffectiveMealById } from "@/lib/mealsServer";
 import { requireSlug } from "@/lib/auth/session";
+import { dayKeyOf, parseISODate } from "@/lib/dates";
+import { maybeAwardDayComplete, rewardMealCheck } from "@/lib/gamification/awards";
 
 /**
  * Server Action canónica para los 3 tipos de check del Carnet.
@@ -91,6 +93,21 @@ export async function toggleCheck(input: ToggleInput): Promise<ToggleResult> {
           { onConflict: "profile_id,date,meal_id" },
         );
       if (error) return { ok: false, error: error.message };
+
+      // Dispatch de gamificación. Falla suave (los helpers loggean y siguen).
+      // XP por la meal individual + chequeo de day_complete + pair_bonus.
+      await rewardMealCheck({
+        profile: data.profile,
+        profile_id,
+        meal_id: data.key,
+        date: data.date,
+      });
+      await maybeAwardDayComplete({
+        profile: data.profile,
+        profile_id,
+        date: data.date,
+        day_key: dayKeyOf(parseISODate(data.date)),
+      });
     } else if (data.table === "shopping_check") {
       const { error } = await sb
         .from("shopping_check")

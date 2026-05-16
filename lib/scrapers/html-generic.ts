@@ -1,5 +1,12 @@
 import type { CanonicalProduct } from "../types";
-import { pricePerUnit, scoreMatch, type ScrapedPrice, type StoreScraper } from "./base";
+import {
+  pricePerUnit,
+  scoreMatch,
+  SCRAPER_TIMEOUT_MS,
+  SCRAPER_UA,
+  type ScrapedPrice,
+  type StoreScraper,
+} from "./base";
 
 /**
  * Scraper genérico HTML-regex para tiendas sin API pública.
@@ -23,10 +30,6 @@ export interface HtmlScraperConfig {
   fallbackRegex?: RegExp;
 }
 
-const UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
-  "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
-
 export function makeHtmlScraper(cfg: HtmlScraperConfig): StoreScraper {
   return {
     storeId: cfg.storeId,
@@ -38,11 +41,11 @@ export function makeHtmlScraper(cfg: HtmlScraperConfig): StoreScraper {
       try {
         const res = await fetch(url, {
           headers: {
-            "User-Agent": UA,
+            "User-Agent": SCRAPER_UA,
             Accept: "text/html,application/xhtml+xml",
             "Accept-Language": "es-MX,es;q=0.9",
           },
-          signal: AbortSignal.timeout(10_000),
+          signal: AbortSignal.timeout(SCRAPER_TIMEOUT_MS),
         });
         if (!res.ok) {
           console.warn(`[${cfg.storeId}] ${product.id} HTTP ${res.status}`);

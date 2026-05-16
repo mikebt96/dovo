@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PRODUCTS, getProduct } from "@/lib/data/products";
 import { SCRAPERS } from "@/lib/scrapers";
+import { SCRAPER_TIMEOUT_MS, SCRAPER_UA } from "@/lib/scrapers/base";
 import type { StoreId } from "@/lib/types";
 
 /**
@@ -17,10 +18,6 @@ import type { StoreId } from "@/lib/types";
  */
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-
-const UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
-  "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
 export async function GET(req: Request) {
   const auth = req.headers.get("authorization") ?? "";
@@ -158,8 +155,8 @@ export async function GET(req: Request) {
     if (probedUrl) {
       try {
         const res = await fetch(probedUrl, {
-          headers: { "User-Agent": UA, "Accept-Language": "es-MX,es;q=0.9" },
-          signal: AbortSignal.timeout(10_000),
+          headers: { "User-Agent": SCRAPER_UA, "Accept-Language": "es-MX,es;q=0.9" },
+          signal: AbortSignal.timeout(SCRAPER_TIMEOUT_MS),
         });
         const text = await res.text();
         htmlExcerpt = text.slice(0, 5_000);

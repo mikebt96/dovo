@@ -20,6 +20,12 @@ import {
   SectionLabel,
 } from "@/app/components/ui";
 import ActivityRingLazy from "@/app/three/ActivityRingLazy";
+import { computeStreak } from "@/lib/streaks";
+import { getMyStats } from "@/lib/gamification/stats";
+
+// La página lee streaks desde Supabase por request, y getEnv() necesita
+// vars solo presentes en runtime, no en build.
+export const dynamic = "force-dynamic";
 
 export default async function ProfileDashboard({
   params,
@@ -32,22 +38,25 @@ export default async function ProfileDashboard({
 
   const today = todayKey();
   const day = getDay(today)!;
-  const [meals, macros] = await Promise.all([
+  const [meals, macros, myStreak, partnerStreak] = await Promise.all([
     getEffectiveMealsFor(profile.id, today).catch(() => getMealsFor(profile.id, today)),
     getEffectiveDayMacros(profile.id, today).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
+    computeStreak(profile.id),
+    computeStreak(profile.partnerId),
   ]);
   const exercises = exercisesVisibleFor(profile.id, today);
   const altActivity = alternativeActivityFor(profile.id, today);
 
-  // Stub stats — Phase 3 wired to DB
+  // XP/coins/level siguen siendo stubs hasta la siguiente slice (xp_events).
+  // Las rachas YA vienen reales de DB.
   const stats = {
     level: 1,
     xp: 0,
     nextLevelXp: 500,
-    streak: 0,
-    longestStreak: 0,
+    streak: myStreak.current,
+    longestStreak: myStreak.longest,
     coins: 0,
-    partnerStreak: 0,
+    partnerStreak: partnerStreak.current,
     mealsDone: 0,
     workoutDone: 0,
   };
@@ -125,7 +134,7 @@ export default async function ProfileDashboard({
       {/* BigStats row */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
         <BigStat label="Racha" value={stats.streak} unit="d" sub={`récord ${stats.longestStreak}d`} accent={accent} />
-        <BigStat label={`Racha ${profile.partnerId}`} value={stats.partnerStreak} unit="d" sub="pareja" />
+        <BigStat label={`Racha ${profile.partnerId}`} value={stats.partnerStreak} unit="d" sub="dúo" />
         <BigStat
           label={`Nivel · ${stats.xp}/${stats.nextLevelXp} XP`}
           value={`Lv${stats.level}`}
@@ -276,7 +285,7 @@ export default async function ProfileDashboard({
           <QuickPass href={`/${profile.id}/super`} label="Compras" sub="lista filtrada" />
           <QuickPass href={`/${profile.id}/prep`} label="Domingo" sub="40 min prep" />
           <QuickPass href={`/${profile.id}/tienda`} label="Recompensas" sub="canjear coins" />
-          <QuickPass href={`/${profile.id}/pareja`} label="Pareja" sub="rachas · deudas" />
+          <QuickPass href={`/${profile.id}/duo`} label="Dúo" sub="rachas · deudas" />
         </div>
       </section>
 
