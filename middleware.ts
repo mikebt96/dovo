@@ -47,6 +47,6 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     // Aplica a todo excepto: assets de Next, archivos públicos, /unlock, favicon.
-    "/((?!_next/static|_next/image|favicon.ico|unlock|api/webhook).*)",
+    "/((?!_next/static|_next/image|favicon.ico|unlock|landing|api/webhook).*)",
   ],
 };

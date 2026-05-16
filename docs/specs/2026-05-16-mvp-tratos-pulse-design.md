@@ -383,14 +383,30 @@ Cualquier discusión de estos features queda capturada en una sección de Roadma
 
 ---
 
-## 11 · Decisiones abiertas (necesitan respuesta de Miguel antes del kickoff)
+## 11 · Decisiones tomadas (resueltas 2026-05-16)
 
-1. ¿El score público es realmente público (cualquiera lo puede ver) o solo visible para dúos que comparten un trato?
-2. ¿Permitimos tratos entre más de 2 personas en el MVP, o estrictamente dúos? (Voto fuerte por dúos estrictos en MVP)
-3. ¿El check-in es self-report o necesita validación del otro miembro del dúo? (Voto por self-report en MVP, validación es feature de v0.2)
-4. ¿Los 200 free son orden de llegada o curados (early access list)? (Voto por curados — control de cohorte para validación)
-5. ¿Web only o también algún wrap iOS rápido tipo PWA (Add to Home Screen)? (Voto por PWA bien hecha — sin nativo todavía)
+1. **Score público** → **Hidden por default + toggle del usuario en Ajustes**.
+   - Impacto técnico: tabla `user_scores` tiene flag `visibility enum('hidden', 'duos_con_trato', 'publico')` con default `'hidden'`. UI muestra toggle de 3 estados, no booleano.
+   - Impacto en producto: el score deja de ser vanity-driver del MVP. Hay que compensar con otra mecánica de "logro visible" para que la racha del trato individual sea suficiente reward sin necesidad de score público.
+
+2. **Tamaño del dúo** → **Solo dúos estrictos (2 personas)**.
+   - Impacto técnico: tabla `tratos` mantiene `creator_id` + `partner_id`. Sin tabla intermedia de membresía. Validación dura en BD via constraint.
+   - Grupos quedan documentados como feature v0.2 en Roadmap.
+
+3. **Check-in** → **Self-report + flag de disputa por el otro miembro**.
+   - Impacto técnico: tabla `checkins` añade columna `disputed_by user_id null`, `disputed_at`, `disputed_reason text`. Check-in disputado queda visible para ambos pero NO afecta el score de cumplimiento hasta que se resuelva (auto-resuelve a "sin resolver" al cierre del trato si no hubo acuerdo).
+   - Impacto en UX: en la pantalla del trato activo (Pantalla 05) cada check-in del otro muestra un botón sutil "marcar disputa". Confirmar requiere texto breve (mínimo 10 caracteres) para reducir disputas frívolas.
+
+4. **Selección de los 200 free** → **Mix · 100 curados + 100 orden de llegada**.
+   - Operación: dos canales paralelos:
+     - **100 curados**: lista compilada por Miguel + entrevistas cualitativas (1 a 1) durante los primeros 30 días. Diversidad de tipos de dúo: parejas, amigos, gym buddies, hermanos, rivales/competitivos. Target: 5 entrevistas/tipo.
+     - **100 FCFS**: form público con waitlist, los primeros 100 que confirmen su dúo entran. Genera viral launch + email list.
+   - Impacto técnico: tabla `users` añade columna `access_channel enum('curated', 'fcfs')` para segmentar análisis cuantitativo después.
+
+5. **Plataforma** → **PWA bien hecha (Add to Home Screen)**.
+   - Sin native apps en MVP. Service worker + web push + manifest.json para instalación. Validar funcionamiento en iOS Safari (donde push requiere iOS 16.4+) y Chrome Android.
+   - Reto explícito: el push de iOS PWA es la mayor incertidumbre técnica. Backup plan: email + SMS via Twilio (~$0.30 MXN/SMS, presupuestar ~$5k MXN para los 200 usuarios MVP).
 
 ---
 
-*fin del spec · v0.1 · 2026-05-16*
+*fin del spec · v0.1 · 2026-05-16 · decisiones resueltas*
