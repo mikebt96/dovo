@@ -62,12 +62,12 @@ export default async function UnlockPage({
               letterSpacing: "-0.03em",
             }}
           >
-            {needPin ? "pin requerido." : "entra al carnet."}
+            {needPin ? "pin requerido." : "entrar a dovo."}
           </h1>
           <p className="text-sm text-[color:var(--color-text-2)] leading-relaxed">
             {needPin
-              ? "Estás entrando a una zona reservada (datos sensibles). Marca el PIN."
-              : "Escribe el folio privado de la pareja. Una vez dentro, no necesitarás repetirlo."}
+              ? "Zona reservada con datos sensibles. Marca el PIN."
+              : "Escribe el link privado del dúo. Una vez dentro, no necesitarás repetirlo."}
           </p>
         </header>
 
@@ -118,7 +118,7 @@ export default async function UnlockPage({
         </button>
 
         <p className="mono text-[10px] tracking-wider text-[color:var(--color-text-3)] leading-relaxed pt-2 border-t border-[color:var(--color-divider)]">
-          Este folio es único entre tú y tu pareja. No lo compartas en chats ni
+          Este link es único entre tú y tu pareja. No lo compartas en chats ni
           redes. El PIN protege fotos, peso y otros datos sensibles.
         </p>
       </form>

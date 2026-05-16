@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { revertReplan, triggerReplan } from "./actions";
 import type { ReplanSummary } from "@/lib/mealsServer";
+import type { MealChangeWithDelta } from "@/lib/types";
 import { SectionLabel } from "@/app/components/ui";
 
 function fmtDate(iso: string) {
@@ -194,5 +195,57 @@ export default function ReplanHistory({
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Muestra "920 → 850 kcal · −60 (−7%)" cuando hay info de macros.
+ * Si AI no devolvió newKcal o no tenemos original, no muestra nada (silent).
+ * El signo del delta colorea: bajada = warning (perdiste calorías), subida = success.
+ */
+function MacroDelta({ change }: { change: MealChangeWithDelta }) {
+  const { originalKcal, newKcal, originalProteinG, newProteinG } = change;
+
+  const showKcal =
+    typeof originalKcal === "number" && typeof newKcal === "number";
+  const showProtein =
+    typeof originalProteinG === "number" && typeof newProteinG === "number";
+
+  if (!showKcal && !showProtein) return null;
+
+  const kcalDelta = showKcal ? newKcal! - originalKcal! : 0;
+  const proteinDelta = showProtein ? newProteinG! - originalProteinG! : 0;
+  // ±15% del original = banda esperada de la AI. Fuera de eso, amarillo.
+  const kcalOutOfBand =
+    showKcal && originalKcal! > 0 && Math.abs(kcalDelta) / originalKcal! > 0.15;
+
+  const fmt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+
+  return (
+    <div className="mono text-[10px] tabular text-[color:var(--color-text-3)] flex items-center gap-2">
+      {showKcal && (
+        <span
+          style={{
+            color: kcalOutOfBand
+              ? "var(--color-warning)"
+              : "var(--color-text-2)",
+          }}
+        >
+          {originalKcal} → {newKcal} kcal
+          <span className="ml-1 text-[color:var(--color-text-4)]">
+            ({fmt(kcalDelta)})
+          </span>
+        </span>
+      )}
+      {showProtein && (
+        <span>
+          <span className="text-[color:var(--color-text-4)]">·</span>{" "}
+          {originalProteinG}→{newProteinG}g P{" "}
+          <span className="text-[color:var(--color-text-4)]">
+            ({fmt(proteinDelta)})
+          </span>
+        </span>
+      )}
+    </div>
   );
 }
