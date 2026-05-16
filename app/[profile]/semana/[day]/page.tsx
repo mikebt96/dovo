@@ -9,7 +9,7 @@ import {
 } from "@/lib/data/training";
 import { getDay, DAYS } from "@/lib/data/days";
 import { isValidDayKey, mondayOf } from "@/lib/dates";
-import { getMealsChecked, asRecord } from "@/lib/checksServer";
+import { getCheckedSet } from "@/lib/queries/checks";
 import { toggleCheck } from "@/lib/actions/checks";
 import type { DayKey } from "@/lib/types";
 import CheckList from "@/app/components/CheckList";

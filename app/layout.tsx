@@ -32,9 +32,20 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+  ),
   title: "dovo",
-  description: "Disciplina compartida para parejas. Tu plan semanal, sus rachas, sus recompensas reales.",
+  description:
+    "Disciplina compartida en dúo. Tu plan semanal, sus rachas, sus recompensas reales.",
   robots: "noindex, nofollow",
+  openGraph: {
+    title: "dovo · disciplina compartida",
+    description:
+      "Plan semanal de dúo. Las rachas se ganan juntos. Los premios son reales — y las consecuencias también.",
+    type: "website",
+    locale: "es_MX",
+  },
 };
 
 export const viewport: Viewport = {

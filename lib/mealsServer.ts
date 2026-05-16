@@ -42,6 +42,10 @@ export async function getEffectiveMealsFor(
       name: c.newName,
       ingredients: c.newIngredients,
       prepInstructions: c.newPrepInstructions ?? m.prepInstructions,
+      // Si AI devolvió macros nuevos (contrato post-v5), úsalos. Si no,
+      // fallback al seed — preserva retrocompat con replans antiguos.
+      kcal: c.newKcal ?? m.kcal,
+      proteinG: c.newProteinG ?? m.proteinG,
       replanned: true,
       replanReason: c.reason,
     };
