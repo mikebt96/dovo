@@ -12,6 +12,7 @@ import {
 } from "@/app/components/ui";
 import UploadForm from "./UploadForm";
 import PhotoActions from "./PhotoActions";
+import AnalysisPoller from "./AnalysisPoller";
 
 // Zona sensible (middleware ya pide PIN antes de entrar) + datos por
 // request → no prerender.
@@ -175,9 +176,12 @@ async function PhotoCard({
       {/* Analysis */}
       <div className="space-y-5">
         {analysis === null ? (
-          <p className="mono text-xs text-[color:var(--color-text-3)] uppercase tracking-widest">
-            analizando…
-          </p>
+          <>
+            <p className="mono text-xs text-[color:var(--color-text-3)] uppercase tracking-widest">
+              analizando…
+            </p>
+            <AnalysisPoller />
+          </>
         ) : analysisFailed ? (
           <p
             className="mono text-xs uppercase tracking-widest"
