@@ -43,9 +43,11 @@ export default async function ProfileLayout({
         <nav className="max-w-5xl mx-auto px-4 pb-2 overflow-x-auto">
           <ul className="flex gap-1 text-xs">
             <NavLink href={`/${profile.id}`} label="Hoy" />
+            <NavLink href="/juntos" label="Juntos" highlight />
             <NavLink href={`/${profile.id}/super`} label="Súper" />
             <NavLink href={`/${profile.id}/prep`} label="Prep dom" />
             <NavLink href={`/${profile.id}/semana`} label="Semana" />
+            <NavLink href={`/${profile.id}/actividad`} label="Actividad" />
             <NavLink href={`/${profile.id}/tienda`} label="Tienda" />
             <NavLink href={`/${profile.id}/pareja`} label="Pareja" />
           </ul>
@@ -65,12 +67,25 @@ export default async function ProfileLayout({
   );
 }
 
-function NavLink({ href, label }: { href: string; label: string }) {
+function NavLink({
+  href,
+  label,
+  highlight,
+}: {
+  href: string;
+  label: string;
+  highlight?: boolean;
+}) {
   return (
     <li>
       <Link
         href={href}
-        className="mono uppercase tracking-wider text-[10px] px-3 py-2 inline-block text-[var(--color-muted)] hover:text-[var(--color-accent)] transition"
+        className="mono uppercase tracking-wider text-[10px] px-3 py-2 inline-block transition"
+        style={
+          highlight
+            ? { color: "var(--color-accent)" }
+            : { color: "var(--color-muted)" }
+        }
       >
         {label}
       </Link>

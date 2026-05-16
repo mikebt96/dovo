@@ -58,7 +58,34 @@ export default function HomePage() {
             />
           </div>
 
-          <p className="mono text-[10px] text-[var(--color-dim)] mt-10">
+          <div className="mt-8 pt-8 border-t border-[var(--color-border)]">
+            <Link
+              href="/juntos"
+              className="group flex items-center justify-between p-5 card hover:border-[var(--color-accent)] transition"
+            >
+              <div>
+                <p className="mono text-[10px] text-[var(--color-accent)] mb-1">
+                  Vista compartida
+                </p>
+                <p className="font-extrabold text-lg">
+                  Entrar como{" "}
+                  <span style={{ color: "var(--color-mike)" }}>Mike</span> +{" "}
+                  <span style={{ color: "var(--color-andy)" }}>Andy</span>
+                </p>
+                <p className="mono text-[10px] text-[var(--color-muted)] mt-1">
+                  Streak de pareja · race XP · deudas · plan de hoy
+                </p>
+              </div>
+              <span
+                className="mono text-xs group-hover:translate-x-1 transition-transform"
+                style={{ color: "var(--color-accent)" }}
+              >
+                →
+              </span>
+            </Link>
+          </div>
+
+          <p className="mono text-[10px] text-[var(--color-dim)] mt-8">
             Tu sesión se recuerda en este dispositivo. Cambiar de perfil:{" "}
             <Link href="/" className="text-[var(--color-accent)] underline">
               vuelve aquí

@@ -67,6 +67,75 @@ export interface ShoppingItem {
   subtitle?: string;
   qty: string;
   priceMxn: number;
+  productId?: string;             // FK al catálogo canónico (`products.id`)
+}
+
+// ---------- DIETARY PREFERENCES (per profile) ----------
+export type DietaryTag =
+  | "vegetarian"
+  | "vegan"
+  | "pescatarian"
+  | "keto"
+  | "paleo"
+  | "no-gluten"
+  | "no-dairy"
+  | "no-eggs";
+
+export interface DietaryProfile {
+  postalCode?: string;
+  dietaryTags: DietaryTag[];
+  allergens: string[];
+  dislikedIngredients: string[];
+  likedIngredients: string[];
+  dislikedTextures: string[];
+  maxMealKcal?: number;
+  notesForAi?: string;
+}
+
+// ---------- PRICE SCRAPING ----------
+export type StoreId = "walmart" | "soriana" | "chedraui" | "sumesa";
+
+export interface CanonicalProduct {
+  id: string;
+  canonicalName: string;
+  category: string;
+  unit: "piezas" | "g" | "ml" | "L";
+  unitQty: number;
+  tags: string[];
+  isVegetarian: boolean;
+  isVegan: boolean;
+  containsDairy: boolean;
+  containsEggs: boolean;
+  containsGluten: boolean;
+}
+
+export interface PriceSnapshot {
+  productId: string;
+  storeId: StoreId;
+  postalCode?: string;
+  priceMxn: number;
+  pricePerUnit?: number;
+  inStock: boolean;
+  promoLabel?: string;
+  sourceUrl?: string;
+  scrapedAt: string;
+}
+
+export interface BestPriceResult {
+  productId: string;
+  bestStore: StoreId;
+  bestPriceMxn: number;
+  savingsVsWorst: number;          // diferencia entre el más caro y el más barato
+  allPrices: PriceSnapshot[];
+}
+
+// ---------- AI MEAL REPLAN ----------
+export interface MealChange {
+  originalId: string;
+  newName: string;
+  newIngredients: string;
+  newPrepInstructions?: string;
+  reason: string;                  // por qué la AI cambió esta meal
 }
 
 export interface PrepTask {
