@@ -39,20 +39,11 @@ export function pad(n: number, width = 3): string {
   return String(n).padStart(width, "0");
 }
 
-const MONTH_ABBR = [
-  "ENE", "FEB", "MAR", "ABR", "MAY", "JUN",
-  "JUL", "AGO", "SEP", "OCT", "NOV", "DIC",
+const MONTH_LONG = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
 ];
 
-export function folioDate(d: Date = new Date()): string {
-  return `${pad(d.getDate(), 2)}·${MONTH_ABBR[d.getMonth()]}`;
-}
-
-export function folioSerial(profileId: string, dayKey?: DayKey): string {
-  const d = new Date();
-  const w = pad(isoWeek(d), 2);
-  const profileTag = profileId.slice(0, 2).toUpperCase();
-  const dayTag = dayKey ? `·${dayKey.toUpperCase()}` : "";
-  const doy = pad(dayOfYear(d), 3);
-  return `W${w}·${profileTag}${dayTag}·${doy}`;
+export function dateLong(d: Date = new Date()): string {
+  return `${d.getDate()} ${MONTH_LONG[d.getMonth()]}`;
 }

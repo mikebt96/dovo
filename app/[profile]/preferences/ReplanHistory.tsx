@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
-import { revertReplan } from "./actions";
+import { useState, useTransition } from "react";
+import { revertReplan, triggerReplan } from "./actions";
 import type { ReplanSummary } from "@/lib/mealsServer";
+import { SectionLabel } from "@/app/components/ui";
 
 function fmtDate(iso: string) {
   try {
@@ -34,77 +35,156 @@ export default function ReplanHistory({
   color: string;
 }) {
   const [isPending, startTransition] = useTransition();
-  if (history.length === 0) return null;
+  const [notice, setNotice] = useState<string | null>(null);
 
   function onRevert() {
     if (!confirm("¿Volver al plan original? Esto deshace los cambios de AI.")) return;
     startTransition(async () => {
       await revertReplan(slug);
+      setNotice("Plan original restaurado.");
     });
+  }
+
+  function onRegenerate() {
+    setNotice("Pidiendo al AI un re-plan nuevo...");
+    startTransition(async () => {
+      const res = await triggerReplan(slug);
+      if (res.ok) {
+        setNotice(
+          res.changes === 0
+            ? "AI dice que el plan actual ya cumple tus prefs."
+            : `Plan rediseñado · ${res.changes} comidas actualizadas.`
+        );
+      } else {
+        setNotice(`Falló: ${res.error}`);
+      }
+    });
+  }
+
+  if (history.length === 0) {
+    return (
+      <section>
+        <SectionLabel right="sin movimientos">AI re-plan</SectionLabel>
+        <div className="mt-5 space-y-4">
+          <p
+            className="italic text-[color:var(--color-text-2)] leading-relaxed"
+            style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}
+          >
+            Cuando guardes prefs, la AI rediseña meals automáticamente. O
+            fuérzalo manualmente:
+          </p>
+          <button
+            type="button"
+            onClick={onRegenerate}
+            disabled={isPending}
+            className="btn-ghost disabled:opacity-50"
+            style={{ borderColor: color, color }}
+          >
+            {isPending ? "Generando..." : "Regenerar ahora →"}
+          </button>
+          {notice && (
+            <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-2)]">
+              {notice}
+            </p>
+          )}
+        </div>
+      </section>
+    );
   }
 
   const latest = history[0];
   const isAlreadyReverted = latest.triggeredBy === "manual_revert";
 
   return (
-    <section className="card p-6 space-y-4">
-      <header className="flex items-baseline justify-between gap-3">
-        <div>
-          <p className="mono text-[10px] tracking-widest uppercase text-[color:var(--color-ink-mute)]">
-            Últimos cambios del AI
+    <section>
+      <SectionLabel
+        right={
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onRegenerate}
+              disabled={isPending}
+              className="btn-ghost disabled:opacity-50"
+              style={{ borderColor: color, color }}
+            >
+              {isPending ? "..." : "Regenerar"}
+            </button>
+            {!isAlreadyReverted && latest.changeCount > 0 && (
+              <button
+                type="button"
+                onClick={onRevert}
+                disabled={isPending}
+                className="btn-ghost disabled:opacity-50"
+              >
+                Revertir
+              </button>
+            )}
+          </div>
+        }
+      >
+        AI re-plan
+        <span className="ml-3 mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+          {isAlreadyReverted
+            ? "plan original activo"
+            : `${latest.changeCount} comidas rediseñadas`}
+        </span>
+      </SectionLabel>
+
+      <div className="mt-5">
+        {notice && (
+          <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-2)] mb-4">
+            {notice}
           </p>
-          <h3 className="font-bold text-base mt-1">
-            {isAlreadyReverted
-              ? "Plan original activo"
-              : `${latest.changeCount} comidas rediseñadas`}
-          </h3>
-        </div>
-        {!isAlreadyReverted && latest.changeCount > 0 && (
-          <button
-            type="button"
-            onClick={onRevert}
-            disabled={isPending}
-            className="mono text-[10px] uppercase tracking-widest px-3 py-1.5 border transition disabled:opacity-50"
+        )}
+
+        {latest.changes.length > 0 && (
+          <ul className="divide-y divide-[color:var(--color-divider)]">
+            {latest.changes.slice(0, 5).map((c, i) => (
+              <li key={i} className="py-4">
+                <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mb-1">
+                  {c.originalId}
+                </p>
+                <p className="font-bold text-sm">{c.newName}</p>
+                <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
+                  {c.newIngredients}
+                </p>
+                <p
+                  className="italic text-xs text-[color:var(--color-text-2)] mt-2 leading-relaxed"
+                  style={{ fontFamily: "var(--font-serif)", fontSize: "0.9rem" }}
+                >
+                  “{c.reason}”
+                </p>
+              </li>
+            ))}
+            {latest.changes.length > 5 && (
+              <li className="py-3 mono text-[10px] tracking-widest text-[color:var(--color-text-3)] text-center">
+                + {latest.changes.length - 5} más
+              </li>
+            )}
+          </ul>
+        )}
+
+        <div className="mt-4 pt-3 border-t border-[color:var(--color-divider)] flex items-center gap-3 flex-wrap">
+          <span
+            className="mono text-[10px] uppercase tracking-widest"
             style={{
-              borderColor: color,
-              color,
+              color: isAlreadyReverted
+                ? "var(--color-warning)"
+                : "var(--color-success)",
             }}
           >
-            {isPending ? "Revirtiendo..." : "↻ revertir"}
-          </button>
-        )}
-      </header>
-
-      {latest.changes.length > 0 && (
-        <ul className="divide-y divide-[var(--color-border)]">
-          {latest.changes.slice(0, 5).map((c, i) => (
-            <li key={i} className="py-3">
-              <p className="mono text-[10px] text-[color:var(--color-ink-mute)] mb-1">
-                {c.originalId}
-              </p>
-              <p className="font-bold text-sm">{c.newName}</p>
-              <p className="text-xs text-[color:var(--color-ink-mute)] mt-1">
-                {c.newIngredients}
-              </p>
-              <p className="mono text-[10px] italic text-[color:var(--color-ink-soft)] mt-1.5">
-                {c.reason}
-              </p>
-            </li>
-          ))}
-          {latest.changes.length > 5 && (
-            <li className="py-2 mono text-[10px] text-[color:var(--color-ink-mute)] text-center">
-              + {latest.changes.length - 5} más
-            </li>
+            {triggerLabel(latest.triggeredBy)}
+          </span>
+          <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] tabular">
+            {fmtDate(latest.generatedAt)}
+          </span>
+          {history.length > 1 && (
+            <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)]">
+              · {history.length} re-plans totales
+            </span>
           )}
-        </ul>
-      )}
-
-      <footer className="mono text-[10px] text-[color:var(--color-ink-dim)] tracking-widest uppercase pt-2 border-t border-[var(--color-border)]">
-        Último: {triggerLabel(latest.triggeredBy)} · {fmtDate(latest.generatedAt)}
-        {history.length > 1 && (
-          <span> · {history.length} re-plans en total</span>
-        )}
-      </footer>
+        </div>
+      </div>
     </section>
   );
 }

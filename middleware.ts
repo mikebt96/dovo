@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { PIN_COOKIE, SLUG_COOKIE } from "@/lib/auth/session";
+import { PIN_COOKIE, SLUG_COOKIE } from "@/lib/auth/constants";
 
 /**
  * Gate global:

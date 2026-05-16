@@ -1,21 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
-import { getShoppingFor, totalCost } from "@/lib/data/shopping";
-import { folioSerial, isoWeek, pad } from "@/lib/dates";
+import { getShoppingFor, totalCost, CATEGORY_ORDER } from "@/lib/data/shopping";
+import { isoWeek, pad } from "@/lib/dates";
 import { getDietaryProfile } from "@/lib/profileServer";
 import { getBestPrices, cheapestBasketTotal } from "@/lib/prices";
 import CheckList from "@/app/components/CheckList";
 import {
-  Folio,
-  Plate,
-  Ticket,
-  TicketHead,
-  TicketFoot,
-  LeaderRow,
-  Stamp,
-  Perforated,
-} from "@/app/components/carnet";
+  BigStat,
+  BracketLink,
+  Eyebrow,
+  HRule,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
 import type { BestPriceResult, StoreId } from "@/lib/types";
 
 const STORE_LABEL: Record<StoreId, string> = {
@@ -41,20 +39,24 @@ export default async function SuperPage({
   const myTotal = totalCost(myItems);
   const sharedTotal = totalCost(sharedItems);
 
-  const byStore = items.reduce<Record<string, typeof items>>((acc, item) => {
-    acc[item.store] = acc[item.store] || [];
-    acc[item.store].push(item);
+  const byCategory = items.reduce<Record<string, typeof items>>((acc, item) => {
+    acc[item.category] = acc[item.category] || [];
+    acc[item.category].push(item);
     return acc;
   }, {});
+  const sortedCategories = Object.keys(byCategory).sort((a, b) => {
+    const ia = CATEGORY_ORDER.indexOf(a);
+    const ib = CATEGORY_ORDER.indexOf(b);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
 
   const accent =
     profile.id === "mike"
-      ? "var(--color-plate-mike)"
-      : "var(--color-plate-andy)";
+      ? "var(--color-role-mike)"
+      : "var(--color-role-andy)";
 
   const week = pad(isoWeek(new Date()), 2);
 
-  // Live prices: CP + best prices por productId (graceful fallback)
   const dietary = await getDietaryProfile(profile.id).catch(() => null);
   const cp = dietary?.postalCode;
   const productIds = items
@@ -64,193 +66,155 @@ export default async function SuperPage({
     () => new Map<string, BestPriceResult>()
   );
   const haveLivePrices = bestPrices.size > 0;
-  const cheapest = haveLivePrices
-    ? cheapestBasketTotal(bestPrices)
-    : null;
+  const cheapest = haveLivePrices ? cheapestBasketTotal(bestPrices) : null;
   const savings = cheapest ? Math.max(0, total - cheapest.total) : 0;
 
   return (
-    <div className="space-y-10">
-      <Folio
-        serial={`LIST·W${week}·${profile.id.slice(0, 2).toUpperCase()}`}
-        title="VALE DE COMPRA"
-      />
-
-      <section>
-        <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-2">
-          LISTA DE SÚPER · SEMANA {week}
-          {cp && <span> · CP {cp}</span>}
-        </p>
+    <div className="space-y-12 pb-20">
+      <section className="pt-4">
+        <Eyebrow className="mb-3">
+          <RoleDot who={profile.id} />
+          <span>{profile.displayName.toLowerCase()}</span>
+          <span className="text-[color:var(--color-text-4)]">·</span>
+          <span>Semana {week}</span>
+          {cp && (
+            <>
+              <span className="text-[color:var(--color-text-4)]">·</span>
+              <span>CP {cp}</span>
+            </>
+          )}
+        </Eyebrow>
         <h1
-          className="font-extrabold tracking-tight leading-[0.88]"
+          className="font-extrabold lowercase tracking-tight leading-[0.85]"
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.5rem, 6vw, 4rem)",
+            fontSize: "clamp(3rem, 9vw, 5.5rem)",
+            color: "var(--color-text)",
+            letterSpacing: "-0.04em",
           }}
         >
-          Tu compra de la semana.
+          compras.
         </h1>
         <p
-          className="mt-4 italic text-[color:var(--color-ink-soft)] leading-relaxed max-w-xl"
-          style={{ fontFamily: "var(--font-stamp)", fontSize: "1.05rem" }}
+          className="mt-4 text-[color:var(--color-text-2)] leading-relaxed max-w-xl"
+          style={{ fontSize: "1.05rem" }}
         >
-          Lo que es tuyo, lo que es compartido. Marcas en pasillo, llegas a casa
-          con la semana resuelta.
+          Tu lista filtrada de la semana. Marca en pasillo y llega a casa con
+          todo resuelto.
         </p>
-
         {!cp && (
-          <p className="mt-4">
-            <Link href={`/${profile.id}/preferences`}>
-              <Stamp sm variant="warn">
-                CONFIGURA TU CP EN PREFS
-              </Stamp>
-            </Link>
-          </p>
+          <div className="mt-5">
+            <BracketLink href={`/${profile.id}/preferences`}>
+              Agregar tu CP para precios reales →
+            </BracketLink>
+          </div>
         )}
       </section>
 
-      <Perforated thick />
+      <HRule />
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-        <LeaderRow
-          label="Total semana (lista)"
-          value={`$${total}`}
-          accent="var(--color-overprint)"
-        />
+      {/* Totals */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
+        <BigStat label="Total semana" value={`$${total}`} sub="estimado" accent="var(--color-accent)" />
         {haveLivePrices && cheapest && (
-          <LeaderRow
-            label="Total más barato (live)"
-            value={`$${cheapest.total}`}
-            accent="var(--color-overprint)"
-          />
+          <BigStat label="Más barato (live)" value={`$${cheapest.total}`} sub={savings > 0 ? `ahorras $${savings.toFixed(0)}` : "ya está al mínimo"} accent="var(--color-success)" />
         )}
-        <LeaderRow
-          label={`Tuyo · ${myItems.length} ítems`}
-          value={`$${myTotal}`}
-          accent={accent}
-        />
-        <LeaderRow
-          label={`Compartido · ${sharedItems.length} ítems`}
-          value={`$${sharedTotal}`}
-        />
-        <LeaderRow
-          label="Productos totales"
-          value={String(items.length)}
-        />
-        {haveLivePrices && savings > 0 && (
-          <LeaderRow
-            label="Ahorro comprando barato"
-            value={`$${savings.toFixed(0)}`}
-            accent={accent}
-          />
-        )}
+        <BigStat label="Tuyo" value={`$${myTotal}`} sub={`${myItems.length} ítems`} accent={accent} />
+        <BigStat label="Compartido" value={`$${sharedTotal}`} sub={`${sharedItems.length} ítems`} />
       </section>
 
-      <Perforated />
+      <HRule />
 
-      {Object.entries(byStore).map(([store, storeItems]) => {
-        const storeTotal = totalCost(storeItems);
-        const checkItems = storeItems.map((it) => {
-          const best = it.productId ? bestPrices.get(it.productId) : undefined;
-          const showSavings = best && best.savingsVsWorst >= 5;
-          const livePrice = best?.bestPriceMxn;
+      {/* Per-category lists */}
+      <div className="space-y-12">
+        {sortedCategories.map((category) => {
+          const catItems = byCategory[category];
+          const catTotal = totalCost(catItems);
 
-          return {
-            id: it.id,
-            primary: (
-              <div>
-                <p className="font-bold text-sm leading-tight">
-                  {it.name}
-                  {it.user !== "shared" && (
-                    <span className="ml-2 inline-block align-middle">
-                      <Plate who={it.user as "mike" | "andy"}>
-                        {it.user === profile.id ? "tuyo" : it.user}
-                      </Plate>
-                    </span>
+          const checkItems = catItems.map((it) => {
+            const best = it.productId ? bestPrices.get(it.productId) : undefined;
+            const showSavings = best && best.savingsVsWorst >= 5;
+            const livePrice = best?.bestPriceMxn;
+
+            return {
+              id: it.id,
+              primary: (
+                <div>
+                  <p className="font-bold text-sm leading-tight flex items-center gap-2">
+                    <span>{it.name}</span>
+                    {it.user !== "shared" && (
+                      <RoleDot who={it.user as "mike" | "andy"} className="!w-1.5 !h-1.5" />
+                    )}
+                  </p>
+                  {it.subtitle && (
+                    <p className="text-xs text-[color:var(--color-text-3)] mt-0.5">
+                      {it.subtitle}
+                    </p>
                   )}
-                </p>
-                {it.subtitle && (
-                  <p className="text-xs text-[color:var(--color-ink-mute)] mt-0.5">
-                    {it.subtitle}
+                  {best && (
+                    <p className="mono text-[10px] text-[color:var(--color-text-3)] mt-1 tabular">
+                      {best.allPrices
+                        .map(
+                          (p) =>
+                            `${STORE_LABEL[p.storeId]} $${p.priceMxn.toFixed(0)}${
+                              p.storeId === best.bestStore ? " ◀" : ""
+                            }`
+                        )
+                        .join(" · ")}
+                    </p>
+                  )}
+                </div>
+              ),
+              meta: (
+                <div className="text-right">
+                  <p
+                    className="mono text-[10px] tabular"
+                    style={{ color: "var(--color-accent)" }}
+                  >
+                    {it.qty}
                   </p>
-                )}
-                {best && (
-                  <p className="mono text-[10px] text-[color:var(--color-ink-mute)] mt-1 tabular">
-                    {best.allPrices
-                      .map(
-                        (p) =>
-                          `${STORE_LABEL[p.storeId]} $${p.priceMxn.toFixed(0)}${
-                            p.storeId === best.bestStore ? " ◀" : ""
-                          }`
-                      )
-                      .join(" · ")}
+                  <p className="mono text-[10px] tabular text-[color:var(--color-text-3)]">
+                    ${livePrice?.toFixed(0) ?? it.priceMxn}
+                    {!livePrice && " est."}
                   </p>
-                )}
-              </div>
-            ),
-            meta: (
-              <div className="text-right">
-                <p
-                  className="mono text-[10px] tabular"
-                  style={{ color: "var(--color-overprint)" }}
-                >
-                  {it.qty}
-                </p>
-                <p className="mono text-[10px] tabular text-[color:var(--color-ink-mute)]">
-                  ${livePrice?.toFixed(0) ?? it.priceMxn}
-                  {!livePrice && " est."}
-                </p>
-                {showSavings && (
-                  <span className="inline-block mt-1">
-                    <Stamp sm>
-                      -${best.savingsVsWorst.toFixed(0)} en{" "}
-                      {STORE_LABEL[best.bestStore]}
-                    </Stamp>
-                  </span>
-                )}
-              </div>
-            ),
-          };
-        });
+                  {showSavings && (
+                    <p
+                      className="mono text-[9px] tracking-widest uppercase mt-1"
+                      style={{ color: "var(--color-success)" }}
+                    >
+                      -${best.savingsVsWorst.toFixed(0)} {STORE_LABEL[best.bestStore]}
+                    </p>
+                  )}
+                </div>
+              ),
+            };
+          });
 
-        return (
-          <Ticket key={store}>
-            <TicketHead
-              eyebrow={`SUCURSAL · ${storeItems.length} productos`}
-              title={
-                <span className="flex items-baseline gap-3">
-                  <Stamp sm>{storeLabel(store)}</Stamp>
+          return (
+            <section key={category}>
+              <SectionLabel right={`$${catTotal}`}>
+                {category}
+                <span className="ml-3 mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+                  {catItems.length}
                 </span>
-              }
-              right={
-                <span className="mono text-[11px] tabular text-[color:var(--color-ink-soft)]">
-                  ${storeTotal}
-                </span>
-              }
-            />
-            <CheckList
-              storageKey={`super-${profile.id}-${store}`}
-              items={checkItems}
-              accent={accent}
-            />
-            <TicketFoot
-              serial={`${store.toUpperCase()}·W${week}·${profile.id.toUpperCase()}`}
-            />
-          </Ticket>
-        );
-      })}
+              </SectionLabel>
+              <div className="mt-2">
+                <CheckList
+                  storageKey={`super-${profile.id}-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                  items={checkItems}
+                  accent={accent}
+                />
+              </div>
+            </section>
+          );
+        })}
+      </div>
 
-      <p className="mono text-[10px] tracking-widest text-[color:var(--color-ink-dim)] text-center">
+      <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center mt-8">
         {haveLivePrices
-          ? "precios live · scrapeado diariamente · cache 24h"
+          ? "precios live · scrapeado diario · cache 24h"
           : "precios estimados · corre el cron para sincronizar live"}
       </p>
     </div>
   );
-}
-
-function storeLabel(store: string): string {
-  if (store === "walmart") return "Walmart";
-  if (store === "vegetariana") return "Vegetariana";
-  return store;
 }

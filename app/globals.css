@@ -1,38 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  /* Night paper — warm-biased dark, not Vercel-black */
-  --color-bg: #0e0d11;
-  --color-paper: #15131a;
-  --color-paper-2: #1c1a22;
-  --color-paper-3: #24222b;
-  --color-ink: #efece4;          /* warm bone, not pure white — like uncoated stock */
-  --color-ink-soft: #b9b3a7;
-  --color-ink-mute: #7a756c;
-  --color-ink-dim: #4a463f;
-  --color-rule: #2a2730;          /* faint rule line */
-  --color-rule-strong: #3a3742;
+  /* Dark premium — cooler, deeper than carnet */
+  --color-bg: #08080a;
+  --color-surface-1: #101015;
+  --color-surface-2: #16161c;
+  --color-surface-3: #1d1d25;
+  --color-glass: rgba(255,255,255,0.04);
+  --color-glass-strong: rgba(255,255,255,0.07);
+  --color-divider: rgba(255,255,255,0.08);
+  --color-divider-strong: rgba(255,255,255,0.14);
 
-  /* Two-plate printing system */
-  --color-plate-mike: #6bf5ff;    /* cyan plate */
-  --color-plate-andy: #ff6b9d;    /* magenta plate */
-  --color-overprint: #c8f135;     /* lime — where the plates overlap */
+  --color-text: #f3f3f5;
+  --color-text-2: #b5b5bd;
+  --color-text-3: #74747e;
+  --color-text-4: #44444c;
 
-  /* Stamps & states */
-  --color-stamp: #d9461c;          /* dry-stamped vermillion */
-  --color-stamp-soft: rgba(217, 70, 28, 0.65);
-  --color-paid: #7fb069;            /* paid stamp */
-  --color-overdue: #ef4444;
-  --color-warn: #d4a73c;
+  /* Single accent — lime is the win color */
+  --color-accent: #c8f135;
+  --color-accent-soft: rgba(200,241,53,0.18);
 
-  /* Typography
-   * next/font inyecta --font-syne / --font-space-mono / --font-newsreader
-   * en <html>. Mantenemos el alias --font-display etc. para no tocar
-   * 50+ usos en el codebase; el var() con fallback cubre el caso
-   * (raro) en que la página renderee antes de hidratar las vars. */
+  /* Role indicators (used as tiny dots, not big areas) */
+  --color-role-mike: #6bf5ff;
+  --color-role-andy: #ff6b9d;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #ef4444;
+
+  /* Typography — Syne + Space Mono; Newsreader queda accesible para italic literario */
   --font-display: var(--font-syne, "Syne"), "Inter", system-ui, sans-serif;
   --font-mono: var(--font-space-mono, "Space Mono"), ui-monospace, monospace;
-  --font-stamp: var(--font-newsreader, "Newsreader"), "Times New Roman", serif;
+  --font-serif: var(--font-newsreader, "Newsreader"), "Times New Roman", serif;
 }
 
 @layer base {
@@ -42,304 +41,302 @@
 
   html, body {
     background: var(--color-bg);
-    color: var(--color-ink);
+    color: var(--color-text);
     font-family: var(--font-display);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "ss01", "cv11";
+    font-variant-numeric: tabular-nums;
   }
 
-  /* Paper grain — barely visible, but lifts the surface off "Vercel dark" */
+  *::selection {
+    background: var(--color-accent);
+    color: #000;
+  }
+
+  /* Soft corner vignette — pulls eye to center, premium feel */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.035;
     z-index: 0;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-    mix-blend-mode: overlay;
-  }
-
-  *::selection {
-    background: var(--color-overprint);
-    color: #000;
-  }
-
-  /* Tabular numerals across the board — printed-ledger feel */
-  .tabular, .mono, .leader-row, .stat-num, .folio-num {
-    font-variant-numeric: tabular-nums;
+    background:
+      radial-gradient(ellipse at top, rgba(107,245,255,0.04) 0%, transparent 45%),
+      radial-gradient(ellipse at bottom, rgba(255,107,157,0.03) 0%, transparent 50%);
   }
 }
 
 @layer components {
-  /* ============ FOLIO — page header of the carnet ============ */
-  .folio {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.75rem 0;
-    border-top: 1px solid var(--color-rule-strong);
-    border-bottom: 1px solid var(--color-rule-strong);
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-ink-soft);
+  /* ============ GLASS SURFACES ============ */
+  .glass {
+    background: var(--color-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--color-divider);
   }
-  .folio-num {
-    color: var(--color-ink);
-    font-weight: 700;
-  }
-  .folio-mark {
-    font-size: 0.875rem;
-    color: var(--color-ink-mute);
+  .glass-strong {
+    background: var(--color-glass-strong);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--color-divider);
   }
 
-  /* ============ PLATE BADGE — cyan/magenta/overlap ownership tag ============ */
-  .plate {
+  /* ============ ROLE DOT — tiny 6px circle ============ */
+  .role-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+    vertical-align: 1px;
+  }
+  .role-dot-mike { background: var(--color-role-mike); box-shadow: 0 0 8px rgba(107,245,255,0.5); }
+  .role-dot-andy { background: var(--color-role-andy); box-shadow: 0 0 8px rgba(255,107,157,0.5); }
+  .role-dot-both {
+    background: linear-gradient(135deg, var(--color-role-mike) 0%, var(--color-role-andy) 100%);
+    box-shadow: 0 0 8px rgba(200,241,53,0.6);
+  }
+
+  /* ============ EYEBROW — small caps with dot separator ============ */
+  .eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     font-family: var(--font-mono);
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    padding: 0.2rem 0.55rem;
-    border: 1px solid currentColor;
-    background: transparent;
-  }
-  .plate-mike  { color: var(--color-plate-mike); }
-  .plate-andy  { color: var(--color-plate-andy); }
-  .plate-both  { color: var(--color-overprint); }
-  .plate-glyph { font-size: 0.85rem; line-height: 1; }
-
-  /* ============ TICKET — perforated, notched receipt-style container ============ */
-  .ticket {
-    position: relative;
-    background: var(--color-paper);
-    border: 1px solid var(--color-rule);
-    /* notched corners — bottom edge looks torn */
-    --notch: 14px;
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% calc(100% - var(--notch)),
-      calc(100% - var(--notch)) 100%,
-      var(--notch) 100%,
-      0 calc(100% - var(--notch))
-    );
-  }
-  .ticket-flat {
-    background: var(--color-paper);
-    border: 1px solid var(--color-rule);
-  }
-  .ticket-head {
-    padding: 0.875rem 1.25rem;
-    border-bottom: 1px dashed var(--color-rule-strong);
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .ticket-body { padding: 1.25rem; }
-  .ticket-foot {
-    padding: 0.75rem 1.25rem;
-    border-top: 1px dashed var(--color-rule-strong);
-    font-family: var(--font-mono);
     font-size: 0.6875rem;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--color-ink-mute);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    color: var(--color-text-3);
   }
 
-  /* Perforation strip — used between major sections */
-  .perforated {
-    height: 1px;
-    background-image: radial-gradient(circle, var(--color-rule-strong) 1px, transparent 1.2px);
-    background-size: 8px 1px;
-    background-repeat: repeat-x;
-  }
-  .perforated-thick {
-    height: 14px;
-    background-image: radial-gradient(circle, var(--color-rule-strong) 2px, transparent 2.5px);
-    background-size: 14px 14px;
-    background-repeat: repeat-x;
-    background-position: center;
-  }
-
-  /* ============ LEADER ROW — key · · · · · · value ============ */
-  .leader-row {
+  /* ============ SECTION LABEL ============ */
+  .section-label {
     display: flex;
     align-items: baseline;
-    gap: 0.5rem;
+    gap: 0.75rem;
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    color: var(--color-ink-soft);
-    padding: 0.35rem 0;
-  }
-  .leader-row .label {
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
     font-size: 0.7rem;
-    color: var(--color-ink-mute);
-    white-space: nowrap;
-  }
-  .leader-row .leader {
-    flex: 1;
-    overflow: hidden;
-    color: var(--color-rule-strong);
-    letter-spacing: 0.18em;
-    white-space: nowrap;
-  }
-  .leader-row .leader::before {
-    content: "· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·";
-  }
-  .leader-row .value {
-    color: var(--color-ink);
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  /* ============ STAMP — italic serif, off-register, vermillion ============ */
-  .stamp {
-    display: inline-block;
-    font-family: var(--font-stamp);
-    font-style: italic;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: var(--color-stamp);
-    border: 2px solid var(--color-stamp);
-    padding: 0.1rem 0.55rem 0.05rem;
-    transform: rotate(-3deg);
-    opacity: 0.92;
-    text-shadow: 0.5px 0.5px 0 rgba(217, 70, 28, 0.25);
+    color: var(--color-text-3);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-divider);
   }
-  .stamp-sm { font-size: 0.7rem; padding: 0.05rem 0.4rem; }
-  .stamp-paid     { color: var(--color-paid); border-color: var(--color-paid); }
-  .stamp-overdue  { color: var(--color-overdue); border-color: var(--color-overdue); }
-  .stamp-warn     { color: var(--color-warn); border-color: var(--color-warn); }
 
-  /* ============ BLOCK PROGRESS — receipt-style block characters ============ */
-  .block-progress {
+  /* ============ BIG STAT — label + massive number + sub ============ */
+  .big-stat .label {
     font-family: var(--font-mono);
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
-    color: var(--color-ink-dim);
-    line-height: 1;
-  }
-  .block-progress .fill { color: var(--color-overprint); }
-
-  /* ============ MARGINALIA — small annotation hung in the gutter ============ */
-  .marginalia {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    line-height: 1.45;
-    letter-spacing: 0.06em;
-    color: var(--color-ink-mute);
-    border-left: 1px solid var(--color-rule-strong);
-    padding-left: 0.75rem;
-  }
-  .marginalia .tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-text-3);
+    margin-bottom: 0.5rem;
     display: block;
-    color: var(--color-overprint);
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 0.6rem;
-    margin-bottom: 0.15rem;
   }
-
-  /* ============ DROP CAP — first letter of long body copy ============ */
-  .dropcap::first-letter {
-    font-family: var(--font-stamp);
-    font-weight: 700;
-    font-size: 3.4em;
-    line-height: 0.82;
-    float: left;
-    margin: 0.08em 0.12em 0 0;
-    color: var(--color-ink);
+  .big-stat .num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 0.85;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
   }
-
-  /* ============ MONO util kept for compatibility ============ */
-  .mono {
+  .big-stat .unit {
     font-family: var(--font-mono);
-    letter-spacing: 0.1em;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
+    color: var(--color-text-3);
+    margin-left: 0.5rem;
+  }
+  .big-stat .sub {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    color: var(--color-text-3);
+    margin-top: 0.5rem;
+    display: block;
   }
 
-  /* ============ CHIP — kept but redrawn ============ */
-  .chip {
+  /* ============ THIN BAR ============ */
+  .metric-bar {
+    height: 2px;
+    background: var(--color-surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .metric-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--color-accent);
+    border-radius: 999px;
+    transition: width 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ============ BRACKET LINK — [ label → ] ============ */
+  .bracket-link {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.55rem;
-    border: 1px solid var(--color-rule-strong);
-    background: var(--color-paper-2);
+    gap: 0.4rem;
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.78rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--color-ink-soft);
+    color: var(--color-text-2);
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--color-divider-strong);
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
   }
+  .bracket-link::before { content: "["; color: var(--color-text-4); }
+  .bracket-link::after  { content: "]"; color: var(--color-text-4); }
+  .bracket-link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+  .bracket-link:hover::before,
+  .bracket-link:hover::after { color: var(--color-accent); }
 
-  /* ============ RULE — heavy, with serial in the middle ============ */
-  .rule-with-mark {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--color-ink-mute);
-  }
-  .rule-with-mark::before,
-  .rule-with-mark::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--color-rule-strong);
-  }
-
-  /* ============ CARD legacy — kept so any non-refactored bit still renders ============ */
-  .card {
-    background: var(--color-paper);
-    border: 1px solid var(--color-rule);
-  }
-}
-
-/* Buttons */
-@layer components {
+  /* ============ BUTTONS ============ */
   .btn-ink {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    padding: 0.6rem 1rem;
-    background: var(--color-ink);
+    padding: 0.85rem 1.4rem;
+    background: var(--color-accent);
     color: #000;
-    border: 1px solid var(--color-ink);
-    transition: transform 120ms ease, background 120ms ease;
+    border: 1px solid var(--color-accent);
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    border-radius: 0;
   }
-  .btn-ink:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--color-rule-strong); }
+  .btn-ink:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(200,241,53,0.25);
+  }
+  .btn-ink:disabled { opacity: 0.5; cursor: not-allowed; }
+
   .btn-ghost {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    padding: 0.55rem 1rem;
-    border: 1px solid var(--color-rule-strong);
-    color: var(--color-ink-soft);
+    padding: 0.7rem 1.1rem;
     background: transparent;
-    transition: color 120ms ease, border-color 120ms ease;
+    color: var(--color-text-2);
+    border: 1px solid var(--color-divider-strong);
+    transition: color 160ms ease, border-color 160ms ease;
+    border-radius: 0;
   }
-  .btn-ghost:hover { color: var(--color-ink); border-color: var(--color-ink); }
+  .btn-ghost:hover {
+    color: var(--color-text);
+    border-color: var(--color-text-2);
+  }
+
+  /* ============ INPUT — minimal, underline-style ============ */
+  .input-bare {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-divider-strong);
+    padding: 0.6rem 0;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--color-text);
+    transition: border-color 160ms ease;
+  }
+  .input-bare:focus {
+    outline: none;
+    border-bottom-color: var(--color-accent);
+  }
+  .input-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+  }
+
+  /* ============ SURFACE — content card minimal ============ */
+  .surface {
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-divider);
+    border-radius: 0;
+  }
+  .surface-strong {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-divider-strong);
+    border-radius: 0;
+  }
+
+  /* ============ HAIR RULE ============ */
+  .hr-thin {
+    height: 1px;
+    background: var(--color-divider);
+    border: 0;
+  }
+
+  /* ============ CHIP (kept minimal) ============ */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--color-divider-strong);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-2);
+  }
+
+  /* ============ MONO util ============ */
+  .mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* ============ SCENE STAGE — 3D canvas mount points ============ */
+  .scene-stage {
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+  }
+  .scene-stage-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* ============ DAY HERO — full-bleed page hero ============ */
+  .day-hero {
+    position: relative;
+    padding: 4rem 0 3rem;
+  }
+  .day-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.82;
+    font-size: clamp(4rem, 14vw, 9rem);
+    color: var(--color-text);
+  }
+}
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

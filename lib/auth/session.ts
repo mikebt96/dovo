@@ -3,17 +3,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { timingSafeEqual } from "node:crypto";
 import { getEnv } from "@/lib/env";
+import {
+  SLUG_COOKIE,
+  PIN_COOKIE,
+  PIN_TTL_SECONDS,
+} from "./constants";
 
-/**
- * Cookies:
- *   dovo_slug    — set tras /unlock con slug correcto. Sin expiración.
- *   dovo_pin_ok  — set tras /unlock con PIN correcto. Expira en 30 min.
- *
- * Ambos son flags ("ok") — el valor real del slug/PIN nunca vuelve al cliente.
- */
-export const SLUG_COOKIE = "dovo_slug";
-export const PIN_COOKIE = "dovo_pin_ok";
-export const PIN_TTL_SECONDS = 30 * 60; // 30 min
+// Re-export para no romper call-sites existentes que importaban desde session.
+export { SLUG_COOKIE, PIN_COOKIE, PIN_TTL_SECONDS };
 
 function timingSafe(a: string, b: string): boolean {
   // Mismo length para timingSafeEqual; pad para evitar leak por longitud.

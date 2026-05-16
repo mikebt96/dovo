@@ -1,16 +1,13 @@
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
 import { getPrepFor } from "@/lib/data/prep";
-import { folioSerial } from "@/lib/dates";
 import CheckList from "@/app/components/CheckList";
 import {
-  Folio,
-  Plate,
-  Ticket,
-  TicketHead,
-  TicketFoot,
-  Marginalia,
-} from "@/app/components/carnet";
+  Eyebrow,
+  HRule,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
 
 export default async function PrepPage({
   params,
@@ -23,28 +20,28 @@ export default async function PrepPage({
 
   const tasks = getPrepFor(profile.id);
   const accent =
-    profile.id === "mike"
-      ? "var(--color-plate-mike)"
-      : "var(--color-plate-andy)";
+    profile.id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
 
-  const sharedCount = tasks.filter((t) => t.user === "shared").length;
-  const mineCount = tasks.length - sharedCount;
-
-  const checkItems = tasks.map((t) => ({
+  const checkItems = tasks.map((t, i) => ({
     id: t.id,
     primary: (
       <div>
-        <div className="flex items-baseline gap-3 mb-1">
-          <p className="font-bold text-sm">{t.title}</p>
+        <p className="font-bold text-base leading-tight flex items-baseline gap-3">
           <span
-            className="mono text-[10px] tracking-widest"
-            style={{ color: "var(--color-overprint)" }}
+            className="mono text-xs tabular text-[color:var(--color-text-4)]"
+            style={{ minWidth: "1.5rem" }}
+          >
+            {String(i + 1).padStart(2, "0")}.
+          </span>
+          <span>{t.title}</span>
+          <span
+            className="mono text-[10px] tracking-widest uppercase"
+            style={{ color: "var(--color-accent)" }}
           >
             {t.duration}
           </span>
-          {t.user === "shared" && <Plate who="both">Compart.</Plate>}
-        </div>
-        <div className="prose-sm mt-2 text-xs text-[color:var(--color-ink-mute)] whitespace-pre-line leading-relaxed">
+        </p>
+        <div className="prose-sm mt-3 ml-8 text-sm text-[color:var(--color-text-2)] whitespace-pre-line leading-relaxed">
           {renderMarkdownish(t.content)}
         </div>
       </div>
@@ -52,73 +49,50 @@ export default async function PrepPage({
   }));
 
   return (
-    <div className="space-y-10">
-      <Folio serial={folioSerial(profile.id)} title="PARTE PREP · DOMINGO" />
-
-      {/* Hero */}
-      <section>
-        <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-2">
-          {profile.displayName.toUpperCase()} · DOMINGO · 40 MIN
-        </p>
+    <div className="space-y-12 pb-20">
+      <section className="pt-4">
+        <Eyebrow className="mb-3">
+          <RoleDot who={profile.id} />
+          <span>{profile.displayName.toLowerCase()}</span>
+          <span className="text-[color:var(--color-text-4)]">·</span>
+          <span>40 min · domingo</span>
+        </Eyebrow>
         <h1
-          className="font-extrabold tracking-tight leading-[0.85]"
+          className="font-extrabold lowercase tracking-tight leading-[0.85]"
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.5rem, 7vw, 4.5rem)",
-            color: accent,
+            fontSize: "clamp(3rem, 9vw, 5.5rem)",
+            color: "var(--color-text)",
+            letterSpacing: "-0.04em",
           }}
         >
-          sin esto,
-          <br />
-          la semana se cae.
+          domingo.
         </h1>
         <p
-          className="mt-5 italic text-[color:var(--color-ink-soft)] leading-relaxed max-w-xl"
-          style={{ fontFamily: "var(--font-stamp)", fontSize: "1.05rem" }}
+          className="mt-4 text-[color:var(--color-text-2)] leading-relaxed max-w-xl"
+          style={{ fontSize: "1.05rem" }}
         >
-          Sólo las tareas que te tocan a ti
-          {sharedCount > 0 && <> (más las {sharedCount} compartidas con tu pareja)</>}.
+          Sin estos 40 minutos, la semana se cae. Cocinas una vez, te
+          comes el resto.
         </p>
       </section>
 
-      <Marginalia tag="Por qué importa">
-        Cada tarea es un ahorro de fricción de la semana. Sin huevos hervidos,
-        no hay snacks. Sin tofu marinado, no hay cena rápida. El prep no es
-        ritual: es lo que mantiene la disciplina viable cuando es martes a las
-        10 PM y no quieres pensar.
-      </Marginalia>
+      <HRule />
 
-      {/* The ticket */}
-      <Ticket>
-        <TicketHead
-          eyebrow={`PARTE PREP · ${tasks.length} tareas`}
-          title={
-            <span>
-              <span className="tabular">{mineCount}</span>
-              <span className="text-[color:var(--color-ink-mute)] font-normal">
-                {" tuyas · "}
-              </span>
-              <span className="tabular">{sharedCount}</span>
-              <span className="text-[color:var(--color-ink-mute)] font-normal">
-                {" compartidas"}
-              </span>
-            </span>
-          }
-          right={<Plate who={profile.id}>{profile.displayName}</Plate>}
-        />
+      <SectionLabel right={`${tasks.length} tareas`}>Prep dominical</SectionLabel>
+
+      <div className="mt-2">
         <CheckList
           storageKey={`prep-${profile.id}`}
           items={checkItems}
           accent={accent}
-          emptyMessage="Folio sin tareas esta semana."
+          emptyMessage="Sin tareas de prep esta semana."
         />
-        <TicketFoot serial={`PREP·${profile.id.toUpperCase()}`} />
-      </Ticket>
+      </div>
     </div>
   );
 }
 
-// Markdown ligero — sólo **bold** y newlines
 function renderMarkdownish(text: string): React.ReactNode {
   return text.split("\n").map((line, i) => {
     const parts = line.split(/(\*\*[^*]+\*\*)/g);
@@ -127,7 +101,7 @@ function renderMarkdownish(text: string): React.ReactNode {
         {parts.map((part, j) => {
           if (part.startsWith("**") && part.endsWith("**")) {
             return (
-              <strong key={j} className="text-[color:var(--color-ink)] font-bold">
+              <strong key={j} className="text-[color:var(--color-text)] font-bold">
                 {part.slice(2, -2)}
               </strong>
             );

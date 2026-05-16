@@ -61,12 +61,11 @@ export interface DayPlan {
 export interface ShoppingItem {
   id: string;
   user: ProfileId | "shared";
-  store: "walmart" | "vegetariana";
-  category: string;
+  category: string;               // "Proteínas base" | "Lácteos" | "Frutas y verduras" | …
   name: string;
   subtitle?: string;
   qty: string;
-  priceMxn: number;
+  priceMxn: number;               // fallback estimado; el precio real viene de price_snapshots
   productId?: string;             // FK al catálogo canónico (`products.id`)
 }
 
@@ -90,6 +89,11 @@ export interface DietaryProfile {
   dislikedTextures: string[];
   maxMealKcal?: number;
   notesForAi?: string;
+}
+
+export interface NotificationSettings {
+  phoneE164?: string;             // E.164 con o sin '+'; el cliente WA normaliza
+  whatsappOptIn: boolean;
 }
 
 // ---------- PRICE SCRAPING ----------

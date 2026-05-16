@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BigStat, SectionLabel } from "@/app/components/ui";
 
 type Activity = {
   id: string;
@@ -12,14 +13,14 @@ type Activity = {
 };
 
 const ACTIVITY_TYPES = [
-  { value: "ballet",   label: "Ballet",   glyph: "🩰" },
-  { value: "pilates",  label: "Pilates",  glyph: "🧘" },
-  { value: "running",  label: "Running",  glyph: "🏃" },
-  { value: "swimming", label: "Natación", glyph: "🏊" },
-  { value: "cycling",  label: "Bici",     glyph: "🚴" },
-  { value: "yoga",     label: "Yoga",     glyph: "🧘" },
-  { value: "walk",     label: "Caminata", glyph: "🚶" },
-  { value: "other",    label: "Otra",     glyph: "🎯" },
+  { value: "ballet", label: "🩰 Ballet" },
+  { value: "pilates", label: "🧘 Pilates" },
+  { value: "running", label: "🏃 Running" },
+  { value: "swimming", label: "🏊 Natación" },
+  { value: "cycling", label: "🚴 Bici" },
+  { value: "yoga", label: "🧘 Yoga" },
+  { value: "walk", label: "🚶 Caminata" },
+  { value: "other", label: "🎯 Otra" },
 ];
 
 export default function ActivityLog({
@@ -84,33 +85,29 @@ export default function ActivityLog({
     .reduce((sum, l) => sum + l.durationMin, 0);
 
   return (
-    <div className="space-y-8">
-      {/* Add form — ticket-flat with dashed dividers */}
-      <section className="ticket-flat">
-        <header className="px-5 py-3 border-b border-dashed border-[color:var(--color-rule-strong)]">
-          <p className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)]">
-            ASIENTO NUEVO · agregar actividad
-          </p>
-        </header>
-        <div className="p-5 space-y-3">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="space-y-12">
+      {/* Add form */}
+      <section>
+        <SectionLabel>Registrar sesión</SectionLabel>
+        <div className="mt-5 space-y-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             <Field label="Fecha">
               <input
                 type="date"
                 value={draft.date}
                 onChange={(e) => setDraft({ ...draft, date: e.target.value })}
-                className="w-full bg-[color:var(--color-bg)] border border-[color:var(--color-rule-strong)] px-2 py-2 text-sm mono tabular focus:outline-none focus:border-[color:var(--color-overprint)] transition"
+                className="input-bare input-mono"
               />
             </Field>
             <Field label="Actividad">
               <select
                 value={draft.type}
                 onChange={(e) => setDraft({ ...draft, type: e.target.value })}
-                className="w-full bg-[color:var(--color-bg)] border border-[color:var(--color-rule-strong)] px-2 py-2 text-sm focus:outline-none focus:border-[color:var(--color-overprint)] transition"
+                className="input-bare"
               >
                 {ACTIVITY_TYPES.map((a) => (
                   <option key={a.value} value={a.value}>
-                    {a.glyph} {a.label}
+                    {a.label}
                   </option>
                 ))}
               </select>
@@ -120,8 +117,10 @@ export default function ActivityLog({
                 type="number"
                 inputMode="numeric"
                 value={draft.durationMin}
-                onChange={(e) => setDraft({ ...draft, durationMin: e.target.value })}
-                className="w-full bg-[color:var(--color-bg)] border border-[color:var(--color-rule-strong)] px-2 py-2 text-sm mono tabular focus:outline-none focus:border-[color:var(--color-overprint)] transition"
+                onChange={(e) =>
+                  setDraft({ ...draft, durationMin: e.target.value })
+                }
+                className="input-bare input-mono"
               />
             </Field>
             <Field label="Intensidad (1-5)">
@@ -130,8 +129,10 @@ export default function ActivityLog({
                 min="1"
                 max="5"
                 value={draft.intensity}
-                onChange={(e) => setDraft({ ...draft, intensity: e.target.value })}
-                className="w-full bg-[color:var(--color-bg)] border border-[color:var(--color-rule-strong)] px-2 py-2 text-sm mono tabular focus:outline-none focus:border-[color:var(--color-overprint)] transition"
+                onChange={(e) =>
+                  setDraft({ ...draft, intensity: e.target.value })
+                }
+                className="input-bare input-mono"
               />
             </Field>
           </div>
@@ -141,84 +142,74 @@ export default function ActivityLog({
               value={draft.notes}
               onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
               placeholder="ej: muy intenso, hicimos pliés extra"
-              className="w-full bg-[color:var(--color-bg)] border border-[color:var(--color-rule-strong)] px-2 py-2 text-sm focus:outline-none focus:border-[color:var(--color-overprint)] transition"
+              className="input-bare"
             />
           </Field>
           <button
             type="button"
             onClick={add}
-            className="btn-ink mt-2"
-            style={{ background: accent, borderColor: accent, color: "#000" }}
+            className="btn-ink"
           >
-            ⊕ Sellar asiento
+            Registrar →
           </button>
         </div>
       </section>
 
-      {/* Stats — leader-row pair */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-        <div className="leader-row">
-          <span className="label">Esta semana</span>
-          <span className="leader" aria-hidden="true" />
-          <span className="value tabular" style={{ color: accent }}>
-            {weekTotal} min
-          </span>
-        </div>
-        <div className="leader-row">
-          <span className="label">Total sesiones</span>
-          <span className="leader" aria-hidden="true" />
-          <span className="value tabular">{logs.length}</span>
-        </div>
+      {/* Stats */}
+      <section className="grid grid-cols-2 gap-x-8 gap-y-6">
+        <BigStat label="Esta semana" value={weekTotal} unit="min" accent={accent} />
+        <BigStat label="Total sesiones" value={logs.length} sub="historial completo" />
       </section>
 
       {/* History */}
-      <section className="ticket-flat overflow-hidden">
-        <header className="px-5 py-3 border-b border-dashed border-[color:var(--color-rule-strong)] flex items-baseline justify-between">
-          <p className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)]">
-            HISTORIAL · {logs.length} asientos
-          </p>
-          <span className="mono text-[10px] tabular text-[color:var(--color-ink-mute)]">
-            más reciente arriba
-          </span>
-        </header>
+      <section>
+        <SectionLabel right={`${logs.length} sesiones`}>Historial</SectionLabel>
         {sorted.length === 0 ? (
-          <div className="px-5 py-10 text-center">
+          <div className="py-12 text-center">
             <p
-              className="italic text-[color:var(--color-ink-soft)] leading-relaxed max-w-md mx-auto"
-              style={{ fontFamily: "var(--font-stamp)", fontSize: "1rem" }}
+              className="italic text-[color:var(--color-text-3)] leading-relaxed"
+              style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}
             >
-              Folio sin entradas. Sella el primer asiento arriba.
+              Aún no hay sesiones. Registra la primera arriba.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-dashed divide-[color:var(--color-rule)]">
+          <ul className="divide-y divide-[color:var(--color-divider)] mt-2">
             {sorted.map((l) => {
               const type = ACTIVITY_TYPES.find((a) => a.value === l.type);
+              const intense = l.intensity >= 4;
               return (
-                <li key={l.id} className="px-5 py-3 flex items-center justify-between gap-3">
+                <li
+                  key={l.id}
+                  className="py-4 flex items-center justify-between gap-3"
+                >
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm">
-                      <span className="mr-1" aria-hidden="true">{type?.glyph ?? "•"}</span>
-                      {type?.label ?? l.type}
+                    <p className="font-bold text-sm flex items-center gap-2 flex-wrap">
+                      <span>{type?.label ?? l.type}</span>
+                      {intense && (
+                        <span
+                          className="mono text-[9px] uppercase tracking-widest"
+                          style={{ color: "var(--color-warning)" }}
+                        >
+                          · intenso
+                        </span>
+                      )}
                     </p>
-                    <p className="mono text-[10px] tabular tracking-wider text-[color:var(--color-ink-mute)] mt-0.5">
-                      {l.date} · {l.durationMin} min · int. {l.intensity}/5
+                    <p className="mono text-[10px] tabular text-[color:var(--color-text-3)] mt-0.5 tracking-widest">
+                      {l.date} · {l.durationMin} min · int {l.intensity}/5
                     </p>
                     {l.notes && (
-                      <p
-                        className="text-xs text-[color:var(--color-ink-soft)] mt-1 italic"
-                        style={{ fontFamily: "var(--font-stamp)" }}
-                      >
-                        “{l.notes}”
+                      <p className="text-xs text-[color:var(--color-text-3)] mt-1">
+                        {l.notes}
                       </p>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => remove(l.id)}
-                    className="mono text-[10px] tracking-widest text-[color:var(--color-ink-dim)] hover:text-[color:var(--color-overdue)] transition"
+                    className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] hover:text-[color:var(--color-danger)] transition"
                   >
-                    × eliminar
+                    eliminar
                   </button>
                 </li>
               );
@@ -230,10 +221,16 @@ export default function ActivityLog({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
-      <span className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)] block mb-1">
+      <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] block mb-1">
         {label}
       </span>
       {children}

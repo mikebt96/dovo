@@ -1,5 +1,5 @@
 import { getServerSupabase } from "./supabase";
-import type { DietaryProfile, ProfileId } from "./types";
+import type { DietaryProfile, NotificationSettings, ProfileId } from "./types";
 
 /**
  * Server-side: traduce slug ('mike'|'andy') → uuid interno.
@@ -55,6 +55,34 @@ export async function updateDietaryProfile(
   if (patch.maxMealKcal !== undefined) row.max_meal_kcal = patch.maxMealKcal ?? null;
   if (patch.notesForAi !== undefined) row.notes_for_ai = patch.notesForAi || null;
 
+  if (Object.keys(row).length === 0) return;
+  await sb.from("profiles").update(row).eq("slug", slug);
+}
+
+export async function getNotificationSettings(
+  slug: ProfileId
+): Promise<NotificationSettings | null> {
+  const sb = getServerSupabase();
+  const { data } = await sb
+    .from("profiles")
+    .select("phone_e164, whatsapp_opt_in")
+    .eq("slug", slug)
+    .single();
+  if (!data) return null;
+  return {
+    phoneE164: data.phone_e164 ?? undefined,
+    whatsappOptIn: !!data.whatsapp_opt_in,
+  };
+}
+
+export async function updateNotificationSettings(
+  slug: ProfileId,
+  patch: Partial<NotificationSettings>
+): Promise<void> {
+  const sb = getServerSupabase();
+  const row: Record<string, unknown> = {};
+  if (patch.phoneE164 !== undefined) row.phone_e164 = patch.phoneE164 || null;
+  if (patch.whatsappOptIn !== undefined) row.whatsapp_opt_in = patch.whatsappOptIn;
   if (Object.keys(row).length === 0) return;
   await sb.from("profiles").update(row).eq("slug", slug);
 }

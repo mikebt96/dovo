@@ -1,7 +1,16 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { getProfile, PROFILES } from "@/lib/profile";
 import { PENALTIES_SEED } from "@/lib/data/rewards";
+import {
+  BigStat,
+  Eyebrow,
+  HRule,
+  MetricBar,
+  MetricRing,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
+import PairRingsLazy from "@/app/three/PairRingsLazy";
 
 export default async function ParejaPage({
   params,
@@ -13,6 +22,11 @@ export default async function ParejaPage({
   if (!profile) notFound();
   const partner = PROFILES[profile.partnerId];
 
+  // Stub stats — Phase 3 wired to DB
+  const mikeStats = { streak: 0, longest: 0, level: 1, xp: 0, coins: 0 };
+  const andyStats = { streak: 0, longest: 0, level: 1, xp: 0, coins: 0 };
+  const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
+
   const groupedPenalties = PENALTIES_SEED.reduce<
     Record<number, typeof PENALTIES_SEED>
   >((acc, p) => {
@@ -22,191 +36,229 @@ export default async function ParejaPage({
   }, {});
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-          Pareja · streaks & deudas
-        </p>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-2">
-          {profile.displayName} ↔ {partner.displayName}
-        </h1>
-      </header>
-
-      {/* Streak comparison */}
-      <section className="grid grid-cols-2 gap-3">
-        <PersonStreak
-          name={profile.displayName}
-          color={profile.color}
-          streak={0}
-          longest={0}
-          isMe
-        />
-        <PersonStreak
-          name={partner.displayName}
-          color={partner.color}
-          streak={0}
-          longest={0}
-        />
-      </section>
-
-      {/* Pair streak status */}
-      <section
-        className="card p-6 text-center relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(107,245,255,0.05) 0%, rgba(255,107,157,0.05) 100%)",
-        }}
-      >
-        <p className="mono text-[10px] text-[var(--color-muted)] mb-2 uppercase tracking-widest">
-          Pair streak · ambos cumpliendo
-        </p>
-        <p className="text-6xl font-extrabold tracking-tight mb-2">0</p>
-        <p className="mono text-[10px] text-[var(--color-muted)]">
-          días seguidos · próximo bono pareja a los 7
-        </p>
-        <div className="mt-4 grid grid-cols-3 gap-3 text-left">
-          <Milestone label="7 días" reward="2× XP semana" />
-          <Milestone label="14 días" reward="Sorpresa random" />
-          <Milestone label="30 días" reward="Premio pareja gratis" />
-        </div>
-      </section>
-
-      {/* Outstanding debts */}
-      <section className="card overflow-hidden">
-        <header className="px-5 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
-          <div>
-            <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-              Deudas pendientes
+    <div className="space-y-14 pb-20">
+      {/* Hero — pair rings + big number */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10 items-center pt-4">
+        <div>
+          <Eyebrow className="mb-3">
+            <RoleDot who="both" />
+            <span>Ambos cumpliendo</span>
+          </Eyebrow>
+          <h1
+            className="font-extrabold tabular tracking-tight leading-[0.82]"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(5rem, 16vw, 11rem)",
+              color: "var(--color-accent)",
+              letterSpacing: "-0.05em",
+            }}
+          >
+            {pairStreak}
+          </h1>
+          <p className="mt-2 mono text-xs tracking-[0.22em] uppercase text-[color:var(--color-text-3)]">
+            días seguidos · {profile.displayName} & {partner.displayName}
+          </p>
+          <div className="mt-6 max-w-md">
+            <MetricBar value={pairStreak} max={21} />
+            <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mt-2">
+              próximo bono en {Math.max(0, 21 - pairStreak)} días
             </p>
-            <h2 className="font-extrabold text-lg">
-              Sin deudas activas
-            </h2>
           </div>
-          <p className="mono text-[10px] text-[var(--color-green)]">
-            CLEAN
+        </div>
+
+        <div className="w-full">
+          <PairRingsLazy
+            mikeProgress={mikeStats.streak === 0 ? 0.1 : Math.min(1, mikeStats.streak / 21)}
+            andyProgress={andyStats.streak === 0 ? 0.1 : Math.min(1, andyStats.streak / 21)}
+            pairStreak={pairStreak}
+          />
+        </div>
+      </section>
+
+      <HRule />
+
+      {/* Individual streaks */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <PersonStats
+          who="mike"
+          name="Mike"
+          streak={profile.id === "mike" ? mikeStats.streak : andyStats.streak}
+          longest={profile.id === "mike" ? mikeStats.longest : andyStats.longest}
+          isMe={profile.id === "mike"}
+        />
+        <PersonStats
+          who="andy"
+          name="Andy"
+          streak={profile.id === "andy" ? mikeStats.streak : andyStats.streak}
+          longest={profile.id === "andy" ? mikeStats.longest : andyStats.longest}
+          isMe={profile.id === "andy"}
+        />
+      </section>
+
+      <HRule />
+
+      {/* Milestones */}
+      <section>
+        <SectionLabel right="bonos compartidos">Milestones</SectionLabel>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Milestone days={7} reward="2× XP toda la semana" pairStreak={pairStreak} />
+          <Milestone days={14} reward="Sorpresa random gratis" pairStreak={pairStreak} />
+          <Milestone days={30} reward="Premio del dúo gratis" pairStreak={pairStreak} />
+        </div>
+      </section>
+
+      <HRule />
+
+      {/* Debts */}
+      <section>
+        <SectionLabel right="al día">Deudas pendientes</SectionLabel>
+        <div className="mt-6 py-10 text-center">
+          <p
+            className="font-extrabold lowercase tracking-tight leading-none"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2.5rem, 6vw, 4rem)",
+              color: "var(--color-success)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            limpio.
           </p>
-        </header>
-        <div className="px-5 py-8 text-center">
-          <p className="text-3xl mb-2">🤝</p>
-          <p className="text-sm text-[var(--color-muted)]">
-            Cuando alguno rompa streak, aparece aquí lo que le debe al otro.
+          <p
+            className="mt-3 italic text-[color:var(--color-text-3)] leading-relaxed max-w-md mx-auto"
+            style={{ fontFamily: "var(--font-serif)", fontSize: "1.02rem" }}
+          >
+            Cuando alguno del dúo rompa racha, aquí aparece lo que le debe al otro.
+            Pago en especie — consensual, finito.
           </p>
         </div>
       </section>
+
+      <HRule />
 
       {/* Penalties catalog */}
-      <section className="card overflow-hidden">
-        <header className="px-5 py-4 border-b border-[var(--color-border)]">
-          <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-            Catálogo de castigos
-          </p>
-          <h2 className="font-extrabold text-lg">
-            Consensual · finito · no humillante
-          </h2>
-          <p className="text-xs text-[var(--color-muted)] mt-2 max-w-xl leading-relaxed">
-            Lo que se cobra cuando alguien rompe streak. La severity escala con
-            qué tan grave fue la falla.
-          </p>
-        </header>
-        {[1, 2, 3].map((sev) => (
-          <div
-            key={sev}
-            className="border-b border-[var(--color-border)] last:border-b-0"
-          >
-            <div className="px-5 py-3 bg-[var(--color-card-2)]">
-              <p
-                className="mono text-[10px] uppercase tracking-widest font-bold"
-                style={{
-                  color:
-                    sev === 1
-                      ? "var(--color-green)"
-                      : sev === 2
-                      ? "var(--color-orange)"
-                      : "var(--color-red)",
-                }}
-              >
-                Severity {sev} ·{" "}
-                {sev === 1
-                  ? "Rompiste 1 día"
-                  : sev === 2
-                  ? "Rompiste 3+ días"
-                  : "Rompiste la semana"}
-              </p>
-            </div>
-            <ul className="divide-y divide-[var(--color-border)]">
-              {groupedPenalties[sev]?.map((p, i) => (
-                <li key={i} className="px-5 py-3">
-                  <p className="font-bold text-sm">{p.name}</p>
-                  {p.description && (
-                    <p className="text-xs text-[var(--color-muted)] mt-0.5 leading-relaxed">
-                      {p.description}
-                    </p>
-                  )}
-                  <p className="mono text-[10px] text-[var(--color-dim)] mt-1.5 uppercase tracking-wider">
-                    {p.category}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <section>
+        <SectionLabel right="por severidad">Catálogo de castigos</SectionLabel>
+        <p className="mt-3 text-sm text-[color:var(--color-text-3)] max-w-2xl leading-relaxed">
+          Lo que se cobra cuando alguien rompe racha. La severidad escala con
+          qué tan grave fue la falla.
+        </p>
+
+        <div className="mt-8 space-y-10">
+          {[1, 2, 3].map((sev) => {
+            const sevColor =
+              sev === 1 ? "var(--color-success)"
+              : sev === 2 ? "var(--color-warning)"
+              : "var(--color-danger)";
+            const sevLabel =
+              sev === 1 ? "1 día roto"
+              : sev === 2 ? "3+ días rotos"
+              : "Semana rota";
+            return (
+              <div key={sev}>
+                <p className="mono text-[10px] tracking-[0.22em] uppercase mb-3" style={{ color: sevColor }}>
+                  severidad {sev} · {sevLabel}
+                </p>
+                <ul className="divide-y divide-[color:var(--color-divider)]">
+                  {groupedPenalties[sev]?.map((p, i) => (
+                    <li key={i} className="py-3">
+                      <p className="font-bold text-sm">{p.name}</p>
+                      {p.description && (
+                        <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
+                          {p.description}
+                        </p>
+                      )}
+                      <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] mt-1.5 uppercase">
+                        {p.category}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      <p className="mono text-[10px] text-[var(--color-dim)] text-center">
-        Editable en Fase 2. Si alguno no les gusta, lo cambian.
+      <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center mt-8">
+        editable en fase 2 · si alguno no les gusta, lo cambian
       </p>
     </div>
   );
 }
 
-function PersonStreak({
+function PersonStats({
+  who,
   name,
-  color,
   streak,
   longest,
   isMe,
 }: {
+  who: "mike" | "andy";
   name: string;
-  color: string;
   streak: number;
   longest: number;
-  isMe?: boolean;
+  isMe: boolean;
 }) {
+  const accent = who === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
   return (
-    <div className="card p-5 relative overflow-hidden">
-      <div
-        className="absolute top-0 left-0 right-0 h-0.5"
-        style={{ background: color }}
+    <div>
+      <Eyebrow className="mb-3">
+        <RoleDot who={who} />
+        <span style={{ color: accent }}>{isMe ? "Tú" : name}</span>
+        {isMe && (
+          <span className="text-[color:var(--color-text-4)] normal-case lowercase tracking-normal">
+            · {name}
+          </span>
+        )}
+      </Eyebrow>
+      <BigStat
+        label="Racha actual"
+        value={streak}
+        unit="d"
+        sub={`récord ${longest}d`}
+        accent={accent}
       />
-      <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-        {isMe ? "Tú" : "Pareja"} · {name}
-      </p>
-      <p
-        className="font-extrabold text-3xl tracking-tight"
-        style={{ color }}
-      >
-        {streak}
-        <span className="mono text-sm text-[var(--color-muted)] ml-1">
-          días
-        </span>
-      </p>
-      <p className="mono text-[10px] text-[var(--color-dim)] mt-1">
-        Récord {longest}d
-      </p>
     </div>
   );
 }
 
-function Milestone({ label, reward }: { label: string; reward: string }) {
+function Milestone({
+  days,
+  reward,
+  pairStreak,
+}: {
+  days: number;
+  reward: string;
+  pairStreak: number;
+}) {
+  const hit = pairStreak >= days;
+  const pct = Math.min(1, pairStreak / days);
   return (
-    <div className="card p-3">
-      <p
-        className="mono text-[10px] uppercase tracking-widest"
-        style={{ color: "var(--color-accent)" }}
+    <div className="surface p-6 flex items-start gap-5">
+      <MetricRing
+        value={pairStreak}
+        max={days}
+        size={64}
+        stroke={4}
+        accent={hit ? "var(--color-success)" : "var(--color-accent)"}
       >
-        {label}
-      </p>
-      <p className="text-xs mt-1">{reward}</p>
+        <span
+          className="mono text-[10px] tabular tracking-widest"
+          style={{ color: hit ? "var(--color-success)" : "var(--color-accent)" }}
+        >
+          {hit ? "✓" : `${Math.round(pct * 100)}%`}
+        </span>
+      </MetricRing>
+      <div className="flex-1 min-w-0">
+        <p
+          className="mono text-[10px] tracking-[0.22em] uppercase"
+          style={{ color: hit ? "var(--color-success)" : "var(--color-accent)" }}
+        >
+          {days} días
+        </p>
+        <p className="text-sm font-bold mt-1 leading-snug">{reward}</p>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,13 @@
 import { notFound } from "next/navigation";
 import { getProfile } from "@/lib/profile";
-import { getDietaryProfile } from "@/lib/profileServer";
+import { getDietaryProfile, getNotificationSettings } from "@/lib/profileServer";
 import { getReplanHistory } from "@/lib/mealsServer";
+import {
+  Eyebrow,
+  HRule,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
 import PreferencesForm from "./PreferencesForm";
 import ReplanHistory from "./ReplanHistory";
 
@@ -14,7 +20,11 @@ export default async function PreferencesPage({
   const profile = getProfile(profileParam);
   if (!profile) notFound();
 
-  // Si la DB no responde (dev sin Supabase), arrancamos con defaults vacíos.
+  const accent =
+    profile.id === "mike"
+      ? "var(--color-role-mike)"
+      : "var(--color-role-andy)";
+
   const dietary = (await getDietaryProfile(profile.id).catch(() => null)) ?? {
     postalCode: undefined,
     dietaryTags: [],
@@ -27,39 +37,58 @@ export default async function PreferencesPage({
   };
 
   const history = await getReplanHistory(profile.id, 10).catch(() => []);
+  const notifications = (await getNotificationSettings(profile.id).catch(
+    () => null
+  )) ?? { phoneE164: undefined, whatsappOptIn: false };
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <header>
-        <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-          Tu perfil
-        </p>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-2">
-          Preferencias alimentarias
+    <div className="space-y-12 pb-20 max-w-3xl">
+      <section className="pt-4">
+        <Eyebrow className="mb-3">
+          <RoleDot who={profile.id} />
+          <span>{profile.displayName.toLowerCase()}</span>
+          <span className="text-[color:var(--color-text-4)]">·</span>
+          <span>tu ficha alimentaria</span>
+        </Eyebrow>
+        <h1
+          className="font-extrabold lowercase tracking-tight leading-[0.85]"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(3rem, 9vw, 5rem)",
+            color: "var(--color-text)",
+            letterSpacing: "-0.04em",
+          }}
+        >
+          ajustes.
         </h1>
-        <p className="text-sm text-[var(--color-muted)]">
-          Lo que comes, lo que evitas y tu CP para precios reales. Cuando
-          guardes, la AI rediseña tus comidas para que las recomendaciones
-          sean reales.
+        <p
+          className="mt-4 text-[color:var(--color-text-2)] leading-relaxed max-w-xl"
+          style={{ fontSize: "1.05rem" }}
+        >
+          Cuando guardes cambios, la AI rediseña tus comidas para que se
+          ajusten a ti. El plan deja de ser genérico y empieza a parecerse
+          a cómo realmente comes.
         </p>
-      </header>
-
-      <section className="card p-6">
-        <PreferencesForm
-          slug={profile.id}
-          color={profile.color}
-          initial={dietary}
-        />
       </section>
 
-      <ReplanHistory
-        slug={profile.id}
-        history={history}
-        color={profile.color}
-      />
+      <HRule />
 
-      <p className="mono text-[10px] text-[var(--color-dim)]">
-        Tus prefs viven en Supabase. El AI re-plan corre con Claude Haiku 4.5.
+      <SectionLabel>Declaración alimentaria</SectionLabel>
+      <div className="mt-2">
+        <PreferencesForm
+          slug={profile.id}
+          color={accent}
+          initial={dietary}
+          notifications={notifications}
+        />
+      </div>
+
+      <HRule />
+
+      <ReplanHistory slug={profile.id} history={history} color={accent} />
+
+      <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] mt-8">
+        datos guardados en supabase · AI re-plan con claude haiku 4.5
       </p>
     </div>
   );

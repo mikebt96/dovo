@@ -1,17 +1,17 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
-import { folioDate, isoWeek, pad, folioSerial } from "@/lib/dates";
+import { GlassBar, RoleDot } from "@/app/components/ui";
 
-const NAV: Array<{ slug: string; roman: string; label: string }> = [
-  { slug: "",          roman: "I",   label: "Hoy" },
-  { slug: "super",     roman: "II",  label: "Súper" },
-  { slug: "prep",      roman: "III", label: "Prep" },
-  { slug: "semana",    roman: "IV",  label: "Semana" },
-  { slug: "actividad", roman: "V",   label: "Actividad" },
-  { slug: "tienda",      roman: "VI",   label: "Tienda" },
-  { slug: "pareja",      roman: "VII",  label: "Pareja" },
-  { slug: "preferences", roman: "VIII", label: "Prefs" },
+const NAV: Array<{ slug: string; label: string }> = [
+  { slug: "",            label: "Hoy" },
+  { slug: "semana",      label: "Semana" },
+  { slug: "super",       label: "Compras" },
+  { slug: "prep",        label: "Domingo" },
+  { slug: "actividad",   label: "Actividad" },
+  { slug: "tienda",      label: "Recompensas" },
+  { slug: "pareja",      label: "Pareja" },
+  { slug: "preferences", label: "Ajustes" },
 ];
 
 export default async function ProfileLayout({
@@ -25,83 +25,82 @@ export default async function ProfileLayout({
   const profile = getProfile(profileParam);
   if (!profile) notFound();
 
-  const now = new Date();
-  const issue = pad(isoWeek(now), 2);
-  const serial = folioSerial(profile.id);
   const accent =
     profile.id === "mike"
-      ? "var(--color-plate-mike)"
-      : "var(--color-plate-andy)";
+      ? "var(--color-role-mike)"
+      : "var(--color-role-andy)";
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Folio band — sticky */}
-      <header className="sticky top-0 z-10 bg-[color:var(--color-bg)]/95 backdrop-blur border-b border-[color:var(--color-rule-strong)]">
-        <div className="max-w-5xl mx-auto px-4 pt-3 pb-1 flex items-center justify-between mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)]">
-          <span className="flex items-center gap-3">
-            <span aria-hidden="true">⊕</span>
-            <Link
-              href={`/${profile.id}`}
-              className="text-[color:var(--color-ink)] font-bold tabular"
-            >
-              N.º {serial}
-            </Link>
-            <span className="hidden sm:inline">· {folioDate(now)} · ED. W{issue}</span>
-          </span>
-          <span className="flex items-center gap-3">
+      <GlassBar>
+        <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+          <Link
+            href={`/${profile.id}`}
+            className="flex items-center gap-2.5"
+            aria-label="dovo · inicio del perfil"
+          >
+            <RoleDot who={profile.id} />
             <span
-              className="font-bold tracking-[0.25em]"
+              className="font-extrabold lowercase text-[color:var(--color-text)]"
+              style={{
+                fontFamily: "var(--font-display)",
+                letterSpacing: "-0.02em",
+                fontSize: "1.05rem",
+              }}
+            >
+              dovo
+            </span>
+            <span
+              className="hidden sm:inline mono text-[10px] tracking-widest"
               style={{ color: accent }}
             >
-              {profile.displayName.toUpperCase()}
+              · {profile.displayName}
             </span>
+          </Link>
+
+          <div className="flex items-center gap-4 mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+            <Link
+              href="/juntos"
+              className="hidden sm:inline hover:text-[color:var(--color-text)] transition"
+            >
+              juntos
+            </Link>
             <Link
               href="/"
-              className="hover:text-[color:var(--color-ink)] transition"
+              className="hover:text-[color:var(--color-text)] transition"
             >
-              ↻ cambiar
+              cambiar
             </Link>
-            <span aria-hidden="true">⊕</span>
-          </span>
+          </div>
         </div>
 
-        <nav className="max-w-5xl mx-auto px-4 pb-3 overflow-x-auto">
-          <ul className="flex items-baseline gap-5 text-xs whitespace-nowrap">
+        <nav className="max-w-6xl mx-auto px-5 pb-3 overflow-x-auto">
+          <ul className="flex items-baseline gap-1 text-xs">
             {NAV.map((n) => (
               <NavItem
                 key={n.slug}
                 href={`/${profile.id}${n.slug ? `/${n.slug}` : ""}`}
-                roman={n.roman}
                 label={n.label}
                 accent={accent}
               />
             ))}
           </ul>
         </nav>
-      </header>
+      </GlassBar>
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-5 py-8 relative z-[1]">
         {children}
       </main>
-
-      <footer className="border-t border-[color:var(--color-rule-strong)] py-5 mt-12">
-        <p className="mono text-[10px] tracking-widest text-[color:var(--color-ink-dim)] text-center">
-          <span aria-hidden="true">⊕</span> IMPRENTA PRIVADA · ED. W{issue} ·
-          TIRADA DE DOS <span aria-hidden="true">⊕</span>
-        </p>
-      </footer>
     </div>
   );
 }
 
 function NavItem({
   href,
-  roman,
   label,
   accent,
 }: {
   href: string;
-  roman: string;
   label: string;
   accent: string;
 }) {
@@ -109,20 +108,16 @@ function NavItem({
     <li>
       <Link
         href={href}
-        className="group inline-flex items-baseline gap-1.5 py-2 text-[color:var(--color-ink-mute)] hover:text-[color:var(--color-ink)] transition"
+        className="group inline-flex items-baseline gap-1.5 px-3 py-2 mono text-[11px] tracking-[0.2em] uppercase text-[color:var(--color-text-3)] hover:text-[color:var(--color-text)] transition"
       >
         <span
-          className="mono text-[10px] tracking-widest transition-colors group-hover:text-[color:var(--color-overprint)]"
+          aria-hidden="true"
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
           style={{ color: accent }}
         >
-          {roman}
+          ·
         </span>
-        <span
-          className="font-bold tracking-tight"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {label}
-        </span>
+        {label}
       </Link>
     </li>
   );

@@ -1,6 +1,6 @@
-# Mike & Andy · Plan v1
+# dovo · Plan v1
 
-Plan semanal de pareja con disciplina compartida, castigos consensuales y premios reales.
+Plan semanal de dúo con disciplina compartida, castigos consensuales y premios reales.
 
 **Para:** Mike (`/mike`) y Andy (`/andy`)
 **No es:** SaaS, multi-tenant, native. Ver `SAAS_MIGRATION_PATH.md` para el plan v2.

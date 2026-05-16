@@ -68,7 +68,7 @@ Tier sugerido (validar con MX market research):
 | Tier | Precio | Incluye |
 |---|---|---|
 | **Free** | $0 | 1 plan, sin AI, sin WhatsApp, sin foto análisis |
-| **Couple Pro** | $99 MXN/mes pareja | Todo, AI coach semanal, WhatsApp nudges, fotos ilimitadas |
+| **Dúo Pro** | $99 MXN/mes dúo | Todo, AI coach semanal, WhatsApp nudges, fotos ilimitadas |
 
 NO cobrar por usuario individual — el producto SOLO funciona con 2 usuarios. Pricing per-couple.
 

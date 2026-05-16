@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { MEALS } from "@/lib/data/meals";
-import { isProfileId } from "@/lib/profile";
-import { getDietaryProfile, slugToUuid } from "@/lib/profileServer";
+import { isProfileId, PROFILES } from "@/lib/profile";
+import {
+  getDietaryProfile,
+  getNotificationSettings,
+  slugToUuid,
+} from "@/lib/profileServer";
 import { getServerSupabase } from "@/lib/supabase";
+import { sendWhatsApp } from "@/lib/whatsapp";
+import { buildReplanMessage } from "@/lib/notifications";
 import type { MealChange } from "@/lib/types";
 
 /**
@@ -107,24 +113,42 @@ export async function POST(req: Request) {
 
   const anthropic = new Anthropic({ apiKey });
 
-  const userMessage = `PREFERENCIAS DEL USUARIO:
-${JSON.stringify(prefs, null, 2)}
-
-MEALS ACTUALES (${userMeals.length}):
+  // Prompt caching: cacheamos system + meals del user (estable hasta que
+  // editen lib/data/meals.ts). Lo que NO se cachea es el bloque de prefs
+  // — esa parte cambia en cada llamada.
+  const stableMealsBlock = `MEALS ACTUALES (${userMeals.length}):
 ${JSON.stringify(userMeals, null, 2)}
 
 Revisa cada meal. Para CADA UNA que rompa las reglas duras, devuélvela rewriteada. Las que cumplan, NO las incluyas en "changes".`;
 
+  const volatilePrefsBlock = `PREFERENCIAS DEL USUARIO:
+${JSON.stringify(prefs, null, 2)}`;
+
   let parsed: { changes: MealChange[] };
   try {
-    // NOTE: prompt caching disabled — SDK v0.32.1 no expone `cache_control` en
-    // types. Cuando upgradeemos a ^0.40, agregar `cache_control: { type: "ephemeral" }`
-    // al system block para ahorrar ~80% en tokens repetidos.
     const resp = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 4_000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userMessage }],
+      system: [
+        {
+          type: "text",
+          text: SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: stableMealsBlock,
+              cache_control: { type: "ephemeral" },
+            },
+            { type: "text", text: volatilePrefsBlock },
+          ],
+        },
+      ],
     });
 
     const text =
@@ -154,9 +178,43 @@ Revisa cada meal. Para CADA UNA que rompa las reglas duras, devuélvela rewritea
     });
   }
 
+  // WhatsApp notification (fire-and-forget) si el user opted-in.
+  // Falla silencioso para no bloquear la response. Logging va a `wa_messages`.
+  notifyReplanIfOptedIn(slug, profileUuid, changes, triggeredBy).catch((err) =>
+    console.warn("[replan-meals] wa notify failed:", err)
+  );
+
   return NextResponse.json({
     triggeredBy,
     mealsChanged: changes.length,
     changes,
+  });
+}
+
+async function notifyReplanIfOptedIn(
+  slug: "mike" | "andy",
+  profileUuid: string | null,
+  changes: MealChange[],
+  triggeredBy: string
+): Promise<void> {
+  const settings = await getNotificationSettings(slug).catch(() => null);
+  if (!settings?.whatsappOptIn || !settings.phoneE164) return;
+
+  // Skip notification para reverts manuales (no agregan info útil)
+  if (triggeredBy === "manual_revert") return;
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://dovo.app";
+  const body = buildReplanMessage({
+    displayName: PROFILES[slug].displayName,
+    changes,
+    appBaseUrl: baseUrl,
+    slug,
+    triggeredBy,
+  });
+
+  await sendWhatsApp(settings.phoneE164, body, {
+    profileUuid: profileUuid ?? undefined,
+    templateName: "replan_summary",
   });
 }

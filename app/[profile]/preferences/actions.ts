@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { isProfileId } from "@/lib/profile";
-import { updateDietaryProfile, slugToUuid } from "@/lib/profileServer";
+import {
+  updateDietaryProfile,
+  updateNotificationSettings,
+  slugToUuid,
+} from "@/lib/profileServer";
 import { getServerSupabase } from "@/lib/supabase";
 import type { DietaryProfile, DietaryTag } from "@/lib/types";
 
@@ -85,6 +89,14 @@ export async function savePreferences(
 
   await updateDietaryProfile(slug, patch);
 
+  // Notification settings (WhatsApp opt-in + phone)
+  const phoneRaw = (formData.get("phone_e164") as string | null)?.trim() ?? "";
+  const phoneNormalized = phoneRaw.replace(/[^\d+]/g, "");
+  await updateNotificationSettings(slug, {
+    phoneE164: phoneNormalized || undefined,
+    whatsappOptIn: formData.get("whatsapp_opt_in") === "on",
+  });
+
   // Dispara AI re-plan async (fire-and-forget). Si falla, no rompe el guardado.
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   fetch(`${baseUrl}/api/replan-meals`, {
@@ -102,6 +114,40 @@ export async function savePreferences(
   revalidatePath(`/${slug}/preferences`);
   revalidatePath(`/${slug}/super`);
   return { ok: true };
+}
+
+/**
+ * Forzar un re-plan AI ahora mismo, sin tocar prefs. Útil cuando el user
+ * cambia ingredientes de la pantalla de meals manualmente o quiere
+ * probar otra variante del plan.
+ */
+export async function triggerReplan(
+  slug: string
+): Promise<{ ok: boolean; changes?: number; error?: string }> {
+  if (!isProfileId(slug)) return { ok: false, error: "Perfil inválido" };
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  try {
+    const res = await fetch(`${baseUrl}/api/replan-meals`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-internal-secret": process.env.CRON_SECRET ?? "",
+      },
+      body: JSON.stringify({ slug, triggeredBy: "manual" }),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return { ok: false, error: `HTTP ${res.status} ${text.slice(0, 200)}` };
+    }
+    const json = (await res.json()) as { mealsChanged?: number };
+    revalidatePath(`/${slug}`);
+    revalidatePath(`/${slug}/preferences`);
+    revalidatePath(`/${slug}/semana`, "layout");
+    return { ok: true, changes: json.mealsChanged ?? 0 };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
 }
 
 /**

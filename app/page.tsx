@@ -1,58 +1,70 @@
 import Link from "next/link";
-import { folioDate, isoWeek, pad } from "@/lib/dates";
-import { Plate, Perforated, RuleWithMark } from "@/app/components/carnet";
+import {
+  BigStat,
+  BracketLink,
+  Eyebrow,
+  HRule,
+  RoleDot,
+} from "@/app/components/ui";
+import HeroCoverLazy from "@/app/three/HeroCoverLazy";
 
 export default function HomePage() {
-  const now = new Date();
-  const issue = pad(isoWeek(now), 2);
-
   return (
     <main className="min-h-screen flex flex-col relative">
-      {/* Top reg-mark strip */}
-      <div className="px-6 pt-6 flex items-center justify-between text-[color:var(--color-ink-mute)] mono text-[10px] tracking-widest">
-        <span aria-hidden="true">⊕</span>
-        <span>CARNET MIKE·ANDY · {folioDate(now)} · ED. W{issue}</span>
-        <span aria-hidden="true">⊕</span>
+      <div className="px-6 pt-6 flex items-center justify-between mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
+        <span
+          className="font-extrabold lowercase tracking-tight text-base text-[color:var(--color-text)]"
+          style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
+        >
+          dovo
+        </span>
+        <span className="hidden sm:inline">Disciplina compartida</span>
+        <span>v1</span>
       </div>
 
-      {/* Cover */}
-      <section className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="relative w-full max-w-3xl">
-          <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-6">
-            CARNET I · IMPRENTA PRIVADA
-          </p>
+      <section className="flex-1 flex flex-col items-center justify-center px-6 pt-8 pb-12">
+        <div className="w-full max-w-5xl">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 items-center mb-16">
+            <div>
+              <Eyebrow className="mb-5">
+                <span>Para dos · personal · v1</span>
+              </Eyebrow>
+              <h1
+                className="font-extrabold lowercase tracking-tight leading-[0.85] text-[color:var(--color-text)]"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(3.5rem, 11vw, 7.5rem)",
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                disciplina,
+                <br />
+                pero en dúo.
+              </h1>
+              <p
+                className="mt-6 text-[color:var(--color-text-2)] leading-relaxed max-w-md"
+                style={{ fontSize: "1.05rem" }}
+              >
+                Tu plan semanal de comidas y entreno. Las rachas se ganan juntos.
+                Los premios son reales — y las consecuencias también.
+              </p>
+            </div>
 
-          <h1
-            className="font-extrabold leading-[0.85] tracking-tight"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(3.5rem, 12vw, 8rem)",
-            }}
-          >
-            <span className="text-[color:var(--color-plate-mike)]">Mike</span>
-            <span className="text-[color:var(--color-ink-mute)]">·</span>
-            <span className="text-[color:var(--color-plate-andy)]">Andy</span>
-          </h1>
-
-          {/* Epigraph — no subhead */}
-          <p
-            className="mt-6 max-w-md italic text-[color:var(--color-ink-soft)] leading-relaxed"
-            style={{ fontFamily: "var(--font-stamp)", fontSize: "1.1rem" }}
-          >
-            Cuadernillo de disciplina a dos tintas. Cyan para él, magenta para
-            ella; donde se sobreimprimen, hay lima.
-          </p>
-
-          <div className="my-12">
-            <Perforated thick />
+            <div className="w-full lg:w-[380px]">
+              <HeroCoverLazy />
+            </div>
           </div>
 
-          {/* Selector — two plates as the choice */}
-          <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-4">
-            REGISTRO — ¿QUIÉN ABRE LA PÁGINA?
-          </p>
+          <HRule />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          <div className="mt-12 mb-6 flex items-baseline justify-between">
+            <Eyebrow>Entrar como</Eyebrow>
+            <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)]">
+              tu sesión queda en este dispositivo
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 border-t border-[color:var(--color-divider-strong)]">
             <ProfileEntry
               href="/mike"
               who="mike"
@@ -60,7 +72,6 @@ export default function HomePage() {
               kcal={2400}
               protein={155}
               disciplines={["Gym", "Caminadora"]}
-              serial="PL-M / 24K"
             />
             <ProfileEntry
               href="/andy"
@@ -69,37 +80,23 @@ export default function HomePage() {
               kcal={1750}
               protein={115}
               disciplines={["Gym", "Ballet", "Pilates"]}
-              serial="PL-A / 17K"
             />
           </div>
 
-          {/* Overprint hint */}
-          <div className="mt-12 flex items-start gap-4">
-            <Plate who="both">Juntos</Plate>
-            <p className="text-xs text-[color:var(--color-ink-mute)] leading-relaxed max-w-md">
-              Cuando ambos cumplen el mismo día, se imprime el sobreimpreso —
-              lima. Es el bono compartido.
+          <div className="mt-8 flex items-center gap-6 flex-wrap">
+            <BracketLink href="/juntos">Vista compartida →</BracketLink>
+            <p className="text-xs text-[color:var(--color-text-3)] flex items-center gap-2">
+              <RoleDot who="both" />
+              <span>
+                Cuando ambos cumplen el mismo día se prende el bono compartido.
+              </span>
             </p>
           </div>
         </div>
       </section>
 
-      {/* Colophon */}
-      <footer className="px-6 py-8">
-        <RuleWithMark>colofón</RuleWithMark>
-        <p className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)] text-center mt-4 leading-relaxed">
-          IMPRESO EN MÉXICO · TIRADA DE DOS · NO PARA DISTRIBUCIÓN
-          <br />
-          <span className="text-[color:var(--color-ink-dim)] tracking-[0.16em] normal-case">
-            Sesión recordada en este dispositivo. Cambiar:{" "}
-            <Link
-              href="/"
-              className="text-[color:var(--color-overprint)] border-b border-[color:var(--color-overprint)]"
-            >
-              recargar carnet
-            </Link>
-          </span>
-        </p>
+      <footer className="px-6 py-6 mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center">
+        dovo · privado · no compartas el link
       </footer>
     </main>
   );
@@ -112,7 +109,6 @@ function ProfileEntry({
   kcal,
   protein,
   disciplines,
-  serial,
 }: {
   href: string;
   who: "mike" | "andy";
@@ -120,56 +116,46 @@ function ProfileEntry({
   kcal: number;
   protein: number;
   disciplines: string[];
-  serial: string;
 }) {
   const accent =
-    who === "mike" ? "var(--color-plate-mike)" : "var(--color-plate-andy)";
+    who === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
   return (
     <Link
       href={href}
-      className="group relative block py-10 px-6 border-t md:border-t-0 md:border-l md:first:border-l-0 border-[color:var(--color-rule-strong)] transition-colors hover:bg-[color:var(--color-paper)]"
+      className="group relative block py-10 px-2 md:px-6 border-b md:border-b-0 md:border-r md:last:border-r-0 border-[color:var(--color-divider-strong)] transition-colors hover:bg-[color:var(--color-surface-1)]"
     >
-      <div className="flex items-baseline justify-between mb-6">
-        <Plate who={who}>{name}</Plate>
-        <span className="mono text-[10px] tracking-widest text-[color:var(--color-ink-mute)]">
-          {serial}
+      <div className="flex items-center justify-between mb-5">
+        <Eyebrow>
+          <RoleDot who={who} />
+          <span style={{ color: accent }}>Soy {name.toLowerCase()}</span>
+        </Eyebrow>
+        <span className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)]">
+          {disciplines.length} disciplinas
         </span>
       </div>
 
       <p
-        className="font-extrabold tracking-tight leading-[0.82] mb-8 transition-transform group-hover:-translate-x-1"
+        className="font-extrabold lowercase tracking-tight leading-[0.82] mb-8 transition-transform group-hover:translate-x-1"
         style={{
           color: accent,
           fontFamily: "var(--font-display)",
-          fontSize: "clamp(3.5rem, 9vw, 5.5rem)",
+          fontSize: "clamp(3rem, 7vw, 4.5rem)",
+          letterSpacing: "-0.04em",
         }}
       >
         {name.toLowerCase()}
       </p>
 
-      <div className="space-y-0">
-        <div className="leader-row">
-          <span className="label">Kcal</span>
-          <span className="leader" aria-hidden="true" />
-          <span className="value tabular">{kcal}</span>
-        </div>
-        <div className="leader-row">
-          <span className="label">Proteína</span>
-          <span className="leader" aria-hidden="true" />
-          <span className="value tabular">{protein}g</span>
-        </div>
-        <div className="leader-row">
-          <span className="label">Disciplinas</span>
-          <span className="leader" aria-hidden="true" />
-          <span className="value">{disciplines.join(" · ")}</span>
-        </div>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+        <BigStat label="Kcal" value={kcal.toLocaleString("en-US")} />
+        <BigStat label="Proteína" value={protein} unit="g" />
       </div>
 
       <p
-        className="mt-8 mono text-[11px] tracking-[0.25em] uppercase flex items-center gap-2 transition-transform group-hover:translate-x-1"
+        className="mt-8 mono text-[11px] tracking-[0.22em] uppercase flex items-center gap-2 transition-colors group-hover:text-[color:var(--color-accent)]"
         style={{ color: accent }}
       >
-        Entrar al carnet
+        Entrar
         <span aria-hidden="true">→</span>
       </p>
     </Link>

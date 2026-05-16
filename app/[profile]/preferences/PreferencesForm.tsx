@@ -2,32 +2,38 @@
 
 import { useState, useTransition } from "react";
 import { savePreferences } from "./actions";
-import type { DietaryProfile, DietaryTag } from "@/lib/types";
+import type { DietaryProfile, DietaryTag, NotificationSettings } from "@/lib/types";
 
-const TAG_OPTIONS: { id: DietaryTag; label: string; emoji: string }[] = [
-  { id: "vegetarian",  label: "Vegetariana",   emoji: "🥗" },
-  { id: "vegan",       label: "Vegana",        emoji: "🌱" },
-  { id: "pescatarian", label: "Pescetariana",  emoji: "🐟" },
-  { id: "keto",        label: "Keto",          emoji: "🥑" },
-  { id: "paleo",       label: "Paleo",         emoji: "🍖" },
-  { id: "no-gluten",   label: "Sin gluten",    emoji: "🌾" },
-  { id: "no-dairy",    label: "Sin lácteos",   emoji: "🥛" },
-  { id: "no-eggs",     label: "Sin huevo",     emoji: "🥚" },
+const TAG_OPTIONS: { id: DietaryTag; label: string; glyph: string }[] = [
+  { id: "vegetarian",  label: "Vegetariana",   glyph: "🥗" },
+  { id: "vegan",       label: "Vegana",        glyph: "🌱" },
+  { id: "pescatarian", label: "Pescetariana",  glyph: "🐟" },
+  { id: "keto",        label: "Keto",          glyph: "🥑" },
+  { id: "paleo",       label: "Paleo",         glyph: "🍖" },
+  { id: "no-gluten",   label: "Sin gluten",    glyph: "🌾" },
+  { id: "no-dairy",    label: "Sin lácteos",   glyph: "🥛" },
+  { id: "no-eggs",     label: "Sin huevo",     glyph: "🥚" },
 ];
+
+const INPUT_CLASS = "input-bare";
+const INPUT_MONO = "input-bare input-mono";
 
 export default function PreferencesForm({
   slug,
   color,
   initial,
+  notifications,
 }: {
   slug: string;
   color: string;
   initial: DietaryProfile;
+  notifications: NotificationSettings;
 }) {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [status, setStatus] = useState<"idle" | "saved">("idle");
   const [isPending, startTransition] = useTransition();
   const [tags, setTags] = useState<DietaryTag[]>(initial.dietaryTags);
+  const [waOptIn, setWaOptIn] = useState<boolean>(notifications.whatsappOptIn);
 
   function toggleTag(t: DietaryTag) {
     setTags((curr) =>
@@ -36,7 +42,6 @@ export default function PreferencesForm({
   }
 
   function submit(form: FormData) {
-    // Re-inyecta tags (controlled state)
     form.delete("dietary_tags");
     for (const t of tags) form.append("dietary_tags", t);
 
@@ -53,9 +58,8 @@ export default function PreferencesForm({
   }
 
   return (
-    <form action={submit} className="space-y-6">
-      {/* CP */}
-      <Field label="Código postal" hint="Para precios reales de tu sucursal">
+    <form action={submit} className="space-y-8">
+      <Field label="Código postal" hint="Para precios reales en tu sucursal">
         <input
           type="text"
           name="postal_code"
@@ -64,13 +68,12 @@ export default function PreferencesForm({
           pattern="\d{5}"
           defaultValue={initial.postalCode ?? ""}
           placeholder="06600"
-          className="input w-32"
+          className={`${INPUT_MONO} max-w-[8rem]`}
         />
       </Field>
 
-      {/* Dietary tags */}
       <Field label="Tipo de dieta" hint="Marca todo lo que aplique">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
           {TAG_OPTIONS.map((t) => {
             const on = tags.includes(t.id);
             return (
@@ -78,15 +81,16 @@ export default function PreferencesForm({
                 key={t.id}
                 type="button"
                 onClick={() => toggleTag(t.id)}
-                className="rounded p-3 text-left transition border"
+                className="text-left transition border px-3 py-3"
                 style={{
-                  borderColor: on ? color : "var(--color-border)",
-                  background: on ? `${color}15` : "var(--color-card-2)",
+                  borderColor: on ? color : "var(--color-divider-strong)",
+                  background: on ? `${color}12` : "transparent",
                   color: on ? color : "var(--color-text)",
                 }}
+                aria-pressed={on}
               >
-                <p className="text-lg">{t.emoji}</p>
-                <p className="mono text-[10px] uppercase tracking-widest mt-1">
+                <p className="text-lg leading-none mb-1.5">{t.glyph}</p>
+                <p className="mono text-[10px] uppercase tracking-widest">
                   {t.label}
                 </p>
               </button>
@@ -101,7 +105,7 @@ export default function PreferencesForm({
           name="allergens"
           defaultValue={initial.allergens.join(", ")}
           placeholder="cacahuate, mariscos, ajonjolí"
-          className="input"
+          className={INPUT_CLASS}
         />
       </Field>
 
@@ -114,20 +118,17 @@ export default function PreferencesForm({
           name="disliked_ingredients"
           defaultValue={initial.dislikedIngredients.join(", ")}
           placeholder="cilantro, aceitunas, hongos"
-          className="input"
+          className={INPUT_CLASS}
         />
       </Field>
 
-      <Field
-        label="Ingredientes que AMAS"
-        hint="La AI los priorizará"
-      >
+      <Field label="Ingredientes que AMAS" hint="La AI los priorizará">
         <input
           type="text"
           name="liked_ingredients"
           defaultValue={initial.likedIngredients.join(", ")}
           placeholder="aguacate, tofu, limón"
-          className="input"
+          className={INPUT_CLASS}
         />
       </Field>
 
@@ -137,7 +138,7 @@ export default function PreferencesForm({
           name="disliked_textures"
           defaultValue={initial.dislikedTextures.join(", ")}
           placeholder="gomoso, crujiente"
-          className="input"
+          className={INPUT_CLASS}
         />
       </Field>
 
@@ -147,7 +148,7 @@ export default function PreferencesForm({
           name="max_meal_kcal"
           defaultValue={initial.maxMealKcal ?? ""}
           placeholder="700"
-          className="input w-32"
+          className={`${INPUT_MONO} max-w-[8rem]`}
         />
       </Field>
 
@@ -157,42 +158,102 @@ export default function PreferencesForm({
           defaultValue={initial.notesForAi ?? ""}
           placeholder="No me gusta cocinar más de 10 minutos. Prefiero microondas."
           rows={3}
-          className="input w-full"
+          className={`${INPUT_CLASS} resize-y`}
+          style={{ borderBottom: "1px solid var(--color-divider-strong)" }}
         />
       </Field>
 
+      {/* WhatsApp notifications */}
+      <div
+        className="surface p-5 space-y-4"
+        style={{ borderLeft: `2px solid ${color}` }}
+      >
+        <div className="flex items-baseline justify-between flex-wrap gap-2">
+          <div>
+            <p className="font-bold text-sm">Avisos por WhatsApp</p>
+            <p className="mono text-[10px] tracking-wider text-[color:var(--color-text-3)] mt-1">
+              Cuando la AI rediseñe tu plan, te llega un resumen
+            </p>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="whatsapp_opt_in"
+              checked={waOptIn}
+              onChange={(e) => setWaOptIn(e.target.checked)}
+              className="w-4 h-4"
+              style={{ accentColor: color }}
+            />
+            <span className="mono text-[10px] uppercase tracking-widest" style={{ color: waOptIn ? color : "var(--color-text-3)" }}>
+              {waOptIn ? "activado" : "apagado"}
+            </span>
+          </label>
+        </div>
+        <Field label="Teléfono E.164" hint="Con código país, sin espacios. Ej: 5215512345678">
+          <input
+            type="tel"
+            name="phone_e164"
+            defaultValue={notifications.phoneE164 ?? ""}
+            placeholder="5215512345678"
+            disabled={!waOptIn}
+            className={`${INPUT_MONO} disabled:opacity-40`}
+            inputMode="tel"
+          />
+        </Field>
+        {waOptIn && !notifications.phoneE164 && (
+          <p
+            className="italic text-xs text-[color:var(--color-text-3)] leading-relaxed"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            Importante: WhatsApp Cloud API solo envía texto libre dentro de 24h
+            de tu última respuesta. Manda un mensaje a tu app primero.
+          </p>
+        )}
+      </div>
+
       {/* Warnings */}
       {warnings.length > 0 && (
-        <div className="card p-4 border-l-2 border-[var(--color-orange)]">
-          <p className="mono text-[10px] uppercase tracking-widest text-[var(--color-orange)] mb-2">
-            Aviso: combinaciones contradictorias
+        <div
+          className="surface p-5"
+          style={{ borderLeft: "2px solid var(--color-warning)" }}
+        >
+          <p className="mono text-[10px] uppercase tracking-widest text-[color:var(--color-warning)] mb-3">
+            Aviso · combinaciones contradictorias
           </p>
           <ul className="space-y-1">
             {warnings.map((w, i) => (
-              <li key={i} className="text-sm">⚠️ {w}</li>
+              <li
+                key={i}
+                className="text-sm italic text-[color:var(--color-text-2)] leading-relaxed"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                · {w}
+              </li>
             ))}
           </ul>
           <input type="hidden" name="force_save" value="1" />
-          <p className="mono text-[10px] text-[var(--color-muted)] mt-2">
-            Da clic en guardar de nuevo para forzar.
+          <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mt-3">
+            Clic en guardar de nuevo para forzar.
           </p>
         </div>
       )}
 
       {/* Submit */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4 flex-wrap pt-2">
         <button
           type="submit"
           disabled={isPending}
-          className="px-5 py-2.5 font-bold rounded transition disabled:opacity-50"
-          style={{ background: color, color: "#000" }}
+          className="btn-ink disabled:opacity-50"
         >
-          {isPending ? "Guardando..." : "Guardar preferencias"}
+          {isPending ? "guardando..." : "Guardar declaración →"}
         </button>
         {status === "saved" && (
-          <p className="mono text-[10px] uppercase tracking-widest text-[var(--color-green)]">
-            ✓ Guardado · AI rediseñando tus comidas...
-          </p>
+          <span
+            className="mono text-[10px] tracking-widest uppercase"
+            style={{ color: "var(--color-success)" }}
+          >
+            ✓ guardado · AI rediseñando
+          </span>
         )}
       </div>
     </form>
@@ -210,10 +271,10 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block mb-2">
+      <label className="block mb-1">
         <p className="font-bold text-sm">{label}</p>
         {hint && (
-          <p className="mono text-[10px] text-[var(--color-muted)] mt-0.5">
+          <p className="mono text-[10px] tracking-wider text-[color:var(--color-text-3)] mt-0.5">
             {hint}
           </p>
         )}

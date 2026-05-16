@@ -1,14 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Space_Mono, Newsreader } from "next/font/google";
+import BackgroundWrapper from "@/app/components/BackgroundWrapper";
 import "./globals.css";
 
 /**
- * Self-host de fuentes vía next/font.
- * - Cero requests externos en runtime (todas las fuentes salen del mismo origen).
- * - `display: 'swap'` evita FOIT; texto visible al instante con fuente del sistema
- *   y se sustituye al cargar la real.
- * - Cada peso/ital declarado se prepara como subset latin para reducir bytes.
- * - Las CSS vars se inyectan en <html>; globals.css consume `var(--font-display)`.
+ * Self-host fuentes vía next/font.
+ * - Syne: display + body
+ * - Space Mono: numerics + labels mono
+ * - Newsreader (italic): para momentos literarios cuando se necesite
  */
 const syne = Syne({
   subsets: ["latin"],
@@ -26,21 +25,20 @@ const spaceMono = Space_Mono({
 
 const newsreader = Newsreader({
   subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: ["500"],
   style: ["italic"],
   variable: "--font-newsreader",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "dovo · carnet de dúo",
-  description:
-    "dovo · disciplina compartida a dos tintas para parejas, amigos y novios",
+  title: "dovo",
+  description: "Disciplina compartida para parejas. Tu plan semanal, sus rachas, sus recompensas reales.",
   robots: "noindex, nofollow",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e0d11",
+  themeColor: "#08080a",
   width: "device-width",
   initialScale: 1,
 };
@@ -55,7 +53,10 @@ export default function RootLayout({
       lang="es"
       className={`${syne.variable} ${spaceMono.variable} ${newsreader.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <BackgroundWrapper />
+        {children}
+      </body>
     </html>
   );
 }

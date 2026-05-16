@@ -2,25 +2,23 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
 import { getEffectiveMealsFor, getEffectiveDayMacros } from "@/lib/mealsServer";
+import { getMealsFor } from "@/lib/data/meals";
 import {
   exercisesVisibleFor,
   alternativeActivityFor,
 } from "@/lib/data/training";
 import { getDay, DAYS } from "@/lib/data/days";
-import { isValidDayKey, folioSerial } from "@/lib/dates";
+import { isValidDayKey } from "@/lib/dates";
 import CheckList from "@/app/components/CheckList";
 import ExerciseLogger from "@/app/components/ExerciseLogger";
 import {
-  Folio,
-  Plate,
-  Ticket,
-  TicketHead,
-  TicketBody,
-  TicketFoot,
-  Marginalia,
-  Perforated,
-  Stamp,
-} from "@/app/components/carnet";
+  BracketLink,
+  Eyebrow,
+  HRule,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
+import WeightPlateLazy from "@/app/three/WeightPlateLazy";
 
 export default async function DayPage({
   params,
@@ -34,8 +32,8 @@ export default async function DayPage({
 
   const day = getDay(dayParam)!;
   const [meals, macros] = await Promise.all([
-    getEffectiveMealsFor(profile.id, day.key),
-    getEffectiveDayMacros(profile.id, day.key),
+    getEffectiveMealsFor(profile.id, day.key).catch(() => getMealsFor(profile.id, day.key)),
+    getEffectiveDayMacros(profile.id, day.key).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
   ]);
   const exercises = exercisesVisibleFor(profile.id, day.key);
   const altActivity = alternativeActivityFor(profile.id, day.key);
@@ -46,8 +44,11 @@ export default async function DayPage({
 
   const accent =
     profile.id === "mike"
-      ? "var(--color-plate-mike)"
-      : "var(--color-plate-andy)";
+      ? "var(--color-role-mike)"
+      : "var(--color-role-andy)";
+
+  // Volume hint para WeightPlate: total reps * average sets * something. Stub.
+  const volumeHint = exercises.reduce((acc, e) => acc + (e.sets ?? 3) * 8, 0);
 
   const mealItems = meals.map((m) => ({
     id: m.id,
@@ -55,48 +56,36 @@ export default async function DayPage({
       <div>
         <p
           className="mono text-[10px] tracking-widest mb-1"
-          style={{ color: "var(--color-overprint)" }}
+          style={{ color: "var(--color-accent)" }}
         >
           {m.time} · {m.slotName}
         </p>
-        <p className="font-bold text-sm leading-tight">
-          {m.name}
-          {m.replanned && (
-            <span className="ml-2 align-middle">
-              <Stamp sm>AI · rediseñada</Stamp>
-            </span>
-          )}
-        </p>
-        <p className="text-xs text-[color:var(--color-ink-mute)] mt-1 leading-relaxed">
+        <p className="font-bold text-sm leading-tight">{m.name}</p>
+        <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
           {m.ingredients}
         </p>
-        {m.replanned && m.replanReason && (
-          <p className="mono text-[10px] text-[color:var(--color-ink-mute)] mt-1 italic">
-            {m.replanReason}
-          </p>
-        )}
         {m.prepInstructions && (
-          <div
-            className="mt-3 pl-3 border-l-2 dropcap text-xs text-[color:var(--color-ink-soft)] leading-relaxed"
+          <p
+            className="mt-3 pl-3 border-l-2 text-xs italic text-[color:var(--color-text-2)] leading-relaxed"
             style={{
-              borderColor: "var(--color-overprint)",
-              fontFamily: "var(--font-stamp)",
-              fontSize: "0.85rem",
+              borderColor: "var(--color-accent)",
+              fontFamily: "var(--font-serif)",
+              fontSize: "0.9rem",
             }}
           >
             <span
               className="mono not-italic text-[10px] block mb-1 tracking-widest"
-              style={{ color: "var(--color-overprint)" }}
+              style={{ color: "var(--color-accent)", fontFamily: "var(--font-mono)" }}
             >
               PREP
             </span>
             {m.prepInstructions}
-          </div>
+          </p>
         )}
       </div>
     ),
     meta: (
-      <p className="mono text-[10px] tabular text-right text-[color:var(--color-ink-mute)]">
+      <p className="mono text-[10px] tabular text-right text-[color:var(--color-text-3)]">
         {m.kcal} kcal
         <br />
         {m.proteinG}g P
@@ -105,186 +94,165 @@ export default async function DayPage({
   }));
 
   return (
-    <div className="space-y-10">
-      <Folio
-        serial={folioSerial(profile.id, day.key)}
-        title="PARTE COMPLETO"
-        right={
-          <span className="flex items-center gap-2">
-            {prevDay && (
-              <Link
-                href={`/${profile.id}/semana/${prevDay.key}`}
-                className="hover:text-[color:var(--color-ink)] transition"
-              >
-                ← {prevDay.label.slice(0, 3).toUpperCase()}
-              </Link>
-            )}
-            {prevDay && nextDay && <span>·</span>}
-            {nextDay && (
-              <Link
-                href={`/${profile.id}/semana/${nextDay.key}`}
-                className="hover:text-[color:var(--color-ink)] transition"
-              >
-                {nextDay.label.slice(0, 3).toUpperCase()} →
-              </Link>
-            )}
-          </span>
-        }
-      />
-
-      {/* Day hero */}
-      <section>
-        <div className="flex items-baseline justify-between flex-wrap gap-3">
-          <div>
-            <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-2">
-              {profile.displayName.toUpperCase()} · {day.key.toUpperCase()}
-            </p>
-            <h1
-              className="font-extrabold tracking-tight leading-[0.85]"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(3rem, 8vw, 5rem)",
-                color: accent,
-              }}
-            >
-              {day.label.toLowerCase()}
-            </h1>
-          </div>
-          <span
-            className="mono text-[11px] tracking-[0.25em] uppercase"
-            style={{ color: "var(--color-overprint)" }}
+    <div className="space-y-12 pb-20">
+      {/* Hero — day name + optional 3D plate */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 items-center pt-4">
+        <div>
+          <Eyebrow className="mb-3">
+            <RoleDot who={profile.id} />
+            <span>{profile.displayName.toLowerCase()}</span>
+            <span className="text-[color:var(--color-text-4)]">·</span>
+            <span>{day.key}</span>
+          </Eyebrow>
+          <h1
+            className="font-extrabold lowercase tracking-tight leading-[0.82]"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(3.5rem, 11vw, 6.5rem)",
+              color: "var(--color-text)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            {day.label.toLowerCase()}
+          </h1>
+          <p
+            className="mt-4 mono text-xs tracking-[0.22em] uppercase"
+            style={{ color: "var(--color-accent)" }}
           >
             {day.focus}
-          </span>
-        </div>
-        {day.notes && (
-          <p
-            className="mt-4 italic text-[color:var(--color-ink-soft)] leading-relaxed max-w-2xl"
-            style={{ fontFamily: "var(--font-stamp)", fontSize: "1.05rem" }}
-          >
-            {day.notes}
           </p>
+          {day.notes && (
+            <p className="mt-4 text-[color:var(--color-text-2)] leading-relaxed max-w-xl">
+              {day.notes}
+            </p>
+          )}
+          <div className="mt-6 flex items-center gap-3 flex-wrap">
+            {prevDay && (
+              <BracketLink href={`/${profile.id}/semana/${prevDay.key}`}>
+                ← {prevDay.label.slice(0, 3).toLowerCase()}
+              </BracketLink>
+            )}
+            {nextDay && (
+              <BracketLink href={`/${profile.id}/semana/${nextDay.key}`}>
+                {nextDay.label.slice(0, 3).toLowerCase()} →
+              </BracketLink>
+            )}
+          </div>
+        </div>
+
+        {/* Show plate only on training days; else show empty space */}
+        {exercises.length > 0 && !altActivity && (
+          <div className="w-full">
+            <WeightPlateLazy weightKg={Math.max(10, Math.min(50, volumeHint / 8))} />
+          </div>
         )}
       </section>
 
-      <Perforated />
+      <HRule />
 
-      {/* Meals */}
-      <Ticket>
-        <TicketHead
-          eyebrow={`PARTE NUTRICIONAL · ${meals.length} momentos`}
-          title={
-            <span>
-              {macros.kcal} kcal
-              <span className="text-[color:var(--color-ink-mute)] font-normal">
-                {" · "}
-              </span>
-              {macros.proteinG}g P
-            </span>
-          }
-          right={<Plate who={profile.id}>{profile.displayName}</Plate>}
-        />
-        <CheckList
-          storageKey={`meals-${profile.id}-${day.key}`}
-          items={mealItems}
-          accent={accent}
-        />
-        <TicketFoot
-          serial={`NUTR·${profile.id.toUpperCase()}·${day.key.toUpperCase()}`}
-        />
-      </Ticket>
+      {/* Nutrition */}
+      <section>
+        <SectionLabel right={`${macros.kcal} kcal · ${macros.proteinG}g P`}>
+          Nutrición · {meals.length} momentos
+        </SectionLabel>
+        <div className="mt-2">
+          <CheckList
+            storageKey={`meals-${profile.id}-${day.key}`}
+            items={mealItems}
+            accent={accent}
+          />
+        </div>
+      </section>
 
-      {/* Training or alt or rest */}
+      <HRule />
+
+      {/* Training / Activity / Rest */}
       {altActivity ? (
-        <Ticket>
-          <TicketHead
-            eyebrow="PARTE DE ACTIVIDAD"
-            title={altActivity}
-            right={<Plate who={profile.id}>{profile.displayName}</Plate>}
-          />
-          <TicketBody>
+        <section>
+          <SectionLabel right={day.trainingDuration}>
+            Actividad · {altActivity}
+          </SectionLabel>
+          <div className="mt-6 space-y-5">
             <p
-              className="italic text-[color:var(--color-ink-soft)] leading-relaxed"
-              style={{ fontFamily: "var(--font-stamp)", fontSize: "1.05rem" }}
+              className="italic text-[color:var(--color-text-2)] leading-relaxed"
+              style={{ fontFamily: "var(--font-serif)", fontSize: "1.1rem" }}
             >
-              Hoy te toca tu disciplina alterna. Acabas y la registras.
+              Hoy te toca {altActivity.toLowerCase()}. Termina la sesión y
+              regístrala en{" "}
+              <Link
+                href={`/${profile.id}/actividad`}
+                className="border-b border-[color:var(--color-accent)] text-[color:var(--color-text)]"
+              >
+                actividad
+              </Link>
+              .
             </p>
-            <Link
-              href={`/${profile.id}/actividad`}
-              className="btn-ink mt-5 inline-flex"
-            >
-              Loguear actividad →
-            </Link>
-          </TicketBody>
-          <TicketFoot
-            serial={`ACT·${profile.id.toUpperCase()}·${day.key.toUpperCase()}`}
-          />
-        </Ticket>
+            <BracketLink href={`/${profile.id}/actividad`}>
+              Loguear ahora →
+            </BracketLink>
+          </div>
+        </section>
       ) : exercises.length > 0 ? (
-        <Ticket>
-          <TicketHead
-            eyebrow={
-              day.trainingTogether
-                ? "PARTE DE ENTRENO · entrenan juntos"
-                : "PARTE DE ENTRENO"
-            }
-            title={day.trainingTitle ?? "Entreno"}
-            right={
-              <div className="flex flex-col items-end gap-1">
-                {day.trainingTogether ? (
-                  <Plate who="both">Juntos</Plate>
-                ) : (
-                  <Plate who={profile.id}>{profile.displayName}</Plate>
-                )}
-                {day.trainingDuration && (
-                  <span className="mono text-[10px] tabular text-[color:var(--color-ink-mute)]">
-                    {day.trainingDuration}
-                  </span>
-                )}
-              </div>
-            }
-          />
-          <TicketBody className="space-y-4">
-            {day.warmup && (
-              <Marginalia tag="CALENTAMIENTO">{day.warmup}</Marginalia>
+        <section>
+          <SectionLabel
+            right={day.trainingDuration ?? ""}
+          >
+            Entrenamiento · {day.trainingTitle ?? "Sesión"}
+            {day.trainingTogether && (
+              <span className="ml-3 mono text-[10px] tracking-widest" style={{ color: "var(--color-accent)" }}>
+                · juntos
+              </span>
             )}
-            <div className="space-y-2">
-              {exercises.map((ex) => (
-                <ExerciseLogger
-                  key={ex.id}
-                  storageKey={`ex-${profile.id}-${day.key}-${ex.id}`}
-                  exercise={ex}
-                  profileId={profile.id}
-                  accent={accent}
-                />
-              ))}
+          </SectionLabel>
+          {day.warmup && (
+            <div className="mt-4 pl-3 border-l-2 border-[color:var(--color-success)]">
+              <p className="mono text-[10px] tracking-widest text-[color:var(--color-success)] mb-1">
+                CALENTAMIENTO
+              </p>
+              <p className="text-xs text-[color:var(--color-text-2)] leading-relaxed">
+                {day.warmup}
+              </p>
             </div>
-            {day.cardio && (
-              <Marginalia tag="CARDIO FINAL">{day.cardio}</Marginalia>
-            )}
-          </TicketBody>
-          <TicketFoot
-            serial={`ENTR·${profile.id.toUpperCase()}·${day.key.toUpperCase()}`}
-          />
-        </Ticket>
+          )}
+          <div className="mt-4 space-y-2">
+            {exercises.map((ex) => (
+              <ExerciseLogger
+                key={ex.id}
+                storageKey={`ex-${profile.id}-${day.key}-${ex.id}`}
+                exercise={ex}
+                profileId={profile.id}
+                accent={accent}
+              />
+            ))}
+          </div>
+          {day.cardio && (
+            <div className="mt-4 pl-3 border-l-2" style={{ borderColor: "var(--color-role-mike)" }}>
+              <p className="mono text-[10px] tracking-widest mb-1" style={{ color: "var(--color-role-mike)" }}>
+                CARDIO FINAL
+              </p>
+              <p className="text-xs text-[color:var(--color-text-2)] leading-relaxed">
+                {day.cardio}
+              </p>
+            </div>
+          )}
+        </section>
       ) : (
         <section className="py-16 text-center">
-          <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-4">
-            PARTE DE REPOSO
-          </p>
+          <Eyebrow className="justify-center mb-5">Descanso</Eyebrow>
           <h2
-            className="font-extrabold tracking-tight leading-[0.85]"
+            className="font-extrabold lowercase tracking-tight leading-[0.82]"
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(4rem, 14vw, 10rem)",
-              color: "var(--color-ink-soft)",
+              fontSize: "clamp(4rem, 14vw, 8rem)",
+              color: "var(--color-text-2)",
+              letterSpacing: "-0.04em",
             }}
           >
             descanso
           </h2>
           <p
-            className="mt-6 italic text-[color:var(--color-ink-mute)] leading-relaxed max-w-md mx-auto"
-            style={{ fontFamily: "var(--font-stamp)", fontSize: "1.05rem" }}
+            className="mt-6 italic text-[color:var(--color-text-3)] leading-relaxed max-w-md mx-auto"
+            style={{ fontFamily: "var(--font-serif)", fontSize: "1.05rem" }}
           >
             Caminata, foam roller, estiramientos. El músculo no crece en el gym
             — crece aquí.

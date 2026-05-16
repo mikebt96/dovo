@@ -1,26 +1,25 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProfile } from "@/lib/profile";
-import { getMealsFor } from "@/lib/data/meals";
 import { getEffectiveMealsFor, getEffectiveDayMacros } from "@/lib/mealsServer";
 import {
   exercisesVisibleFor,
   alternativeActivityFor,
 } from "@/lib/data/training";
 import { DAYS, getDay } from "@/lib/data/days";
-import { todayKey, folioSerial } from "@/lib/dates";
+import { todayKey, dateLong } from "@/lib/dates";
+import { getMealsFor } from "@/lib/data/meals";
 import {
-  Folio,
-  Plate,
-  Ticket,
-  TicketHead,
-  TicketBody,
-  TicketFoot,
-  LeaderRow,
-  Perforated,
-  BlockProgress,
-  Marginalia,
-} from "@/app/components/carnet";
+  BigStat,
+  BracketLink,
+  Eyebrow,
+  HRule,
+  MetricBar,
+  MetricRing,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
+import ActivityRingLazy from "@/app/three/ActivityRingLazy";
 
 export default async function ProfileDashboard({
   params,
@@ -34,8 +33,8 @@ export default async function ProfileDashboard({
   const today = todayKey();
   const day = getDay(today)!;
   const [meals, macros] = await Promise.all([
-    getEffectiveMealsFor(profile.id, today),
-    getEffectiveDayMacros(profile.id, today),
+    getEffectiveMealsFor(profile.id, today).catch(() => getMealsFor(profile.id, today)),
+    getEffectiveDayMacros(profile.id, today).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
   ]);
   const exercises = exercisesVisibleFor(profile.id, today);
   const altActivity = alternativeActivityFor(profile.id, today);
@@ -49,357 +48,291 @@ export default async function ProfileDashboard({
     longestStreak: 0,
     coins: 0,
     partnerStreak: 0,
+    mealsDone: 0,
+    workoutDone: 0,
   };
 
   const accent =
-    profile.id === "mike"
-      ? "var(--color-plate-mike)"
-      : "var(--color-plate-andy)";
-  const partnerAccent =
-    profile.partnerId === "mike"
-      ? "var(--color-plate-mike)"
-      : "var(--color-plate-andy)";
+    profile.id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
+  const accentHex = profile.id === "mike" ? "#6bf5ff" : "#ff6b9d";
+
+  const completion = meals.length === 0 ? 0 : stats.mealsDone / meals.length;
 
   return (
-    <div className="space-y-10">
-      <Folio serial={folioSerial(profile.id, today)} title="PARTE DIARIO" />
-
-      {/* Day hero — no card, just type */}
-      <section>
-        <div className="flex items-baseline justify-between flex-wrap gap-3">
-          <div>
-            <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-2">
-              HOY · {day.key.toUpperCase()}
-            </p>
-            <h1
-              className="font-extrabold tracking-tight leading-[0.85]"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(3rem, 8vw, 5.5rem)",
-                color: accent,
-              }}
-            >
-              {day.label.toLowerCase()}
-            </h1>
-          </div>
-          <span
-            className="mono text-[11px] tracking-[0.25em] uppercase"
-            style={{ color: "var(--color-overprint)" }}
+    <div className="space-y-14 pb-20">
+      {/* Hero — big day name + 3D activity ring */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 items-center pt-6">
+        <div>
+          <Eyebrow className="mb-4">
+            <RoleDot who={profile.id} />
+            <span>{profile.displayName.toLowerCase()}</span>
+            <span className="text-[color:var(--color-text-4)]">·</span>
+            <span>{dateLong()}</span>
+          </Eyebrow>
+          <h1
+            className="font-extrabold lowercase tracking-tight leading-[0.82]"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(3.5rem, 11vw, 7rem)",
+              color: "var(--color-text)",
+              letterSpacing: "-0.04em",
+            }}
+          >
+            {day.label.toLowerCase()}
+          </h1>
+          <p
+            className="mt-4 mono text-xs tracking-[0.22em] uppercase"
+            style={{ color: "var(--color-accent)" }}
           >
             {day.focus}
-          </span>
-        </div>
-        {day.notes && (
-          <p
-            className="mt-4 italic text-[color:var(--color-ink-soft)] leading-relaxed max-w-2xl"
-            style={{ fontFamily: "var(--font-stamp)", fontSize: "1.05rem" }}
-          >
-            {day.notes}
           </p>
-        )}
-      </section>
+          {day.notes && (
+            <p className="mt-5 text-[color:var(--color-text-2)] leading-relaxed max-w-xl">
+              {day.notes}
+            </p>
+          )}
 
-      <Perforated />
-
-      {/* Stat ledger */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-        <LeaderRow
-          label="Racha"
-          value={`${stats.streak} días`}
-          accent={accent}
-        />
-        <LeaderRow
-          label={`Racha ${profile.partnerId}`}
-          value={`${stats.partnerStreak} días`}
-          accent={partnerAccent}
-        />
-        <LeaderRow
-          label={`Nivel · ${stats.xp}/${stats.nextLevelXp} XP`}
-          value={`Lv ${stats.level}`}
-          accent="var(--color-overprint)"
-        />
-        <LeaderRow
-          label="Coins"
-          value={String(stats.coins)}
-          accent="var(--color-warn)"
-        />
-      </section>
-
-      <Perforated />
-
-      {/* Two columns: meals + training */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Meals */}
-        <Ticket>
-          <TicketHead
-            eyebrow={`PARTE NUTRICIONAL · ${meals.length} momentos`}
-            title={`${macros.kcal} kcal · ${macros.proteinG}g P`}
-            right={<Plate who={profile.id}>{profile.displayName}</Plate>}
-          />
-          <TicketBody className="space-y-0 py-0">
-            {meals.length === 0 ? (
-              <p className="px-1 py-6 text-sm text-[color:var(--color-ink-mute)]">
-                Sin comidas planeadas hoy.
-              </p>
-            ) : (
-              <ul className="divide-y divide-[color:var(--color-rule)]">
-                {meals.map((meal) => (
-                  <li key={meal.id} className="py-3">
-                    <div className="flex items-baseline justify-between gap-3 mb-1">
-                      <p
-                        className="mono text-[10px] tracking-widest"
-                        style={{ color: "var(--color-overprint)" }}
-                      >
-                        {meal.time} · {meal.slotName}
-                      </p>
-                      <p className="mono text-[10px] tabular text-[color:var(--color-ink-mute)]">
-                        {meal.kcal} kcal · {meal.proteinG}g P
-                      </p>
-                    </div>
-                    <p className="font-bold text-sm leading-tight">
-                      {meal.name}
-                    </p>
-                    <p className="text-xs text-[color:var(--color-ink-mute)] mt-1 leading-relaxed">
-                      {meal.ingredients}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {!altActivity && exercises.length > 0 && (
+              <BracketLink href={`/${profile.id}/semana/${today}`}>
+                Comenzar entreno →
+              </BracketLink>
             )}
-          </TicketBody>
-          <TicketFoot
-            serial={`NUTR·${profile.id.toUpperCase()}·${today.toUpperCase()}`}
-            action={
-              <Link
-                href={`/${profile.id}/semana/${today}`}
-                className="hover:text-[color:var(--color-ink)] transition"
-                style={{ color: accent }}
-              >
-                marcar comidas →
-              </Link>
-            }
+            {altActivity && (
+              <BracketLink href={`/${profile.id}/actividad`}>
+                Loguear {altActivity.toLowerCase()} →
+              </BracketLink>
+            )}
+            <BracketLink href={`/${profile.id}/semana/${today}`}>
+              Marcar comidas →
+            </BracketLink>
+          </div>
+        </div>
+
+        <div className="w-full">
+          <ActivityRingLazy
+            progress={completion === 0 ? 0.05 : completion}
+            color={completion >= 1 ? "#c8f135" : accentHex}
           />
-        </Ticket>
+          <p className="mono text-[10px] tracking-[0.22em] uppercase text-[color:var(--color-text-3)] text-center mt-2">
+            {stats.mealsDone}/{meals.length} comidas · {stats.workoutDone === 1 ? "entreno hecho" : "entreno pendiente"}
+          </p>
+        </div>
+      </section>
+
+      <HRule />
+
+      {/* BigStats row */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
+        <BigStat label="Racha" value={stats.streak} unit="d" sub={`récord ${stats.longestStreak}d`} accent={accent} />
+        <BigStat label={`Racha ${profile.partnerId}`} value={stats.partnerStreak} unit="d" sub="pareja" />
+        <BigStat
+          label={`Nivel · ${stats.xp}/${stats.nextLevelXp} XP`}
+          value={`Lv${stats.level}`}
+          sub="progreso"
+          accent="var(--color-accent)"
+        />
+        <BigStat label="Coins" value={stats.coins} sub="para canjear" accent="var(--color-warning)" />
+      </section>
+
+      <HRule />
+
+      {/* Two columns — meals + training */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* Meals */}
+        <section>
+          <SectionLabel right={`${macros.kcal} kcal · ${macros.proteinG}g P`}>
+            Nutrición · {meals.length} momentos
+          </SectionLabel>
+          <ul className="mt-2">
+            {meals.length === 0 ? (
+              <li className="py-6 text-sm text-[color:var(--color-text-3)]">
+                Sin comidas planeadas hoy.
+              </li>
+            ) : (
+              meals.slice(0, 4).map((meal) => (
+                <li key={meal.id} className="py-4 border-b border-[color:var(--color-divider)] last:border-b-0">
+                  <div className="flex items-baseline justify-between gap-3 mb-1">
+                    <p
+                      className="mono text-[10px] tracking-widest"
+                      style={{ color: "var(--color-accent)" }}
+                    >
+                      {meal.time} · {meal.slotName}
+                    </p>
+                    <p className="mono text-[10px] tabular text-[color:var(--color-text-3)]">
+                      {meal.kcal} kcal · {meal.proteinG}g P
+                    </p>
+                  </div>
+                  <p className="font-bold text-sm leading-tight">{meal.name}</p>
+                  <p className="text-xs text-[color:var(--color-text-3)] mt-1 leading-relaxed">
+                    {meal.ingredients}
+                  </p>
+                </li>
+              ))
+            )}
+          </ul>
+          {meals.length > 0 && (
+            <div className="mt-5">
+              <BracketLink href={`/${profile.id}/semana/${today}`}>
+                Marcar comidas →
+              </BracketLink>
+            </div>
+          )}
+        </section>
 
         {/* Training */}
-        <Ticket>
-          <TicketHead
-            eyebrow={
-              day.trainingTogether
-                ? "PARTE DE ENTRENO · juntos"
-                : altActivity
-                ? "PARTE DE ACTIVIDAD"
-                : "PARTE DE ENTRENO"
-            }
-            title={altActivity ?? day.trainingTitle ?? "Descanso"}
-            right={
-              <div className="flex flex-col items-end gap-1">
-                {day.trainingTogether ? (
-                  <Plate who="both">Juntos</Plate>
-                ) : altActivity ? (
-                  <Plate who={profile.id}>{profile.displayName}</Plate>
-                ) : (
-                  <Plate who={profile.id}>{profile.displayName}</Plate>
-                )}
-                {day.trainingDuration && (
-                  <span className="mono text-[10px] text-[color:var(--color-ink-mute)]">
-                    {day.trainingDuration}
-                  </span>
-                )}
-              </div>
-            }
-          />
-          <TicketBody className="space-y-3">
+        <section>
+          <SectionLabel
+            right={day.trainingDuration ?? (altActivity ? "actividad" : "descanso")}
+          >
+            Entrenamiento · {altActivity ?? day.trainingTitle ?? "Descanso"}
+          </SectionLabel>
+          <div className="mt-2 space-y-3">
             {altActivity ? (
-              <p
-                className="text-sm leading-relaxed"
-                style={{ fontFamily: "var(--font-stamp)" }}
-              >
+              <p className="text-sm leading-relaxed text-[color:var(--color-text-2)] py-4">
                 Hoy haces{" "}
-                <strong style={{ color: accent, fontStyle: "italic" }}>
+                <span style={{ color: accent }} className="font-bold">
                   {altActivity}
-                </strong>
-                . Lo logueas en la sección de actividad.
+                </span>
+                . Termina y regístrala.
               </p>
             ) : exercises.length === 0 ? (
-              <p className="text-sm text-[color:var(--color-ink-mute)]">
-                Descanso activo. Caminata, foam roller, estiramientos.
+              <p className="text-sm text-[color:var(--color-text-3)] py-4">
+                Descanso activo: caminata, foam roller, estiramientos.
               </p>
             ) : (
-              <>
-                {day.warmup && (
-                  <Marginalia tag="CALENTAMIENTO">{day.warmup}</Marginalia>
-                )}
-                <ul className="space-y-2">
-                  {exercises.slice(0, 4).map((ex) => {
-                    const sugWeight =
-                      profile.id === "mike" ? ex.weightMike : ex.weightAndy;
-                    return (
-                      <li
-                        key={ex.id}
-                        className="border border-[color:var(--color-rule)] bg-[color:var(--color-paper-2)] px-3 py-2.5"
-                      >
-                        <div className="flex items-start justify-between gap-2 mb-0.5">
-                          <p className="font-bold text-sm leading-tight">
-                            {ex.name}
-                            {ex.starred && (
-                              <span
-                                className="ml-1.5"
-                                style={{ color: "var(--color-overprint)" }}
-                              >
-                                ★
-                              </span>
-                            )}
-                          </p>
-                          <span
-                            className="mono text-[10px] tabular whitespace-nowrap"
-                            style={{ color: "var(--color-overprint)" }}
-                          >
-                            {ex.sets} × {ex.repsRange}
-                          </span>
-                        </div>
-                        <p className="text-xs text-[color:var(--color-ink-mute)] leading-relaxed">
-                          {ex.description}
+              <ul className="space-y-2">
+                {exercises.slice(0, 4).map((ex) => {
+                  const sugWeight =
+                    profile.id === "mike" ? ex.weightMike : ex.weightAndy;
+                  return (
+                    <li
+                      key={ex.id}
+                      className="border-b border-[color:var(--color-divider)] py-3"
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <p className="font-bold text-sm leading-tight">
+                          {ex.name}
+                          {ex.starred && (
+                            <span
+                              className="ml-1.5"
+                              style={{ color: "var(--color-accent)" }}
+                            >
+                              ★
+                            </span>
+                          )}
                         </p>
-                        {sugWeight && (
-                          <span
-                            className="mono text-[10px] tabular mt-1.5 inline-block"
-                            style={{ color: accent }}
-                          >
-                            peso → {sugWeight}
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-                {exercises.length > 4 && (
-                  <p className="mono text-[10px] text-[color:var(--color-ink-mute)] text-center pt-2">
-                    + {exercises.length - 4} ejercicios más en el parte completo
-                  </p>
-                )}
-              </>
+                        <span
+                          className="mono text-[11px] tabular whitespace-nowrap"
+                          style={{ color: "var(--color-accent)" }}
+                        >
+                          {ex.sets} × {ex.repsRange}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[color:var(--color-text-3)] leading-relaxed">
+                        {ex.description}
+                      </p>
+                      {sugWeight && (
+                        <span
+                          className="mono text-[10px] tabular mt-1.5 inline-block"
+                          style={{ color: accent }}
+                        >
+                          peso → {sugWeight}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             )}
-          </TicketBody>
-          <TicketFoot
-            serial={`ENTR·${profile.id.toUpperCase()}·${today.toUpperCase()}`}
-            action={
-              (exercises.length > 0 || altActivity) && (
-                <Link
-                  href={
-                    altActivity
-                      ? `/${profile.id}/actividad`
-                      : `/${profile.id}/semana/${today}`
-                  }
-                  className="hover:text-[color:var(--color-ink)] transition"
-                  style={{ color: accent }}
-                >
-                  {altActivity ? "loguear actividad →" : "loguear pesos →"}
-                </Link>
-              )
-            }
-          />
-        </Ticket>
+            {exercises.length > 4 && (
+              <p className="mono text-[10px] text-[color:var(--color-text-3)] text-center pt-2">
+                + {exercises.length - 4} ejercicios más
+              </p>
+            )}
+          </div>
+          {(exercises.length > 0 || altActivity) && (
+            <div className="mt-5">
+              <BracketLink
+                href={
+                  altActivity
+                    ? `/${profile.id}/actividad`
+                    : `/${profile.id}/semana/${today}`
+                }
+              >
+                {altActivity ? "Loguear actividad →" : "Loguear pesos →"}
+              </BracketLink>
+            </div>
+          )}
+        </section>
       </div>
 
-      <Perforated />
+      <HRule />
 
       {/* Quick passes */}
       <section>
-        <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-4">
-          PASES RÁPIDOS
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 border-l border-t border-[color:var(--color-rule-strong)]">
-          <QuickPass
-            href={`/${profile.id}/super`}
-            glyph="◫"
-            label="Súper"
-            sub="lista por persona"
-          />
-          <QuickPass
-            href={`/${profile.id}/prep`}
-            glyph="⌗"
-            label="Prep dom"
-            sub="40 min"
-          />
-          <QuickPass
-            href={`/${profile.id}/tienda`}
-            glyph="◇"
-            label="Tienda"
-            sub="canjea coins"
-          />
-          <QuickPass
-            href={`/${profile.id}/pareja`}
-            glyph="⊛"
-            label="Pareja"
-            sub="streaks · deudas"
-          />
+        <SectionLabel>Accesos directos</SectionLabel>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          <QuickPass href={`/${profile.id}/super`} label="Compras" sub="lista filtrada" />
+          <QuickPass href={`/${profile.id}/prep`} label="Domingo" sub="40 min prep" />
+          <QuickPass href={`/${profile.id}/tienda`} label="Recompensas" sub="canjear coins" />
+          <QuickPass href={`/${profile.id}/pareja`} label="Pareja" sub="rachas · deudas" />
         </div>
       </section>
 
-      {/* Week strip */}
+      <HRule />
+
+      {/* Week strip with rings */}
       <section>
-        <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-4">
-          SEMANA — VISTA RÁPIDA
-        </p>
-        <ul className="grid grid-cols-7 gap-2">
+        <SectionLabel>Semana — vista rápida</SectionLabel>
+        <ul className="grid grid-cols-7 gap-2 mt-4">
           {DAYS.map((d) => {
             const isToday = d.key === today;
-            const isAltDay =
-              profile.id === "andy" &&
-              (d.key === "mar" || d.key === "jue" || d.key === "sab");
             const dayMeals = getMealsFor(profile.id, d.key).length;
+            const dayEx = exercisesVisibleFor(profile.id, d.key).length;
             return (
-              <Link
-                key={d.key}
-                href={`/${profile.id}/semana/${d.key}`}
-                className={`group flex flex-col items-stretch ticket-flat px-2 py-3 transition-colors ${
-                  isToday
-                    ? "bg-[color:var(--color-paper-2)]"
-                    : "hover:bg-[color:var(--color-paper)]"
-                }`}
-                style={
-                  isToday
-                    ? { borderColor: accent }
-                    : undefined
-                }
-              >
-                <p
-                  className="mono text-[10px] tracking-widest text-center"
-                  style={{
-                    color: isToday ? accent : "var(--color-ink-mute)",
-                  }}
+              <li key={d.key}>
+                <Link
+                  href={`/${profile.id}/semana/${d.key}`}
+                  className="group flex flex-col items-center gap-2 py-4 transition-colors hover:bg-[color:var(--color-surface-1)]"
+                  style={isToday ? { background: "var(--color-surface-1)" } : undefined}
                 >
-                  {d.key}
-                </p>
-                <p className="text-center font-bold text-[11px] mt-1 text-[color:var(--color-ink-soft)] truncate">
-                  {d.hasTraining
-                    ? d.trainingTogether
-                      ? "⊛"
-                      : isAltDay
-                      ? "🩰"
-                      : "⊕"
-                    : "◌"}
-                </p>
-                <p className="mono text-[9px] text-center text-[color:var(--color-ink-dim)] mt-1 tabular">
-                  {dayMeals}m
-                </p>
-              </Link>
+                  <p
+                    className="mono text-[10px] tracking-widest"
+                    style={{ color: isToday ? accent : "var(--color-text-3)" }}
+                  >
+                    {d.key}
+                  </p>
+                  <MetricRing
+                    value={0}
+                    max={dayMeals + (dayEx > 0 ? 1 : 0)}
+                    size={36}
+                    stroke={3}
+                    accent={isToday ? accent : "var(--color-text-4)"}
+                  />
+                  <p className="mono text-[9px] tabular text-[color:var(--color-text-4)]">
+                    {dayMeals}m
+                  </p>
+                </Link>
+              </li>
             );
           })}
         </ul>
       </section>
 
-      {/* Block progress for current streak */}
-      <section className="pt-4">
-        <p className="mono text-[10px] tracking-[0.3em] text-[color:var(--color-ink-mute)] mb-2">
-          PAIR STREAK
-        </p>
-        <BlockProgress
-          value={Math.min(stats.streak, 21)}
-          max={21}
-          label="hasta bono de 21 días"
-        />
+      <HRule />
+
+      {/* Pair streak bar */}
+      <section>
+        <SectionLabel right={`próximo bono en ${Math.max(0, 21 - Math.min(stats.streak, stats.partnerStreak))} días`}>
+          Pair streak
+        </SectionLabel>
+        <div className="mt-4 space-y-3">
+          <p className="font-extrabold text-3xl tabular" style={{ color: "var(--color-accent)" }}>
+            {Math.min(stats.streak, stats.partnerStreak)} <span className="text-base font-normal text-[color:var(--color-text-3)]">días seguidos</span>
+          </p>
+          <MetricBar value={Math.min(stats.streak, stats.partnerStreak)} max={21} />
+        </div>
       </section>
     </div>
   );
@@ -407,30 +340,22 @@ export default async function ProfileDashboard({
 
 function QuickPass({
   href,
-  glyph,
   label,
   sub,
 }: {
   href: string;
-  glyph: string;
   label: string;
   sub: string;
 }) {
   return (
     <Link
       href={href}
-      className="group block px-4 py-5 border-r border-b border-[color:var(--color-rule-strong)] hover:bg-[color:var(--color-paper)] transition"
+      className="group block px-4 py-5 border border-[color:var(--color-divider)] hover:border-[color:var(--color-text-3)] transition"
     >
-      <span
-        className="text-2xl text-[color:var(--color-ink-mute)] group-hover:text-[color:var(--color-overprint)] transition"
-        aria-hidden="true"
-      >
-        {glyph}
-      </span>
-      <p className="font-bold text-sm mt-2 group-hover:text-[color:var(--color-overprint)] transition">
+      <p className="font-bold text-base group-hover:text-[color:var(--color-accent)] transition">
         {label}
       </p>
-      <p className="mono text-[10px] text-[color:var(--color-ink-mute)] mt-0.5">
+      <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-3)] mt-1">
         {sub}
       </p>
     </Link>

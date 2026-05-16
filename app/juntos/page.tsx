@@ -1,51 +1,82 @@
 import Link from "next/link";
 import { PROFILES } from "@/lib/profile";
 import { getEffectiveMealsFor, getEffectiveDayMacros } from "@/lib/mealsServer";
+import { getMealsFor } from "@/lib/data/meals";
 import {
   exercisesVisibleFor,
   alternativeActivityFor,
 } from "@/lib/data/training";
 import { getDay, DAYS } from "@/lib/data/days";
-import { todayKey } from "@/lib/dates";
+import { todayKey, dateLong } from "@/lib/dates";
 import type { ProfileId } from "@/lib/types";
+import {
+  BigStat,
+  BracketLink,
+  Eyebrow,
+  HRule,
+  MetricBar,
+  MetricRing,
+  RoleDot,
+  SectionLabel,
+} from "@/app/components/ui";
+import PairRingsLazy from "@/app/three/PairRingsLazy";
 
-export default function JuntosPage() {
+// `force-dynamic` evita prerender estático: esta página lee Supabase por
+// request (via mealsServer/getEnv), que requiere env vars no presentes en
+// build time. Sin esto el build falla al intentar SSG /juntos.
+export const dynamic = "force-dynamic";
+
+export default async function JuntosPage() {
   const today = todayKey();
   const day = getDay(today)!;
 
-  // Stub stats — Phase 3 wired to DB
+  // Stub stats — fase 3 desde DB
   const mikeStats = { level: 1, xp: 0, streak: 0, coins: 0, longest: 0 };
   const andyStats = { level: 1, xp: 0, streak: 0, coins: 0, longest: 0 };
   const pairStreak = Math.min(mikeStats.streak, andyStats.streak);
 
   return (
-    <div className="min-h-screen">
-      {/* Top bar */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-card)] sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/juntos" className="flex items-center gap-3">
-            <div className="flex -space-x-1">
-              <div className="w-3 h-3 rounded-full bg-[var(--color-mike)] ring-1 ring-[var(--color-bg)]" />
-              <div className="w-3 h-3 rounded-full bg-[var(--color-andy)] ring-1 ring-[var(--color-bg)]" />
-            </div>
-            <span className="font-extrabold tracking-tight">Juntos</span>
+    <div className="min-h-screen flex flex-col">
+      {/* Top glass bar */}
+      <header className="sticky top-0 z-20 glass">
+        <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+          <Link
+            href="/juntos"
+            className="flex items-center gap-2.5"
+          >
+            <RoleDot who="both" />
+            <span
+              className="font-extrabold lowercase text-[color:var(--color-text)]"
+              style={{
+                fontFamily: "var(--font-display)",
+                letterSpacing: "-0.02em",
+                fontSize: "1.05rem",
+              }}
+            >
+              dovo
+            </span>
+            <span className="mono text-[10px] tracking-widest text-[color:var(--color-accent)] hidden sm:inline">
+              · juntos
+            </span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5 mono text-[10px] tracking-widest text-[color:var(--color-text-3)]">
             <Link
               href="/mike"
-              className="mono text-[10px] text-[var(--color-mike)] hover:underline"
+              className="hover:opacity-80 transition"
+              style={{ color: "var(--color-role-mike)" }}
             >
               ver mike
             </Link>
             <Link
               href="/andy"
-              className="mono text-[10px] text-[var(--color-andy)] hover:underline"
+              className="hover:opacity-80 transition"
+              style={{ color: "var(--color-role-andy)" }}
             >
               ver andy
             </Link>
             <Link
               href="/"
-              className="mono text-[10px] text-[var(--color-muted)] hover:text-[var(--color-text)]"
+              className="hover:text-[color:var(--color-text)] transition"
             >
               cambiar
             </Link>
@@ -53,333 +84,306 @@ export default function JuntosPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* Day banner */}
-        <section className="card p-6 relative overflow-hidden">
-          <div
-            className="absolute top-0 left-0 right-0 h-0.5"
-            style={{
-              background:
-                "linear-gradient(90deg, var(--color-mike) 0%, var(--color-andy) 100%)",
-            }}
-          />
-          <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-            Hoy
-          </p>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-1">
-            {day.label}
-          </h1>
-          <p className="mono text-xs text-[var(--color-accent)] uppercase tracking-widest">
-            {day.focus}
-          </p>
+      <main className="flex-1 max-w-6xl mx-auto px-5 py-10 space-y-14 w-full">
+        {/* Hero — pair rings 3D + pair streak number */}
+        <section className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 items-center pt-4">
+          <div>
+            <Eyebrow className="mb-3">
+              <RoleDot who="both" />
+              <span>Vista compartida</span>
+              <span className="text-[color:var(--color-text-4)]">·</span>
+              <span>{dateLong()}</span>
+            </Eyebrow>
+            <h1
+              className="font-extrabold lowercase tracking-tight leading-[0.82] flex items-baseline gap-3 md:gap-5 flex-wrap"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(3rem, 9vw, 5.5rem)",
+                letterSpacing: "-0.04em",
+              }}
+            >
+              <span style={{ color: "var(--color-role-mike)" }}>mike</span>
+              <span className="text-[color:var(--color-text-4)] text-2xl md:text-4xl">+</span>
+              <span style={{ color: "var(--color-role-andy)" }}>andy</span>
+            </h1>
+            <p
+              className="mt-5 text-[color:var(--color-text-2)] leading-relaxed max-w-md"
+              style={{ fontSize: "1.05rem" }}
+            >
+              Hoy es {day.label.toLowerCase()} — {day.focus.toLowerCase()}.
+              {" "}{day.trainingTogether ? "Entrenan juntos." : "Caminos separados hoy."}
+            </p>
+          </div>
+
+          <div className="w-full">
+            <PairRingsLazy
+              height="380px"
+              mikeProgress={Math.min(1, (mikeStats.streak || 0.5) / 21)}
+              andyProgress={Math.min(1, (andyStats.streak || 0.5) / 21)}
+              pairStreak={pairStreak}
+            />
+          </div>
         </section>
 
-        {/* PAIR STREAK — el centro de gravedad */}
-        <section
-          className="card p-6 text-center relative overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(107,245,255,0.04) 0%, rgba(255,107,157,0.04) 100%)",
-          }}
-        >
-          <p className="mono text-[10px] text-[var(--color-muted)] mb-2 uppercase tracking-widest">
-            Pair Streak · ambos cumpliendo
-          </p>
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ background: "var(--color-mike)" }}
-            />
-            <p className="text-7xl font-extrabold tracking-tight">
+        <HRule />
+
+        {/* Pair streak BigStat */}
+        <section className="py-4">
+          <Eyebrow className="mb-4">Ambos cumpliendo</Eyebrow>
+          <div className="flex items-baseline gap-6 flex-wrap">
+            <p
+              className="font-extrabold tabular tracking-tight leading-none"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(5rem, 16vw, 10rem)",
+                color: "var(--color-accent)",
+                letterSpacing: "-0.05em",
+              }}
+            >
               {pairStreak}
             </p>
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ background: "var(--color-andy)" }}
-            />
-          </div>
-          <p className="mono text-[10px] text-[var(--color-muted)] mb-4">
-            días seguidos · próximo bono a los{" "}
-            {pairStreak < 7 ? 7 : pairStreak < 14 ? 14 : pairStreak < 30 ? 30 : 90}
-          </p>
-          <div className="grid grid-cols-3 gap-3 text-left mt-5">
-            <Milestone
-              label="7 días"
-              reward="2× XP toda la semana"
-              hit={pairStreak >= 7}
-            />
-            <Milestone
-              label="14 días"
-              reward="Sorpresa random gratis"
-              hit={pairStreak >= 14}
-            />
-            <Milestone
-              label="30 días"
-              reward="Premio pareja gratis"
-              hit={pairStreak >= 30}
-            />
-          </div>
-        </section>
-
-        {/* Side-by-side stat panels */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <PersonPanel id="mike" stats={mikeStats} otherStreak={andyStats.streak} />
-          <PersonPanel id="andy" stats={andyStats} otherStreak={mikeStats.streak} />
-        </section>
-
-        {/* XP race this week */}
-        <section className="card p-5">
-          <header className="mb-4">
-            <p className="mono text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-1">
-              XP race · esta semana
-            </p>
-            <h2 className="font-extrabold text-lg">Quien gana mejor cumple</h2>
-          </header>
-          <XPBars mike={mikeStats.xp} andy={andyStats.xp} />
-        </section>
-
-        {/* Deudas pendientes */}
-        <section className="card overflow-hidden">
-          <header className="px-5 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
-            <div>
-              <p className="mono text-[10px] text-[var(--color-muted)]">
-                Deudas activas
-              </p>
-              <h2 className="font-extrabold text-lg">Cuentas claras</h2>
-            </div>
-            <p className="mono text-[10px] text-[var(--color-green)]">CLEAN</p>
-          </header>
-          <div className="px-5 py-6 text-center">
-            <p className="text-3xl mb-2">🤝</p>
-            <p className="text-sm text-[var(--color-muted)]">
-              Sin deudas pendientes. Mantengan el streak y siga así.
+            <p className="mono text-xs tracking-[0.22em] uppercase text-[color:var(--color-text-3)]">
+              días seguidos
+              <br />
+              <span className="text-[color:var(--color-text-4)] normal-case lowercase tracking-normal">
+                próximo bono en {Math.max(0, 21 - pairStreak)} días
+              </span>
             </p>
           </div>
+          <div className="mt-5 max-w-2xl">
+            <MetricBar value={pairStreak} max={21} />
+          </div>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Milestone days={7}  reward="2× XP toda la semana"     pairStreak={pairStreak} />
+            <Milestone days={14} reward="Sorpresa random gratis"   pairStreak={pairStreak} />
+            <Milestone days={30} reward="Premio del dúo gratis"    pairStreak={pairStreak} />
+          </div>
         </section>
 
-        {/* Today's plan side by side */}
+        <HRule />
+
+        {/* Side-by-side BigStats */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <PersonBlock
+            who="mike"
+            stats={mikeStats}
+            otherStreak={andyStats.streak}
+          />
+          <PersonBlock
+            who="andy"
+            stats={andyStats}
+            otherStreak={mikeStats.streak}
+          />
+        </section>
+
+        <HRule />
+
+        {/* XP race */}
         <section>
-          <header className="mb-3">
-            <p className="mono text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-1">
-              Plan de hoy · juntos
+          <SectionLabel right="esta semana">Race XP</SectionLabel>
+          <div className="mt-6 space-y-6">
+            <XPBar who="mike" name="Mike" value={mikeStats.xp} max={Math.max(mikeStats.xp, andyStats.xp, 100)} />
+            <XPBar who="andy" name="Andy" value={andyStats.xp} max={Math.max(mikeStats.xp, andyStats.xp, 100)} />
+          </div>
+        </section>
+
+        <HRule />
+
+        {/* Pending debts */}
+        <section>
+          <SectionLabel right="al día">Deudas pendientes</SectionLabel>
+          <div className="mt-6 py-8 text-center">
+            <p
+              className="font-extrabold lowercase tracking-tight leading-none"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                color: "var(--color-success)",
+                letterSpacing: "-0.04em",
+              }}
+            >
+              limpio.
             </p>
-            <h2 className="font-extrabold text-xl tracking-tight">
-              {day.trainingTogether ? "Entrenamos juntos" : "Caminos separados hoy"}
-            </h2>
-          </header>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <p
+              className="mt-3 italic text-[color:var(--color-text-3)] leading-relaxed max-w-md mx-auto"
+              style={{ fontFamily: "var(--font-serif)", fontSize: "1rem" }}
+            >
+              Cuando uno del dúo rompa racha, aquí aparece lo que le debe al
+              otro. Pago en especie — consensual, finito.
+            </p>
+          </div>
+        </section>
+
+        <HRule />
+
+        {/* Today plan side by side */}
+        <section>
+          <SectionLabel right={day.label}>Plan de hoy</SectionLabel>
+          <h2
+            className="mt-4 font-extrabold lowercase tracking-tight leading-[0.88]"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(1.8rem, 4vw, 2.5rem)",
+              letterSpacing: "-0.03em",
+            }}
+          >
+            {day.trainingTogether ? "entrenan juntos." : "caminos separados hoy."}
+          </h2>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <DayCard id="mike" />
             <DayCard id="andy" />
           </div>
         </section>
 
-        {/* Week overview shared */}
-        <section className="card p-5">
-          <p className="mono text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-3">
-            Semana compartida
-          </p>
-          <ul className="grid grid-cols-7 gap-1 text-center">
-            {DAYS.map((d) => (
-              <li
-                key={d.key}
-                className={`rounded py-3 text-xs ${
-                  d.key === today
-                    ? "bg-[var(--color-card-2)] ring-1 ring-[var(--color-accent)]"
-                    : "bg-[var(--color-card-2)]"
-                }`}
-              >
-                <p className="mono text-[10px] uppercase text-[var(--color-muted)]">
-                  {d.key}
-                </p>
-                <p className="text-xs mt-0.5">
-                  {d.hasTraining
-                    ? d.trainingTogether
-                      ? "💪💪"
-                      : "💪🩰"
-                    : "🛌"}
-                </p>
-              </li>
-            ))}
+        <HRule />
+
+        {/* Week glyph row */}
+        <section>
+          <SectionLabel>Semana compartida</SectionLabel>
+          <ul className="grid grid-cols-7 gap-2 mt-5">
+            {DAYS.map((d) => {
+              const isToday = d.key === today;
+              return (
+                <li
+                  key={d.key}
+                  className="border border-[color:var(--color-divider)] py-4 px-1 text-center"
+                  style={
+                    isToday
+                      ? {
+                          borderColor: "var(--color-accent)",
+                          background: "rgba(200,241,53,0.05)",
+                        }
+                      : undefined
+                  }
+                >
+                  <p className="mono text-[10px] tracking-widest uppercase text-[color:var(--color-text-3)]">
+                    {d.key}
+                  </p>
+                  <p
+                    className="text-base mt-2 leading-none"
+                    style={{
+                      color: d.hasTraining
+                        ? d.trainingTogether
+                          ? "var(--color-accent)"
+                          : "var(--color-text-2)"
+                        : "var(--color-text-4)",
+                    }}
+                  >
+                    {d.hasTraining ? (d.trainingTogether ? "●" : "○") : "·"}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
-          <p className="mono text-[10px] text-[var(--color-muted)] text-center mt-3 leading-relaxed">
-            💪💪 = juntos · 💪🩰 = Mike gym + Andy ballet · 🛌 = descanso
+          <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center mt-4 leading-relaxed">
+            ● juntos · ○ separados · · descanso
           </p>
         </section>
       </main>
 
-      <footer className="border-t border-[var(--color-border)] py-4">
-        <p className="mono text-[10px] text-[var(--color-dim)] text-center">
-          Mike & Andy · vista compartida · v1
+      <footer className="border-t border-[color:var(--color-divider)] py-6">
+        <p className="mono text-[10px] tracking-widest text-[color:var(--color-text-4)] text-center">
+          dovo · vista compartida · privado
         </p>
       </footer>
     </div>
   );
 }
 
-// ============ Components ============
-
-function PersonPanel({
-  id,
+function PersonBlock({
+  who,
   stats,
   otherStreak,
 }: {
-  id: ProfileId;
+  who: ProfileId;
   stats: { level: number; xp: number; streak: number; coins: number; longest: number };
   otherStreak: number;
 }) {
-  const p = PROFILES[id];
-  const winning = stats.streak > otherStreak;
-  const losing = stats.streak < otherStreak;
+  const p = PROFILES[who];
+  const accent = who === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
+  const winning = stats.streak > otherStreak && stats.streak > 0;
+
   return (
-    <div className="card p-5 relative overflow-hidden">
-      <div
-        className="absolute top-0 left-0 right-0 h-0.5"
-        style={{ background: p.color }}
-      />
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="mono text-[10px] text-[var(--color-muted)] mb-0.5">
-            {id === "mike" ? "⚡" : "🌸"} {p.displayName}
-          </p>
-          <h3
-            className="font-extrabold text-2xl tracking-tight"
-            style={{ color: p.color }}
-          >
-            Lv {stats.level}
-          </h3>
-        </div>
+    <div>
+      <Eyebrow className="mb-4 justify-between">
+        <span className="flex items-center gap-1.5">
+          <RoleDot who={who} />
+          <span style={{ color: accent }}>{p.displayName}</span>
+        </span>
         {winning && (
-          <span
-            className="chip"
-            style={{ color: "var(--color-accent)", borderColor: "var(--color-accent)" }}
-          >
-            🔥 LIDERA
-          </span>
+          <span style={{ color: "var(--color-accent)" }}>★ lidera</span>
         )}
-        {losing && (
-          <span className="chip" style={{ color: "var(--color-muted)" }}>
-            atrás
-          </span>
-        )}
+      </Eyebrow>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+        <BigStat label="Racha" value={stats.streak} unit="d" sub={`récord ${stats.longest}d`} accent={accent} />
+        <BigStat label={`Nivel · ${stats.xp} XP`} value={`Lv${stats.level}`} sub="progreso" accent="var(--color-accent)" />
       </div>
-      <div className="grid grid-cols-3 gap-2">
-        <Stat label="Streak" value={`${stats.streak}d`} color={p.color} />
-        <Stat label="XP" value={stats.xp.toString()} color="var(--color-accent)" />
-        <Stat label="Coins" value={stats.coins.toString()} color="var(--color-orange)" />
-      </div>
-      <Link
-        href={`/${id}`}
-        className="block mt-4 mono text-[10px] uppercase tracking-widest text-center py-2 rounded border border-[var(--color-border)] hover:border-current transition"
-        style={{ color: p.color }}
-      >
-        ir a su dashboard →
-      </Link>
     </div>
   );
 }
 
-function Stat({
-  label,
+function XPBar({
+  who,
+  name,
   value,
-  color,
+  max,
 }: {
-  label: string;
-  value: string;
-  color: string;
+  who: ProfileId;
+  name: string;
+  value: number;
+  max: number;
 }) {
+  const color = who === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
   return (
     <div>
-      <p className="mono text-[10px] text-[var(--color-muted)] mb-0.5">
-        {label}
-      </p>
-      <p
-        className="font-extrabold text-lg tracking-tight"
-        style={{ color }}
-      >
-        {value}
-      </p>
+      <div className="flex items-baseline justify-between mb-2">
+        <p className="mono text-[10px] tracking-[0.22em] uppercase flex items-center gap-2" style={{ color }}>
+          <RoleDot who={who} />
+          {name}
+        </p>
+        <p className="mono text-xs tabular" style={{ color }}>
+          {value} XP
+        </p>
+      </div>
+      <MetricBar value={value} max={max} accent={color} />
     </div>
   );
 }
 
 function Milestone({
-  label,
+  days,
   reward,
-  hit,
+  pairStreak,
 }: {
-  label: string;
+  days: number;
   reward: string;
-  hit: boolean;
+  pairStreak: number;
 }) {
+  const hit = pairStreak >= days;
   return (
-    <div
-      className={`card p-3 ${hit ? "ring-1 ring-[var(--color-green)]" : ""}`}
-    >
-      <p
-        className="mono text-[10px] uppercase tracking-widest"
-        style={{
-          color: hit ? "var(--color-green)" : "var(--color-accent)",
-        }}
+    <div className="surface p-5 flex items-start gap-4">
+      <MetricRing
+        value={pairStreak}
+        max={days}
+        size={56}
+        stroke={3}
+        accent={hit ? "var(--color-success)" : "var(--color-accent)"}
       >
-        {hit ? "✓ " : ""}
-        {label}
-      </p>
-      <p className="text-xs mt-1">{reward}</p>
-    </div>
-  );
-}
-
-function XPBars({ mike, andy }: { mike: number; andy: number }) {
-  const max = Math.max(mike, andy, 100);
-  return (
-    <div className="space-y-3">
-      <Bar
-        name="Mike"
-        value={mike}
-        max={max}
-        color="var(--color-mike)"
-        emoji="⚡"
-      />
-      <Bar
-        name="Andy"
-        value={andy}
-        max={max}
-        color="var(--color-andy)"
-        emoji="🌸"
-      />
-    </div>
-  );
-}
-
-function Bar({
-  name,
-  value,
-  max,
-  color,
-  emoji,
-}: {
-  name: string;
-  value: number;
-  max: number;
-  color: string;
-  emoji: string;
-}) {
-  const pct = (value / max) * 100;
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <p className="text-sm font-bold" style={{ color }}>
-          {emoji} {name}
+        <span
+          className="mono text-[10px] tabular tracking-widest"
+          style={{ color: hit ? "var(--color-success)" : "var(--color-accent)" }}
+        >
+          {hit ? "✓" : `${Math.round((pairStreak / days) * 100)}%`}
+        </span>
+      </MetricRing>
+      <div className="flex-1 min-w-0">
+        <p
+          className="mono text-[10px] tracking-[0.22em] uppercase"
+          style={{ color: hit ? "var(--color-success)" : "var(--color-accent)" }}
+        >
+          {days} días
         </p>
-        <p className="mono text-xs" style={{ color }}>
-          {value} XP
-        </p>
-      </div>
-      <div className="h-2 bg-[var(--color-card-2)] rounded overflow-hidden">
-        <div
-          className="h-full rounded transition-all"
-          style={{ width: `${pct}%`, background: color }}
-        />
+        <p className="text-sm font-bold mt-1 leading-snug">{reward}</p>
       </div>
     </div>
   );
@@ -390,58 +394,43 @@ async function DayCard({ id }: { id: ProfileId }) {
   const day = getDay(today)!;
   const p = PROFILES[id];
   const [meals, macros] = await Promise.all([
-    getEffectiveMealsFor(id, today),
-    getEffectiveDayMacros(id, today),
+    getEffectiveMealsFor(id, today).catch(() => getMealsFor(id, today)),
+    getEffectiveDayMacros(id, today).catch(() => ({ kcal: 0, proteinG: 0, mealCount: 0 })),
   ]);
   const exercises = exercisesVisibleFor(id, today);
   const alt = alternativeActivityFor(id, today);
+  const accent = id === "mike" ? "var(--color-role-mike)" : "var(--color-role-andy)";
 
   return (
-    <div className="card p-5 relative overflow-hidden">
-      <div
-        className="absolute top-0 left-0 right-0 h-0.5"
-        style={{ background: p.color }}
-      />
-      <p className="mono text-[10px] text-[var(--color-muted)] mb-1">
-        {id === "mike" ? "⚡" : "🌸"} {p.displayName}
-      </p>
-      <h3
-        className="font-extrabold text-xl tracking-tight mb-3"
-        style={{ color: p.color }}
-      >
-        {meals.length} comidas · {alt ? alt : exercises.length > 0 ? `${exercises.length} ejercicios` : "descanso"}
-      </h3>
-      <div className="space-y-1.5 mb-3 mono text-[10px] text-[var(--color-muted)]">
-        <Row label="Target" value={`${macros.kcal} kcal · ${macros.proteinG}g P`} />
-        <Row
-          label="Hoy"
-          value={
-            alt
-              ? alt
-              : exercises.length > 0
-              ? day.trainingTogether
-                ? "Gym juntos"
-                : "Gym solo"
-              : "Descanso"
-          }
-        />
+    <div className="surface p-6 space-y-4">
+      <div className="flex items-baseline justify-between flex-wrap gap-2">
+        <Eyebrow>
+          <RoleDot who={id} />
+          <span style={{ color: accent }}>{p.displayName.toLowerCase()}</span>
+        </Eyebrow>
+        <span className="mono text-[10px] tabular text-[color:var(--color-text-3)]">
+          {macros.kcal} kcal · {macros.proteinG}g P
+        </span>
       </div>
-      <Link
-        href={`/${id}/semana/${today}`}
-        className="mono text-[10px] uppercase tracking-widest block text-center py-2 rounded border border-[var(--color-border)] hover:border-current transition"
-        style={{ color: p.color }}
-      >
-        ver detalle →
-      </Link>
-    </div>
-  );
-}
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span>{label}</span>
-      <span className="text-[var(--color-text)]">{value}</span>
+      <div>
+        <p className="font-extrabold lowercase tracking-tight text-2xl leading-tight" style={{ fontFamily: "var(--font-display)", color: "var(--color-text)" }}>
+          {meals.length} comidas
+        </p>
+        <p className="mono text-xs tracking-widest mt-1" style={{ color: accent }}>
+          {alt
+            ? alt.toLowerCase()
+            : exercises.length > 0
+            ? day.trainingTogether
+              ? "gym juntos"
+              : "gym solo"
+            : "descanso"}
+        </p>
+      </div>
+
+      <BracketLink href={`/${id}/semana/${today}`}>
+        Ver detalle →
+      </BracketLink>
     </div>
   );
 }
