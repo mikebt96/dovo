@@ -3,8 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.SUPABASE_LOCAL_URL ?? "http://127.0.0.1:54321";
 const key = process.env.SUPABASE_LOCAL_SERVICE_KEY ?? "";
-const admin = createClient(url, key);
-const core = createClient(url, key, { db: { schema: "core" as any } });
+const skip = !key;
+
+const admin = skip ? (null as any) : createClient(url, key);
+const core = skip
+  ? (null as any)
+  : createClient(url, key, { db: { schema: "core" as any } });
 
 async function createTestUser(suffix: string): Promise<{ id: string; email: string }> {
   const email = `t${suffix}-${Date.now()}@dovo.app`;
@@ -19,7 +23,7 @@ async function createTestUser(suffix: string): Promise<{ id: string; email: stri
   return { id, email };
 }
 
-describe("tratos flow", () => {
+describe.skipIf(skip)("tratos flow", () => {
   it("crea trato pendiente con partner_email + invite_token", async () => {
     const creator = await createTestUser("c");
 
