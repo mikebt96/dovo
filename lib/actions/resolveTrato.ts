@@ -10,6 +10,13 @@ import {
 import { dispatchEmail } from "@/lib/email";
 import { closedEmail } from "@/lib/email/templates/closed";
 import { appUrl } from "@/lib/utils/url";
+import { dispatchPulseEvent } from "@/lib/pulse";
+import {
+  categorizeGoal,
+  bucketDuracion,
+  bucketTasaCumplimiento,
+  dowFromDate,
+} from "@/lib/utils/pulse-buckets";
 
 type TratoResultado =
   | "ambos_cumplieron"
@@ -35,7 +42,7 @@ export async function resolveTrato(
     .schema("core")
     .from("tratos")
     .select(
-      "id, creator_id, partner_id, frecuencia, duracion_dias, accepted_at, estado, goal",
+      "id, creator_id, partner_id, frecuencia, duracion_dias, accepted_at, estado, goal, sponsored_id, created_at",
     )
     .eq("id", tratoId)
     .maybeSingle();
@@ -143,6 +150,20 @@ export async function resolveTrato(
       }),
     });
   }
+
+  // Pulse: 1 evento por trato cerrado. Fire-and-forget. La edge function
+  // verifica opt-out de AMBOS miembros antes de insertar — si cualquiera
+  // tiene pulse_opt_out=true, omite. Sin PII (ni user_id ni trato_id).
+  const promedio = Math.round((creatorCount + partnerCount) / 2);
+  dispatchPulseEvent({
+    creator_id: trato.creator_id as string,
+    partner_id: trato.partner_id as string,
+    categoria: categorizeGoal(trato.goal as string),
+    duracion_dias_bucket: bucketDuracion(trato.duracion_dias as number),
+    tasa_cumplimiento_bucket: bucketTasaCumplimiento(promedio, required),
+    es_patrocinado: trato.sponsored_id != null,
+    dow_creacion: dowFromDate(trato.created_at as string),
+  });
 
   revalidatePath(`/trato/${tratoId}`);
   revalidatePath("/");
