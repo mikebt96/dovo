@@ -9,7 +9,11 @@ const PUBLIC_PATHS = [
 ];
 
 function isPublic(pathname: string) {
-  return PUBLIC_PATHS.includes(pathname) || pathname.startsWith("/_next");
+  return (
+    PUBLIC_PATHS.includes(pathname)
+    || pathname.startsWith("/_next")
+    || pathname.startsWith("/invite/")
+  );
 }
 
 export async function middleware(request: NextRequest) {
