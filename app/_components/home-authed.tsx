@@ -44,9 +44,14 @@ export default async function HomeAuthed() {
     <main className="min-h-svh px-6 py-12 bg-papel text-ink max-w-2xl mx-auto">
       <header className="flex justify-between items-end mb-12 pb-6 border-b border-ink">
         <h1 className="syne text-3xl lowercase">tus tratos</h1>
-        <span className="text-xs uppercase tracking-widest opacity-60 mono">
-          {user.email}
-        </span>
+        <nav className="flex gap-4 text-xs uppercase tracking-widest opacity-60">
+          <Link href="/perfil" className="hover:opacity-100">
+            perfil
+          </Link>
+          <Link href="/ajustes" className="hover:opacity-100">
+            ajustes
+          </Link>
+        </nav>
       </header>
 
       {cards.length === 0 ? (
