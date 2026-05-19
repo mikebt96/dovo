@@ -13,8 +13,8 @@ El responsable del tratamiento de sus datos personales es:
 
 - **Nombre / razón social**: TODO: Miguel Ángel Butrón López, persona física con actividad empresarial (o nombre de la sociedad si se constituye antes del launch).
 - **Domicilio**: TODO: domicilio fiscal en Ciudad de México, México.
-- **Correo de contacto en materia de privacidad**: `privacidad@dovo.app` (TODO: configurar buzón).
-- **Producto**: dovo, plataforma de commitment device para dúos, accesible en `https://dovo.app` y `https://dovo.mx`.
+- **Correo de contacto en materia de privacidad**: `privacidad@dovofit.com` (TODO: configurar buzón).
+- **Producto**: dovo, plataforma de commitment device para dúos enfocada en actividad física compartida, accesible en `https://dovofit.com`.
 
 ## 2. Datos personales que se recaban
 
@@ -91,7 +91,7 @@ Usted tiene derecho en todo momento a:
 - **Cancelar** sus datos cuando considere que no se están tratando conforme a la ley.
 - **Oponerse** al tratamiento para finalidades específicas.
 
-Para ejercer estos derechos, envíe una solicitud al correo `privacidad@dovo.app` indicando: (i) su nombre y correo de la cuenta, (ii) el derecho que ejerce, (iii) la finalidad o tratamiento al que se refiere. dovo responderá en un plazo máximo de 20 días hábiles conforme a la LFPDPPP.
+Para ejercer estos derechos, envíe una solicitud al correo `privacidad@dovofit.com` indicando: (i) su nombre y correo de la cuenta, (ii) el derecho que ejerce, (iii) la finalidad o tratamiento al que se refiere. dovo responderá en un plazo máximo de 20 días hábiles conforme a la LFPDPPP.
 
 Adicionalmente, dovo ofrece desde la propia aplicación:
 - **Edición de datos** desde Ajustes → tu cuenta.
@@ -112,11 +112,11 @@ dovo aplica medidas razonables de seguridad administrativas, físicas y técnica
 
 ## 10. Cambios al aviso de privacidad
 
-dovo puede modificar este aviso para reflejar cambios legales o de producto. Cualquier modificación se publicará en `https://dovo.app/privacidad` con una fecha de actualización visible en la parte superior. Si los cambios son sustantivos, dovo le notificará por correo electrónico con anticipación razonable antes de su entrada en vigor.
+dovo puede modificar este aviso para reflejar cambios legales o de producto. Cualquier modificación se publicará en `https://dovofit.com/privacidad` con una fecha de actualización visible en la parte superior. Si los cambios son sustantivos, dovo le notificará por correo electrónico con anticipación razonable antes de su entrada en vigor.
 
 ## 11. Cumplimiento y reporte
 
-dovo opera bajo las disposiciones de la LFPDPPP y mantiene reportes trimestrales públicos sobre el uso del dataset agregado de Pulse en `https://dovo.app/pulse-reportes` (TODO: ruta pendiente de crear).
+dovo opera bajo las disposiciones de la LFPDPPP y mantiene reportes trimestrales públicos sobre el uso del dataset agregado de Pulse en `https://dovofit.com/pulse-reportes` (TODO: ruta pendiente de crear).
 
 Si usted considera que su derecho a la protección de datos personales ha sido vulnerado, puede acudir ante el Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales (INAI) en `https://home.inai.org.mx`.
 

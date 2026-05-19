@@ -13,7 +13,7 @@ const serverEnvSchema = envSchema.extend({
   RESEND_FROM_EMAIL: z
     .string()
     .optional()
-    .default("dovo <hola@dovo.app>"),
+    .default("dovo <hola@dovofit.com>"),
 });
 
 export const publicEnv = envSchema.parse({

@@ -16,7 +16,7 @@ function client(): Resend | null {
 }
 
 function from(): string {
-  return process.env.RESEND_FROM_EMAIL ?? "dovo <hola@dovo.app>";
+  return process.env.RESEND_FROM_EMAIL ?? "dovo <hola@dovofit.com>";
 }
 
 // Fail-soft: si RESEND_API_KEY no está seteada, log warning y skip.
@@ -43,7 +43,7 @@ export async function sendEmail(opts: {
       subject: opts.subject,
       html: opts.html,
       text: opts.text,
-      replyTo: "hola@dovo.app",
+      replyTo: "hola@dovofit.com",
     });
     if (error) {
       console.error("[email] resend error:", error);

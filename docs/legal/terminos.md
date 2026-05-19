@@ -96,8 +96,8 @@ Estos Términos se rigen por las leyes de los Estados Unidos Mexicanos. Para cua
 
 ## 12. Contacto
 
-Para cualquier asunto sobre estos Términos: `hola@dovo.app` (TODO: configurar buzón).
-Para asuntos de privacidad y derechos ARCO: `privacidad@dovo.app` (TODO).
+Para cualquier asunto sobre estos Términos: `hola@dovofit.com` (TODO: configurar buzón).
+Para asuntos de privacidad y derechos ARCO: `privacidad@dovofit.com` (TODO).
 
 ---
 

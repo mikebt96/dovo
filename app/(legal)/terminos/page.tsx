@@ -255,15 +255,15 @@ export default function TerminosPage() {
       <Section n={12} title="contacto">
         <p>
           Para cualquier asunto sobre estos Términos:{" "}
-          <a href="mailto:hola@dovo.app" className="underline">
-            hola@dovo.app
+          <a href="mailto:hola@dovofit.com" className="underline">
+            hola@dovofit.com
           </a>
           .
         </p>
         <p>
           Para asuntos de privacidad y derechos ARCO:{" "}
-          <a href="mailto:privacidad@dovo.app" className="underline">
-            privacidad@dovo.app
+          <a href="mailto:privacidad@dovofit.com" className="underline">
+            privacidad@dovofit.com
           </a>
           .
         </p>

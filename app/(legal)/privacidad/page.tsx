@@ -41,8 +41,8 @@ export default function PrivacidadPage() {
           </li>
           <li>
             <strong>Correo de contacto en materia de privacidad</strong>:{" "}
-            <a href="mailto:privacidad@dovo.app" className="underline">
-              privacidad@dovo.app
+            <a href="mailto:privacidad@dovofit.com" className="underline">
+              privacidad@dovofit.com
             </a>
           </li>
           <li>
@@ -217,8 +217,8 @@ export default function PrivacidadPage() {
         </Ul>
         <p>
           Para ejercer estos derechos, envíe una solicitud a{" "}
-          <a href="mailto:privacidad@dovo.app" className="underline">
-            privacidad@dovo.app
+          <a href="mailto:privacidad@dovofit.com" className="underline">
+            privacidad@dovofit.com
           </a>{" "}
           indicando su nombre y correo de la cuenta, el derecho que ejerce,
           y la finalidad o tratamiento al que se refiere. dovo responderá
