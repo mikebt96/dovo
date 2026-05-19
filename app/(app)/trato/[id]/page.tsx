@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FRECUENCIAS } from "@/lib/schemas/trato";
-import { publicEnv } from "@/lib/env";
 import {
   dayStates,
   diasRequeridos,
@@ -13,6 +12,7 @@ import {
   type Frecuencia,
 } from "@/lib/utils/streak";
 import { resolveTrato } from "@/lib/actions/resolveTrato";
+import { appUrl } from "@/lib/utils/url";
 import InviteLink from "./InviteLink";
 import StreakGrid from "./_components/StreakGrid";
 import CheckinForm from "./_components/CheckinForm";
@@ -101,7 +101,7 @@ export default async function TratoPage({
   const frecuenciaLabel =
     FRECUENCIAS.find((f) => f.value === trato.frecuencia)?.label ??
     trato.frecuencia;
-  const inviteUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/invite/${trato.invite_token}`;
+  const inviteUrl = appUrl(`/invite/${trato.invite_token}`);
 
   let checkins: Checkin[] = [];
   if (trato.estado === "activo" || trato.estado === "cerrado") {

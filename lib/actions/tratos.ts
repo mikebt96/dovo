@@ -6,7 +6,7 @@ import { createTratoSchema, acceptTratoSchema } from "@/lib/schemas/trato";
 import { dispatchEmail } from "@/lib/email";
 import { inviteEmail } from "@/lib/email/templates/invite";
 import { acceptedEmail } from "@/lib/email/templates/accepted";
-import { publicEnv } from "@/lib/env";
+import { appUrl } from "@/lib/utils/url";
 
 type Result<T = void> =
   | { ok: true; data: T }
@@ -89,7 +89,7 @@ export async function createTrato(
       partner_email: parsed.data.partner_email,
       creator_name: creatorName,
       goal: parsed.data.goal,
-      invite_url: `${publicEnv.NEXT_PUBLIC_APP_URL}/invite/${row.invite_token as string}`,
+      invite_url: appUrl(`/invite/${row.invite_token as string}`),
     }),
   });
 
@@ -169,7 +169,7 @@ export async function acceptTrato(
       ...acceptedEmail({
         partner_email: trato.partner_email as string,
         goal: trato.goal as string,
-        trato_url: `${publicEnv.NEXT_PUBLIC_APP_URL}/trato/${trato.id}`,
+        trato_url: appUrl(`/trato/${trato.id}`),
       }),
     });
   }

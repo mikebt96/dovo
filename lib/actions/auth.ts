@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { signUpSchema, signInSchema } from "@/lib/schemas/auth";
-import { publicEnv } from "@/lib/env";
+import { appUrl } from "@/lib/utils/url";
 
 type ActionResult =
   | { ok: true }
@@ -21,7 +21,7 @@ export async function signUpAction(formData: FormData): Promise<ActionResult> {
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
     options: {
-      emailRedirectTo: `${publicEnv.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: appUrl("/auth/callback"),
       data: { nombre: parsed.data.nombre, intent: "sign_up" },
     },
   });
@@ -39,7 +39,7 @@ export async function signInAction(formData: FormData): Promise<ActionResult> {
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
     options: {
-      emailRedirectTo: `${publicEnv.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: appUrl("/auth/callback"),
       data: { intent: "sign_in" },
       shouldCreateUser: false,
     },

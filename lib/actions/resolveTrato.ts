@@ -9,7 +9,7 @@ import {
 } from "@/lib/utils/streak";
 import { dispatchEmail } from "@/lib/email";
 import { closedEmail } from "@/lib/email/templates/closed";
-import { publicEnv } from "@/lib/env";
+import { appUrl } from "@/lib/utils/url";
 
 type TratoResultado =
   | "ambos_cumplieron"
@@ -126,7 +126,7 @@ export async function resolveTrato(
     .select("id, email")
     .in("id", memberLookupIds);
 
-  const tratoUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/trato/${tratoId}`;
+  const tratoUrl = appUrl(`/trato/${tratoId}`);
   for (const m of members ?? []) {
     const email = m.email as string | undefined;
     if (!email) continue;
