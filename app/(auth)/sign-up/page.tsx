@@ -69,6 +69,13 @@ export default function SignUpPage() {
         {pending ? "mandando..." : "entrar"}
       </button>
 
+      <p className="text-xs opacity-60 text-center leading-relaxed">
+        al continuar aceptas los{" "}
+        <a href="/terminos" className="underline">términos</a>{" "}
+        y el{" "}
+        <a href="/privacidad" className="underline">aviso de privacidad</a>.
+      </p>
+
       <p className="text-xs opacity-60 text-center">
         ¿ya tienes cuenta? <a href="/sign-in" className="underline">entra aquí</a>.
       </p>

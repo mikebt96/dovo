@@ -60,6 +60,18 @@ export default async function AjustesPage() {
         </a>
       </section>
 
+      <section className="mb-10">
+        <h2 className="syne text-xl lowercase mb-5">legal</h2>
+        <nav className="flex flex-col gap-2 text-sm">
+          <Link href="/privacidad" className="underline opacity-80 hover:opacity-100">
+            aviso de privacidad →
+          </Link>
+          <Link href="/terminos" className="underline opacity-80 hover:opacity-100">
+            términos de servicio →
+          </Link>
+        </nav>
+      </section>
+
       <section className="pt-8 border-t border-ink">
         <SignOutButton />
       </section>
