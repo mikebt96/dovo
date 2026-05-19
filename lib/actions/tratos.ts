@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createTratoSchema, acceptTratoSchema } from "@/lib/schemas/trato";
+import { dispatchEmail } from "@/lib/email";
+import { inviteEmail } from "@/lib/email/templates/invite";
+import { acceptedEmail } from "@/lib/email/templates/accepted";
+import { publicEnv } from "@/lib/env";
 
 type Result<T = void> =
   | { ok: true; data: T }
@@ -37,7 +41,7 @@ export async function createTrato(
   const { data: meRow } = await supabase
     .schema("core")
     .from("users")
-    .select("email")
+    .select("email, nombre")
     .eq("id", user.id)
     .single();
   if (
@@ -67,12 +71,27 @@ export async function createTrato(
       recompensa_text: parsed.data.recompensa_text,
       castigo_text: parsed.data.castigo_text,
     })
-    .select("id")
+    .select("id, invite_token")
     .single();
 
   if (error || !row) {
     return { ok: false, error: error?.message ?? "error al crear trato" };
   }
+
+  // Fire-and-forget email de invite al partner. No bloquea la respuesta.
+  const creatorName =
+    (meRow?.nombre as string | undefined) ??
+    (meRow?.email as string | undefined) ??
+    "alguien";
+  dispatchEmail({
+    to: parsed.data.partner_email,
+    ...inviteEmail({
+      partner_email: parsed.data.partner_email,
+      creator_name: creatorName,
+      goal: parsed.data.goal,
+      invite_url: `${publicEnv.NEXT_PUBLIC_APP_URL}/invite/${row.invite_token as string}`,
+    }),
+  });
 
   revalidatePath("/");
   return { ok: true, data: { id: row.id as string } };
@@ -94,7 +113,7 @@ export async function acceptTrato(
     .schema("core")
     .from("tratos")
     .select(
-      "id, creator_id, partner_id, partner_email, invite_expires_at, estado",
+      "id, creator_id, partner_id, partner_email, invite_expires_at, estado, goal",
     )
     .eq("invite_token", parsed.data.token)
     .maybeSingle();
@@ -134,6 +153,26 @@ export async function acceptTrato(
     .eq("id", trato.id as string);
 
   if (updErr) return { ok: false, error: updErr.message };
+
+  // Email al creator avisándole que el partner aceptó. Necesita el email del creator.
+  const { data: creatorRow } = await supabase
+    .schema("core")
+    .from("users")
+    .select("email")
+    .eq("id", trato.creator_id as string)
+    .maybeSingle();
+
+  const creatorEmail = creatorRow?.email as string | undefined;
+  if (creatorEmail) {
+    dispatchEmail({
+      to: creatorEmail,
+      ...acceptedEmail({
+        partner_email: trato.partner_email as string,
+        goal: trato.goal as string,
+        trato_url: `${publicEnv.NEXT_PUBLIC_APP_URL}/trato/${trato.id}`,
+      }),
+    });
+  }
 
   revalidatePath("/");
   revalidatePath(`/trato/${trato.id}`);

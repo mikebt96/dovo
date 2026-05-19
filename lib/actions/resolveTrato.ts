@@ -7,6 +7,9 @@ import {
   isPastDuration,
   type Frecuencia,
 } from "@/lib/utils/streak";
+import { dispatchEmail } from "@/lib/email";
+import { closedEmail } from "@/lib/email/templates/closed";
+import { publicEnv } from "@/lib/env";
 
 type TratoResultado =
   | "ambos_cumplieron"
@@ -32,7 +35,7 @@ export async function resolveTrato(
     .schema("core")
     .from("tratos")
     .select(
-      "id, creator_id, partner_id, frecuencia, duracion_dias, accepted_at, estado",
+      "id, creator_id, partner_id, frecuencia, duracion_dias, accepted_at, estado, goal",
     )
     .eq("id", tratoId)
     .maybeSingle();
@@ -111,6 +114,35 @@ export async function resolveTrato(
     .eq("estado", "activo");
 
   if (updErr) return { ok: false, error: updErr.message };
+
+  // Email a ambos miembros con el resultado. Lookups separados porque cada uno
+  // recibe el mismo subject pero distinto "tú cumpliste/fallaste" según su rol.
+  const memberLookupIds = [trato.creator_id, trato.partner_id].filter(
+    (id): id is string => typeof id === "string",
+  );
+  const { data: members } = await supabase
+    .schema("core")
+    .from("users")
+    .select("id, email")
+    .in("id", memberLookupIds);
+
+  const tratoUrl = `${publicEnv.NEXT_PUBLIC_APP_URL}/trato/${tratoId}`;
+  for (const m of members ?? []) {
+    const email = m.email as string | undefined;
+    if (!email) continue;
+    const userCumplio =
+      m.id === trato.creator_id ? creator_cumplio : partner_cumplio;
+    dispatchEmail({
+      to: email,
+      ...closedEmail({
+        to_email: email,
+        goal: trato.goal as string,
+        trato_url: tratoUrl,
+        resultado,
+        user_cumplio: userCumplio,
+      }),
+    });
+  }
 
   revalidatePath(`/trato/${tratoId}`);
   revalidatePath("/");

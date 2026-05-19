@@ -9,6 +9,11 @@ const envSchema = z.object({
 const serverEnvSchema = envSchema.extend({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   SUPABASE_PULSE_ROLE_KEY: z.string().min(1),
+  RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM_EMAIL: z
+    .string()
+    .optional()
+    .default("dovo <hola@dovo.app>"),
 });
 
 export const publicEnv = envSchema.parse({
@@ -22,5 +27,7 @@ export function getServerEnv() {
     ...publicEnv,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     SUPABASE_PULSE_ROLE_KEY: process.env.SUPABASE_PULSE_ROLE_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   });
 }
