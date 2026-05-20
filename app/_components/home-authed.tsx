@@ -1,17 +1,38 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import TratoCard, { type TratoCardData } from "./trato-card";
 
-type TratoRow = {
-  id: string;
-  goal: string;
-  frecuencia: string;
-  duracion_dias: number;
-  partner_email: string;
-  estado: TratoCardData["estado"];
-  creator_id: string;
-  created_at: string;
+type Character = {
+  fue: number;
+  res: number;
+  flex: number;
+  vel: number;
+  equ: number;
+  vit: number;
+  nivel: number;
+  class_name: string;
 };
+
+type Grupo = {
+  id: string;
+  nombre_grupo: string;
+  tipo_grupo: string;
+};
+
+const STAT_LABELS: { key: keyof Character; label: string }[] = [
+  { key: "fue", label: "FUE" },
+  { key: "res", label: "RES" },
+  { key: "flex", label: "FLE" },
+  { key: "vel", label: "VEL" },
+  { key: "equ", label: "EQU" },
+  { key: "vit", label: "VIT" },
+];
+
+// Mapea un stat (log sin cap) a una altura de barra 0-100% para display.
+// Tier display real llega en F3; por ahora una escala simple log.
+function barHeight(v: number): number {
+  if (v <= 0) return 4;
+  return Math.min(100, Math.round((Math.log10(v + 1) / 2.2) * 100));
+}
 
 export default async function HomeAuthed() {
   const supabase = await createClient();
@@ -20,30 +41,47 @@ export default async function HomeAuthed() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: tratos } = await supabase
+  const { data: charRow } = await supabase
     .schema("core")
-    .from("tratos")
-    .select(
-      "id, goal, frecuencia, duracion_dias, partner_email, estado, creator_id, created_at",
-    )
-    .or(`creator_id.eq.${user.id},partner_id.eq.${user.id}`)
-    .order("created_at", { ascending: false });
+    .from("user_character")
+    .select("fue, res, flex, vel, equ, vit, nivel, class_name")
+    .eq("user_id", user.id)
+    .maybeSingle<Character>();
 
-  const rows: TratoRow[] = (tratos as TratoRow[] | null) ?? [];
-  const cards: TratoCardData[] = rows.map((r) => ({
-    id: r.id,
-    goal: r.goal,
-    frecuencia: r.frecuencia,
-    duracion_dias: r.duracion_dias,
-    partner_email: r.partner_email,
-    estado: r.estado,
-    isCreator: r.creator_id === user.id,
-  }));
+  const { data: streakRow } = await supabase
+    .schema("core")
+    .from("user_streak")
+    .select("current_streak_weeks")
+    .eq("user_id", user.id)
+    .maybeSingle<{ current_streak_weeks: number }>();
+
+  const { data: miembros } = await supabase
+    .schema("core")
+    .from("trato_miembros")
+    .select("trato_id, tratos!inner(id, nombre_grupo, tipo_grupo)")
+    .eq("user_id", user.id);
+
+  const character: Character = charRow ?? {
+    fue: 0,
+    res: 0,
+    flex: 0,
+    vel: 0,
+    equ: 0,
+    vit: 0,
+    nivel: 1,
+    class_name: "Novato",
+  };
+  const racha = streakRow?.current_streak_weeks ?? 0;
+  const grupos: Grupo[] = (miembros ?? []).map(
+    (m) => (m.tratos as unknown as Grupo),
+  );
 
   return (
-    <main className="min-h-svh px-6 py-12 bg-papel text-ink max-w-2xl mx-auto">
-      <header className="flex justify-between items-end mb-12 pb-6 border-b border-ink">
-        <h1 className="syne text-3xl lowercase">tus tratos</h1>
+    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
+      <header className="flex justify-between items-start mb-8">
+        <Link href="/" className="syne text-2xl lowercase tracking-tight">
+          dovo
+        </Link>
         <nav className="flex gap-4 text-xs uppercase tracking-widest opacity-60">
           <Link href="/perfil" className="hover:opacity-100">
             perfil
@@ -54,35 +92,74 @@ export default async function HomeAuthed() {
         </nav>
       </header>
 
-      {cards.length === 0 ? (
-        <section className="text-center py-16">
-          <p className="syne text-2xl lowercase opacity-50 mb-6">
-            todavía no hay tratos.
+      {/* Character header: stats compactas + nivel + clase + racha */}
+      <section className="border-t border-b border-ink py-6 mb-8">
+        <div className="flex items-baseline justify-between mb-4">
+          <p className="syne lowercase">
+            nivel {character.nivel} · {character.class_name}
           </p>
+          <p className="text-xs uppercase tracking-widest opacity-60">
+            racha {racha} sem
+          </p>
+        </div>
+        <div className="flex gap-2 items-end h-16">
+          {STAT_LABELS.map(({ key, label }) => (
+            <div key={key} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-full h-12 bg-papel-dark relative flex items-end">
+                <div
+                  className="w-full bg-ink"
+                  style={{ height: `${barHeight(character[key] as number)}%` }}
+                />
+              </div>
+              <span className="text-[10px] uppercase tracking-wider opacity-60">
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Hoy (placeholder — las tasks reales llegan en F2/F3) */}
+      <section className="mb-8">
+        <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
+          hoy
+        </h2>
+        <p className="text-sm opacity-50">
+          el check-in con métricas llega en la siguiente actualización. por
+          ahora arma tu rutina y conoce a tu grupo.
+        </p>
+      </section>
+
+      {/* Grupos */}
+      <section>
+        <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
+          tus grupos
+        </h2>
+        {grupos.length === 0 ? (
           <Link
-            href="/trato/new"
+            href="/onboarding/grupo"
             className="inline-block bg-ink text-papel px-6 py-3 syne lowercase"
           >
-            hacer un trato →
+            crear o unirme a un grupo →
           </Link>
-        </section>
-      ) : (
-        <>
-          <section>
-            {cards.map((c) => (
-              <TratoCard key={c.id} trato={c} />
+        ) : (
+          <ul className="space-y-2">
+            {grupos.map((g) => (
+              <li key={g.id}>
+                <Link
+                  href={`/grupo/${g.id}`}
+                  className="block border border-ink/20 p-4 hover:border-ink transition-colors"
+                >
+                  <span className="syne lowercase">{g.nombre_grupo}</span>
+                  <span className="text-xs opacity-60 ml-2">
+                    {g.tipo_grupo}
+                  </span>
+                </Link>
+              </li>
             ))}
-          </section>
-          <div className="mt-10">
-            <Link
-              href="/trato/new"
-              className="inline-block border border-ink px-6 py-3 syne lowercase"
-            >
-              + hacer otro trato
-            </Link>
-          </div>
-        </>
-      )}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

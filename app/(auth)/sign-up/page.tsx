@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signUpAction } from "@/lib/actions/auth";
+import GoogleButton from "../_components/GoogleButton";
 
 export default function SignUpPage() {
   const [pending, startTransition] = useTransition();
@@ -33,7 +34,15 @@ export default function SignUpPage() {
     >
       <div>
         <h1 className="syne text-3xl lowercase mb-2">hacer dúo</h1>
-        <p className="text-sm opacity-70">empieza con tu nombre y correo.</p>
+        <p className="text-sm opacity-70">empieza con google o tu correo.</p>
+      </div>
+
+      <GoogleButton />
+
+      <div className="flex items-center gap-3 text-xs uppercase tracking-widest opacity-40">
+        <span className="flex-1 h-px bg-ink/20" />
+        o con correo
+        <span className="flex-1 h-px bg-ink/20" />
       </div>
 
       <label className="block">

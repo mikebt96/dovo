@@ -1,43 +1,39 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import VisibilityToggle from "./_components/VisibilityToggle";
 
 export const metadata = { title: "perfil · dovo" };
 export const dynamic = "force-dynamic";
 
-type Visibility = "hidden" | "duos_con_trato" | "publico";
-
-type Score = {
-  tratos_cerrados: number;
-  tratos_cumplidos: number;
-  score_publico: number;
-  visibility: Visibility;
+type Character = {
+  fue: number;
+  res: number;
+  flex: number;
+  vel: number;
+  equ: number;
+  vit: number;
+  nivel: number;
+  xp: number;
+  prestige: number;
+  class_name: string;
 };
 
-type ClosedTrato = {
-  id: string;
-  goal: string;
-  resultado:
-    | "ambos_cumplieron"
-    | "uno_fallo"
-    | "ambos_fallaron"
-    | "sin_resolver"
-    | null;
-  creator_id: string;
-  partner_id: string | null;
-  creator_cumplio: boolean | null;
-  partner_cumplio: boolean | null;
-  closed_at: string;
-  duracion_dias: number;
+type Perfil = {
+  peso_kg: number;
+  altura_cm: number;
+  edad: number;
+  genero: string;
+  bmr_calculado: number | null;
 };
 
-const RESULTADO_TAG: Record<NonNullable<ClosedTrato["resultado"]>, string> = {
-  ambos_cumplieron: "los dos cumplieron",
-  uno_fallo: "uno cumplió",
-  ambos_fallaron: "ninguno cumplió",
-  sin_resolver: "sin resolver",
-};
+const STATS: { key: keyof Character; label: string }[] = [
+  { key: "fue", label: "Fuerza" },
+  { key: "res", label: "Resistencia" },
+  { key: "flex", label: "Flexibilidad" },
+  { key: "vel", label: "Velocidad" },
+  { key: "equ", label: "Equilibrio" },
+  { key: "vit", label: "Vitalidad" },
+];
 
 export default async function PerfilPage() {
   const supabase = await createClient();
@@ -53,44 +49,47 @@ export default async function PerfilPage() {
     .eq("id", user.id)
     .maybeSingle();
 
-  const { data: scoreRow } = await supabase
+  const { data: char } = await supabase
     .schema("core")
-    .from("user_scores")
-    .select("tratos_cerrados, tratos_cumplidos, score_publico, visibility")
+    .from("user_character")
+    .select("fue, res, flex, vel, equ, vit, nivel, xp, prestige, class_name")
     .eq("user_id", user.id)
-    .maybeSingle<Score>();
+    .maybeSingle<Character>();
 
-  const score: Score = scoreRow ?? {
-    tratos_cerrados: 0,
-    tratos_cumplidos: 0,
-    score_publico: 0,
-    visibility: "hidden",
-  };
-
-  const { data: closed } = await supabase
+  const { data: perfil } = await supabase
     .schema("core")
-    .from("tratos")
-    .select(
-      "id, goal, resultado, creator_id, partner_id, creator_cumplio, partner_cumplio, closed_at, duracion_dias",
-    )
-    .eq("estado", "cerrado")
-    .or(`creator_id.eq.${user.id},partner_id.eq.${user.id}`)
-    .order("closed_at", { ascending: false })
-    .limit(20);
+    .from("user_perfil_fisico")
+    .select("peso_kg, altura_cm, edad, genero, bmr_calculado")
+    .eq("user_id", user.id)
+    .maybeSingle<Perfil>();
 
-  const history = (closed as ClosedTrato[] | null) ?? [];
+  const character: Character = char ?? {
+    fue: 0,
+    res: 0,
+    flex: 0,
+    vel: 0,
+    equ: 0,
+    vit: 0,
+    nivel: 1,
+    xp: 0,
+    prestige: 0,
+    class_name: "Novato",
+  };
 
   return (
     <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
       <header className="mb-12 flex items-end justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest opacity-60 mb-2">
-            tu perfil
+            tu personaje
           </p>
           <h1 className="syne text-3xl lowercase">
             {meRow?.nombre ?? user.email}
           </h1>
-          <p className="text-xs mono opacity-60 mt-1">{user.email}</p>
+          <p className="text-xs mono opacity-60 mt-1">
+            nivel {character.nivel} · {character.class_name}
+            {character.prestige > 0 && ` · prestige ${character.prestige}`}
+          </p>
         </div>
         <Link
           href="/"
@@ -100,71 +99,62 @@ export default async function PerfilPage() {
         </Link>
       </header>
 
-      <section className="border-t border-b border-ink py-10 mb-12 text-center">
-        <p className="text-xs uppercase tracking-widest opacity-60 mb-3">
-          score
+      <section className="border-t border-b border-ink py-8 mb-10">
+        <p className="text-xs uppercase tracking-widest opacity-60 mb-5">
+          atributos
         </p>
-        <p className="syne text-7xl">{score.score_publico}</p>
-        <p className="text-sm opacity-70 mt-3">
-          {score.tratos_cumplidos} cumplidos de {score.tratos_cerrados} cerrados
+        <div className="space-y-3">
+          {STATS.map(({ key, label }) => (
+            <div key={key} className="flex items-center gap-4">
+              <span className="text-sm w-28">{label}</span>
+              <div className="flex-1 h-2 bg-papel-dark">
+                <div
+                  className="h-full bg-ink"
+                  style={{
+                    width: `${Math.min(100, Math.round((Math.log10((character[key] as number) + 1) / 2.2) * 100))}%`,
+                  }}
+                />
+              </div>
+              <span className="text-xs mono opacity-60 w-10 text-right">
+                {Math.round(character[key] as number)}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs opacity-50 mt-6">
+          tus atributos suben con cada check-in (llega en la siguiente
+          actualización).
         </p>
       </section>
 
-      <section className="mb-12">
-        <VisibilityToggle current={score.visibility} />
-      </section>
-
-      <section>
-        <h2 className="syne text-xl lowercase mb-6">historial</h2>
-        {history.length === 0 ? (
-          <p className="text-sm opacity-60">
-            todavía no cierras tratos. cuando uno termine, aparece aquí.
+      {perfil && (
+        <section>
+          <p className="text-xs uppercase tracking-widest opacity-60 mb-4">
+            datos físicos
           </p>
-        ) : (
-          <ul className="space-y-4">
-            {history.map((t) => (
-              <HistoryItem key={t.id} trato={t} userId={user.id} />
-            ))}
-          </ul>
-        )}
-      </section>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <Row label="Peso" value={`${perfil.peso_kg} kg`} />
+            <Row label="Altura" value={`${perfil.altura_cm} cm`} />
+            <Row label="Edad" value={`${perfil.edad} años`} />
+            <Row label="Género" value={perfil.genero} />
+            {perfil.bmr_calculado && (
+              <Row
+                label="Metabolismo basal"
+                value={`${Math.round(perfil.bmr_calculado)} kcal/día`}
+              />
+            )}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
 
-function HistoryItem({
-  trato,
-  userId,
-}: {
-  trato: ClosedTrato;
-  userId: string;
-}) {
-  const isCreator = trato.creator_id === userId;
-  const userCumplio = isCreator ? trato.creator_cumplio : trato.partner_cumplio;
-  const resultLabel = trato.resultado
-    ? RESULTADO_TAG[trato.resultado]
-    : "cerrado";
-
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <li className="border-b border-ink/15 pb-4">
-      <Link
-        href={`/trato/${trato.id}`}
-        className="block hover:opacity-70 transition-opacity"
-      >
-        <div className="flex items-baseline justify-between gap-3 mb-1">
-          <p className="syne lowercase">{trato.goal}</p>
-          <span
-            className={`text-xs uppercase tracking-widest shrink-0 ${
-              userCumplio ? "opacity-90" : "opacity-50"
-            }`}
-          >
-            {userCumplio ? "cumpliste" : "fallaste"}
-          </span>
-        </div>
-        <p className="text-xs opacity-60">
-          {resultLabel} · {trato.duracion_dias} días
-        </p>
-      </Link>
-    </li>
+    <div>
+      <p className="text-xs uppercase tracking-widest opacity-60">{label}</p>
+      <p className="mt-1">{value}</p>
+    </div>
   );
 }

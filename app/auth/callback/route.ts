@@ -17,28 +17,41 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/sign-in?error=invalid_code`);
   }
 
-  // Si es primer login, crear el row en core.users
-  const meta = data.user.user_metadata as { nombre?: string; intent?: string };
-  if (meta.intent === "sign_up" || meta.nombre) {
-    const { error: insertError } = await supabase
-      .schema("core")
-      .from("users")
-      .upsert({
+  // Resolver nombre: magic link trae meta.nombre, Google OAuth trae full_name/name.
+  const meta = data.user.user_metadata as {
+    nombre?: string;
+    full_name?: string;
+    name?: string;
+  };
+  const nombre =
+    meta.nombre ?? meta.full_name ?? meta.name ?? "sin nombre";
+
+  // Upsert core.users (idempotente). Crea row en primer login.
+  const { error: insertError } = await supabase
+    .schema("core")
+    .from("users")
+    .upsert(
+      {
         id: data.user.id,
         email: data.user.email!,
-        nombre: meta.nombre ?? "sin nombre",
-        access_channel: "fcfs", // los curados se setean manualmente en BD
-      }, { onConflict: "id" });
-
-    if (insertError) {
-      console.error("[auth/callback] insert core.users falló:", insertError);
-    }
-
-    // Crear row inicial en user_scores
-    await supabase.schema("core").from("user_scores").upsert({
-      user_id: data.user.id,
-    }, { onConflict: "user_id" });
+        nombre,
+        access_channel: "fcfs",
+      },
+      { onConflict: "id" },
+    );
+  if (insertError) {
+    console.error("[auth/callback] insert core.users falló:", insertError);
   }
+
+  // Crear rows iniciales del character system (idempotente).
+  await supabase
+    .schema("core")
+    .from("user_character")
+    .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
+  await supabase
+    .schema("core")
+    .from("user_streak")
+    .upsert({ user_id: data.user.id }, { onConflict: "user_id" });
 
   return NextResponse.redirect(`${origin}${next}`);
 }

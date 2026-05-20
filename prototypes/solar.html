@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dovo · solar — archar-style light prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ===== dovofit LIGHT tokens (archar-faithful) ===== */
+  :root {
+    --paper: #f4f4f6;       /* cool near-white (away from Claude cream) */
+    --paper-2: #fafafb;     /* lighter cool */
+    --white: #ffffff;
+    --ink: #08070d;         /* blue-black near-black */
+    --ink-dim: rgba(8,7,13,0.62);
+    --ink-ghost: rgba(8,7,13,0.40);
+    --line: rgba(8,7,13,0.12);
+    --line-strong: rgba(8,7,13,0.26);
+    --signal: #6d4aff;      /* electric violet */
+    --signal-deep: #5a37e0;
+    --signal-glow: rgba(109,74,255,0.40);
+    --violet: #6d4aff;
+    --blue: #3a86ff;
+    --cyan: #3ac4d6;
+    --lime: #aef03c;
+    --magenta: #c44aff;
+    /* legacy aliases kept for leftover refs */
+    --amber: #6d4aff;
+    --mint: #aef03c;
+    --font-display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+    --font-mark: 'Syne', sans-serif;
+    --gutter: 40px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body {
+    min-height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* grain — subtle on light */
+  .grain {
+    position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.04; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ===== Nav ===== */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: 22px var(--gutter);
+    display: flex; justify-content: space-between; align-items: center;
+    mix-blend-mode: normal;
+  }
+  .nav .clock {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-dim);
+  }
+  .nav .links { display: flex; gap: 28px; align-items: center; }
+  .nav .links a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink); text-decoration: none; transition: opacity 200ms;
+  }
+  .nav .links a:hover { opacity: 0.5; }
+  .nav .pill {
+    padding: 10px 20px; background: var(--white); border: 1px solid var(--line);
+    border-radius: 999px; font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+    text-decoration: none; transition: background 200ms, color 200ms;
+  }
+  .nav .pill:hover { background: var(--ink); color: var(--white); }
+
+  /* ===== Buttons ===== */
+  .btn-dark {
+    display: inline-flex; align-items: center; gap: 10px; padding: 18px 34px;
+    background: var(--ink); color: var(--white); border-radius: 999px;
+    font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.005em;
+    text-decoration: none; cursor: pointer;
+    transition: transform 300ms cubic-bezier(0.2,0.8,0.2,1), background 300ms;
+  }
+  .btn-dark:hover { transform: translateY(-2px); background: var(--signal); }
+  .btn-dark .arrow { transition: transform 300ms; }
+  .btn-dark:hover .arrow { transform: translateX(4px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 10px; padding: 18px 22px;
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-dim); text-decoration: none; transition: color 200ms;
+  }
+  .btn-ghost:hover { color: var(--ink); }
+
+  /* ===== Section primitives ===== */
+  section { padding: 140px var(--gutter); position: relative; z-index: 2; }
+  .container { max-width: 1640px; margin: 0 auto; }
+  .index-label {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--signal); margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .index-label::before { content: ''; width: 24px; height: 1px; background: var(--signal); }
+  .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 56px; }
+  .section-title {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(56px,9vw,150px); line-height: 0.86; letter-spacing: -0.055em; color: var(--ink);
+  }
+  .section-desc { max-width: 320px; font-size: 14px; line-height: 1.55; color: var(--ink-dim); padding-bottom: 12px; }
+
+  /* ===== Hero ===== */
+  .hero { position: relative; min-height: 100vh; overflow: hidden; padding: 0; }
+  .hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .hero .portrait {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 52%; z-index: 1;
+    background:
+      radial-gradient(ellipse 60% 80% at 60% 45%, rgba(8,7,13,0.55), transparent 70%),
+      radial-gradient(ellipse 90% 90% at 70% 60%, rgba(109,74,255,0.5), transparent 75%),
+      linear-gradient(120deg, transparent 20%, rgba(109,74,255,0.3));
+    mix-blend-mode: multiply;
+  }
+  .hero .portrait::after {
+    content: 'PORTRAIT — diverse athlete, warm light'; position: absolute; bottom: 24px; right: 24px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+  .hero .inner { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 120px var(--gutter) 56px; }
+  .hero .labels { display: flex; flex-direction: column; gap: 8px; opacity: 0; animation: fade-in 800ms ease-out 500ms forwards; }
+  .hero .labels .l { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; color: var(--ink-dim); max-width: 280px; line-height: 1.4; }
+  .hero .labels .l .star { color: var(--signal); }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(88px, 19vw, 320px); line-height: 0.82; letter-spacing: -0.06em; color: var(--ink);
+  }
+  .hero h1 .reveal { display: block; overflow: hidden; }
+  .hero h1 .reveal span { display: inline-block; transform: translateY(105%); animation: line-rise 1000ms cubic-bezier(0.16,1,0.3,1) forwards; }
+  .hero h1 .reveal:nth-child(1) span { animation-delay: 800ms; }
+  .hero h1 .reveal:nth-child(2) span { animation-delay: 980ms; }
+  .hero h1 .dot-end { color: var(--signal); }
+  .hero .cta-row { display: flex; gap: 16px; align-items: center; margin-top: 36px; flex-wrap: wrap; opacity: 0; animation: fade-in 800ms ease-out 1600ms forwards; }
+
+  /* ===== Statement ===== */
+  .statement { background: var(--white); text-align: center; padding: 200px var(--gutter); }
+  .statement h2 {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(56px,11vw,200px); line-height: 0.88; letter-spacing: -0.055em; color: var(--ink);
+    max-width: 1400px; margin: 0 auto; position: relative;
+  }
+  .statement h2 .dot { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: var(--signal); vertical-align: middle; margin-left: 12px; }
+  .statement p { margin: 56px auto 0; max-width: 560px; font-size: clamp(16px,1.4vw,21px); line-height: 1.5; color: var(--ink-dim); }
+
+  /* ===== Render showcase (archar 3D product render) ===== */
+  .render { background: var(--white); padding: 0 var(--gutter) 160px; }
+  .render .stage {
+    position: relative; max-width: 1640px; margin: 0 auto; height: 70vh; min-height: 520px;
+    border-radius: 24px; overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 90% at 30% 40%, rgba(109,74,255,0.32), transparent 60%),
+      radial-gradient(ellipse 60% 80% at 75% 70%, rgba(58,134,255,0.16), transparent 60%),
+      linear-gradient(160deg, #e6e6ea, #d6d6dd);
+    display: flex; align-items: center; justify-content: center;
+    will-change: transform;
+  }
+  .render .stage .render-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-ghost); position: absolute; top: 24px; left: 24px; }
+  .render .float-card {
+    width: min(320px, 70vw); aspect-ratio: 3/4; border-radius: 18px;
+    background: linear-gradient(180deg, #0b0a14, #16132a);
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+    padding: 28px; color: var(--white); display: flex; flex-direction: column; justify-content: space-between;
+    transform: rotate(-4deg);
+  }
+  .render .float-card .fc-top { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mark); font-weight: 800; font-size: 22px; }
+  .render .float-card .fc-top .tier { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--signal); }
+  .render .float-card .fc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  .render .float-card .fc-stats .s { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+  .render .float-card .fc-stats .s b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 28px; color: var(--white); text-transform: none; letter-spacing: -0.03em; margin-top: 4px; }
+  .render .float-card .fc-class { font-family: var(--font-display); font-weight: 800; font-size: 32px; letter-spacing: -0.03em; }
+  .render .float-card .fc-class span { color: var(--signal); }
+
+  /* ===== Process (numbered) ===== */
+  .process { background: var(--paper); }
+  .process .step { display: grid; grid-template-columns: 180px 1fr auto; gap: 48px; align-items: center; padding: 44px 0; border-top: 1px solid var(--line); transition: padding-left 400ms; }
+  .process .step:last-child { border-bottom: 1px solid var(--line); }
+  .process .step:hover { padding-left: 16px; }
+  .process .step .num { font-family: var(--font-display); font-weight: 800; font-size: clamp(56px,7vw,110px); letter-spacing: -0.05em; color: var(--ink-ghost); line-height: 0.9; }
+  .process .step:hover .num { color: var(--signal); }
+  .process .step .body h3 { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px,3vw,46px); letter-spacing: -0.03em; margin-bottom: 12px; }
+  .process .step .body p { font-size: 16px; line-height: 1.5; color: var(--ink-dim); max-width: 620px; }
+  .process .step .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-ghost); }
+
+  /* ===== Stories (Work that Speaks Louder grid) ===== */
+  .stories { background: var(--white); }
+  .stories .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 20px; }
+  .card { border-radius: 20px; overflow: hidden; cursor: pointer; transition: transform 500ms cubic-bezier(0.2,0.8,0.2,1); }
+  .card:hover { transform: translateY(-6px); }
+  .card .cover { aspect-ratio: 4/3; position: relative; }
+  .card .cover .ph { position: absolute; bottom: 16px; left: 16px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+  .card .meta { padding: 20px 4px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .card .meta .n { font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
+  .card .meta .sub { font-family: var(--font-mono); font-size: 11px; color: var(--ink-ghost); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
+  .card .meta .wk { font-family: var(--font-mono); font-size: 11px; color: var(--signal); letter-spacing: 0.08em; }
+
+  /* ===== System ===== */
+  .system { background: var(--paper); }
+  .system .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .system .cell { background: var(--paper-2); padding: 44px 36px; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; transition: background 400ms; }
+  .system .cell:hover { background: var(--white); }
+  .system .cell .num { font-family: var(--font-mono); font-size: 11px; color: var(--signal); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 24px; }
+  .system .cell h3 { font-family: var(--font-display); font-weight: 700; font-size: 25px; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .system .cell p { font-size: 14px; line-height: 1.5; color: var(--ink-dim); }
+
+  /* ===== Pricing ===== */
+  .pricing { background: var(--white); }
+  .pricing .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 16px; max-width: 1400px; margin: 0 auto; }
+  .tier { padding: 40px 32px 36px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper-2); display: flex; flex-direction: column; transition: border-color 400ms, transform 400ms; }
+  .tier:hover { border-color: var(--line-strong); transform: translateY(-4px); }
+  .tier.featured { border-color: var(--signal); background: var(--white); box-shadow: 0 30px 60px -20px var(--signal-glow); }
+  .tier .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--signal); margin-bottom: 12px; min-height: 16px; }
+  .tier h3 { font-family: var(--font-display); font-weight: 800; font-size: 32px; letter-spacing: -0.03em; margin-bottom: 6px; }
+  .tier .price { font-family: var(--font-display); font-weight: 800; font-size: 54px; letter-spacing: -0.04em; line-height: 1; margin: 18px 0 6px; }
+  .tier .price .cents { font-size: 26px; color: var(--ink-ghost); font-weight: 500; }
+  .tier .period { font-family: var(--font-mono); font-size: 11px; color: var(--ink-ghost); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 28px; }
+  .tier ul { list-style: none; flex: 1; margin: 0 0 32px; padding: 24px 0 0; border-top: 1px solid var(--line); }
+  .tier ul li { font-size: 14px; line-height: 1.5; color: var(--ink-dim); padding: 10px 0; display: flex; gap: 12px; align-items: flex-start; }
+  .tier ul li::before { content: ''; flex-shrink: 0; width: 14px; height: 14px; background: var(--signal); border-radius: 50%; margin-top: 3px; }
+  .tier .cta-tier { display: flex; justify-content: center; padding: 14px 24px; border: 1px solid var(--line-strong); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; transition: background 250ms, color 250ms; }
+  .tier .cta-tier:hover { background: var(--ink); color: var(--white); }
+  .tier.featured .cta-tier { background: var(--signal); border-color: var(--signal); color: var(--white); }
+  .tier.featured .cta-tier:hover { background: var(--signal-deep); }
+
+  /* ===== Share ===== */
+  .share { background: var(--ink); color: var(--white); }
+  .share .section-title { color: var(--white); }
+  .share .section-desc { color: rgba(255,255,255,0.6); }
+  .share .index-label { color: var(--signal); }
+  .share-block { display: grid; grid-template-columns: 1.15fr 1fr; gap: 80px; align-items: center; max-width: 1500px; margin: 0 auto; }
+  .share-block h3 { font-family: var(--font-display); font-weight: 800; font-size: clamp(44px,6vw,88px); line-height: 0.95; letter-spacing: -0.04em; margin-bottom: 28px; }
+  .share-block h3 em { font-style: normal; color: var(--signal); }
+  .share-block p { font-size: 17px; line-height: 1.55; color: rgba(255,255,255,0.65); max-width: 500px; margin-bottom: 32px; }
+  .share-platforms { display: flex; gap: 10px; flex-wrap: wrap; }
+  .platform { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 14px; border: 1px solid rgba(255,255,255,0.18); border-radius: 999px; color: rgba(255,255,255,0.7); }
+  .share-mock { aspect-ratio: 9/16; max-width: 340px; width: 100%; margin-left: auto; border-radius: 14px; overflow: hidden; position: relative;
+    background: radial-gradient(at 85% 85%, rgba(109,74,255,0.65), transparent 55%), radial-gradient(at 15% 30%, rgba(196,74,255,0.4), transparent 55%), #07060d;
+    padding: 28px 24px; display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6); }
+  .share-mock .smk-top { display: flex; justify-content: space-between; align-items: center; }
+  .share-mock .smk-wordmark { font-family: var(--font-mark); font-weight: 800; font-size: 22px; }
+  .share-mock .smk-tag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+  .share-mock .smk-stat-value { font-family: var(--font-display); font-weight: 800; font-size: 96px; line-height: 0.88; letter-spacing: -0.045em; }
+  .share-mock .smk-stat-label { font-size: 13px; margin-top: 12px; max-width: 220px; color: rgba(255,255,255,0.85); }
+  .share-mock .smk-footer { display: flex; justify-content: space-between; align-items: flex-end; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .share-mock .smk-footer .pair { display: flex; flex-direction: column; gap: 4px; }
+  .share-mock .smk-footer .pair span:first-child { color: rgba(255,255,255,0.4); }
+
+  /* ===== Final ===== */
+  .final { background: var(--paper); text-align: center; padding: 200px var(--gutter) 160px; }
+  .final h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(64px,12vw,220px); line-height: 0.85; letter-spacing: -0.06em; max-width: 1500px; margin: 0 auto 48px; }
+  .final h2 em { font-style: normal; color: var(--signal); }
+  .final p { font-size: clamp(17px,1.4vw,22px); color: var(--ink-dim); max-width: 560px; margin: 0 auto 48px; line-height: 1.45; }
+  .final .cta-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* ===== Footer ===== */
+  footer { background: var(--ink); color: var(--white); padding: 80px var(--gutter) 56px; }
+  footer .container { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 32px; }
+  footer .left .wordmark { font-family: var(--font-mark); font-weight: 800; font-size: 72px; letter-spacing: -0.03em; text-transform: lowercase; margin-bottom: 16px; }
+  footer .left p { font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; }
+  footer .right { display: flex; gap: 48px; }
+  footer .col h4 { font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; font-weight: 500; }
+  footer .col ul { list-style: none; }
+  footer .col ul li { margin-bottom: 8px; }
+  footer .col ul li a { font-size: 14px; color: rgba(255,255,255,0.7); text-decoration: none; transition: color 200ms; }
+  footer .col ul li a:hover { color: var(--white); }
+
+  /* ===== Animations ===== */
+  @keyframes fade-in { to { opacity: 1; } }
+  @keyframes line-rise { to { transform: translateY(0); } }
+  .reveal-on-scroll { opacity: 0; transform: translateY(40px); transition: opacity 900ms cubic-bezier(0.2,0.8,0.2,1), transform 900ms cubic-bezier(0.2,0.8,0.2,1); }
+  .reveal-on-scroll.is-in { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 880px) {
+    :root { --gutter: 22px; }
+    section { padding: 90px var(--gutter); }
+    .nav .links { display: none; }
+    .nav .clock { display: none; }
+    .hero .portrait { width: 100%; opacity: 0.5; }
+    .hero .inner { padding: 100px var(--gutter) 40px; }
+    .share-block { grid-template-columns: 1fr; gap: 40px; }
+    .share-mock { margin: 0 auto; }
+    .process .step { grid-template-columns: 1fr; gap: 14px; }
+    .process .step .num { font-size: 64px; }
+    footer .container { flex-direction: column; align-items: flex-start; }
+    footer .right { flex-direction: column; gap: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .hero canvas { display: none; }
+    .hero { background: linear-gradient(120deg, var(--paper) 40%, var(--signal)); }
+  }
+</style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <nav class="nav">
+    <div class="clock" id="clock">TRAINING TIME — --:--:--</div>
+    <div class="links">
+      <a href="#how">How</a>
+      <a href="#system">System</a>
+      <a href="#stories">Stories</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <a href="#pricing" class="pill">Start your duo</a>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <canvas id="hero-shader"></canvas>
+      <div class="portrait" data-px="0.14"></div>
+      <div class="inner">
+        <div class="labels">
+          <div class="l">A training partnership, reinforced by AI.</div>
+          <div class="l">Built for two<span class="star">*</span> — available worldwide.</div>
+        </div>
+        <div>
+          <h1>
+            <span class="reveal"><span>Stronger</span></span>
+            <span class="reveal"><span>in pairs<span class="dot-end">.</span></span></span>
+          </h1>
+          <div class="cta-row">
+            <a href="#pricing" class="btn-dark">Start your duo <span class="arrow">→</span></a>
+            <a href="#how" class="btn-ghost">See how it works ↓</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATEMENT -->
+    <section class="statement reveal-on-scroll">
+      <h2>Discipline, shared<span class="dot"></span></h2>
+      <p>Solo apps optimize habits. Couple apps optimize check-ins. dovo optimizes the contract between two people who made their training a shared promise.</p>
+    </section>
+
+    <!-- RENDER SHOWCASE -->
+    <section class="render reveal-on-scroll">
+      <div class="stage" id="render-stage">
+        <div class="render-label">your character card — 3D render zone</div>
+        <div class="float-card">
+          <div class="fc-top"><span>dovo</span><span class="tier">level 14</span></div>
+          <div class="fc-stats">
+            <div class="s">FUE<b>62</b></div>
+            <div class="s">RES<b>88</b></div>
+            <div class="s">FLEX<b>41</b></div>
+          </div>
+          <div class="fc-class">The <span>Athlete</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROCESS -->
+    <section class="process reveal-on-scroll" id="how">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">How it<br/>works.</h2>
+          <p class="section-desc">A continuous loop, not a 30-day challenge. Show up weekly. Climb monthly. Hold the streak.</p>
+        </div>
+        <div class="step"><div class="num">01</div><div class="body"><h3>Pair up.</h3><p>Invite anyone — a partner, a friend, a rival. Two people or a whole group. Symmetric: you both put in, you both get out.</p></div><div class="tag">2 to N</div></div>
+        <div class="step"><div class="num">02</div><div class="body"><h3>Set your sports.</h3><p>Gym, running, pilates, ballet — each with structured metrics. You don't have to do the same thing. Each trains their own routine.</p></div><div class="tag">your routine</div></div>
+        <div class="step"><div class="num">03</div><div class="body"><h3>Train & track.</h3><p>AI converts effort to points, normalized to your own body via BMR. The system measures you against your target, not someone else's.</p></div><div class="tag">weekly cycles</div></div>
+        <div class="step"><div class="num">04</div><div class="body"><h3>Level up together.</h3><p>Climb infinite tiers, hold the streak, unlock real rewards. Every milestone exports as a card to share.</p></div><div class="tag">infinite levels</div></div>
+      </div>
+    </section>
+
+    <!-- STORIES -->
+    <section class="stories reveal-on-scroll" id="stories">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Stories that<br/>speak louder.</h2>
+          <p class="section-desc">Real duos. Real change. Tracked by the system, owned by the people who built it — and theirs to share.</p>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <div class="cover" style="background: linear-gradient(160deg, #8b6dff, #6d4aff);"><span class="ph">Pilates · Calisthenics</span></div>
+            <div class="meta"><div><div class="n">Lía &amp; Bruno</div><div class="sub">"The streak negotiates for us"</div></div><div class="wk">14 wk</div></div>
+          </article>
+          <article class="card">
+            <div class="cover" style="background: linear-gradient(160deg, #0d0b1a, #1f1b38);"><span class="ph">Running · Yoga</span></div>
+            <div class="meta"><div><div class="n">Hana &amp; Sora</div><div class="sub">"Two cities, one streak"</div></div><div class="wk">22 wk</div></div>
+          </article>
+          <article class="card">
+            <div class="cover" style="background: linear-gradient(160deg, #3ac4d6, #2a7a96);"><span class="ph">Swimming · Strength</span></div>
+            <div class="meta"><div><div class="n">Mateo &amp; Camila</div><div class="sub">"Mediterranean booked at Level 6"</div></div><div class="wk">9 wk</div></div>
+          </article>
+          <article class="card">
+            <div class="cover" style="background: linear-gradient(160deg, #aef03c, #6b9620);"><span class="ph">Ballet · Functional</span></div>
+            <div class="meta"><div><div class="n">Aiko &amp; Ren</div><div class="sub">"VIT 22 → 78. I sleep different"</div></div><div class="wk">30 wk</div></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SYSTEM -->
+    <section class="system reveal-on-scroll" id="system">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">The system.</h2>
+          <p class="section-desc">A game where your real body is the character. Six stats, infinite levels, streaks that earn real rewards.</p>
+        </div>
+        <div class="grid">
+          <div class="cell"><div class="num">01 — Stats</div><h3>Six attributes. One body.</h3><p>Every workout maps to Strength, Endurance, Flexibility, Velocity, Equilibrium, Vitality. Read your character sheet like a player.</p></div>
+          <div class="cell"><div class="num">02 — Levels</div><h3>Infinite tiers. Real progression.</h3><p>Climb from Novice to Legend. Reset with prestige and start over with a badge that says you've proved it once.</p></div>
+          <div class="cell"><div class="num">03 — Streaks</div><h3>Weeks, not days.</h3><p>The unit of consistency is a week. Each week you both hit target, the streak grows. Each week you don't, it holds.</p></div>
+          <div class="cell"><div class="num">04 — AI plans</div><h3>Meals that learn your taste.</h3><p>Personalized nutrition, monthly with weekly tweaks. Tell it you hated quinoa once. It won't ask again.</p></div>
+          <div class="cell"><div class="num">05 — Body analysis</div><h3>Private by architecture.</h3><p>Optional photo. AI Vision reads composition. Image deleted in 60 seconds — only the numbers stay, only you see them.</p></div>
+          <div class="cell"><div class="num">06 — Rewards</div><h3>Real things. Earned by streak.</h3><p>Your wishlist + partner discounts + AI-suggested gear. Unlocked by the streak you hold, not the level you sit on.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="pricing reveal-on-scroll" id="pricing">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Pricing.</h2>
+          <p class="section-desc">Free for the first 200 duos. Everything that defines the product is in the free tier.</p>
+        </div>
+        <div class="grid">
+          <div class="tier"><div class="tag">&nbsp;</div><h3>Free</h3><div class="price">$0</div><div class="period">for the first 200 duos</div><ul><li>Unlimited duos &amp; groups</li><li>4 sports, structured check-ins</li><li>BMR-normalized points</li><li>Stats, levels, infinite prestige</li><li>Wishlist &amp; rewards</li><li>Share cards for social</li></ul><a href="#" class="cta-tier">Start free</a></div>
+          <div class="tier featured"><div class="tag">↗ Most chosen</div><h3>Pro</h3><div class="price">$9<span class="cents">.99</span></div><div class="period">per duo / month</div><ul><li>Everything in Free</li><li>AI meal plans + weekly tweaks</li><li>Macros + photo logging</li><li>Body composition analysis</li><li>Premium partner discounts</li><li>Custom reward rituals</li></ul><a href="#" class="cta-tier">Start Pro</a></div>
+          <div class="tier"><div class="tag">— Coming soon</div><h3>Premium</h3><div class="price">$19<span class="cents">.99</span></div><div class="period">per duo / month</div><ul><li>Everything in Pro</li><li>Medical study upload + AI</li><li>Pro-verified plans</li><li>Priority AI compute</li><li>Early access to new sports</li></ul><a href="#" class="cta-tier">Join waitlist</a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHARE (dark inset section) -->
+    <section class="share reveal-on-scroll" id="share">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Built to share.</h2>
+          <p class="section-desc">Wins go further when they travel. Every milestone exports as a vertical card.</p>
+        </div>
+        <div class="share-block">
+          <div class="copy">
+            <h3>Wins go further<br />when <em>they travel.</em></h3>
+            <p>Every level up, every streak hit, every duo bond exports as a vertical card — sized for stories, reels, and feeds. One tap. Your name on it.</p>
+            <div class="share-platforms"><span class="platform">Instagram</span><span class="platform">TikTok</span><span class="platform">X</span><span class="platform">Strava</span><span class="platform">+ image / link</span></div>
+          </div>
+          <div class="share-mock">
+            <div class="smk-top"><div class="smk-wordmark">dovo</div><div class="smk-tag">level up</div></div>
+            <div><div class="smk-stat-value">+12</div><div class="smk-stat-label">levels gained with Bruno in 14 weeks</div></div>
+            <div class="smk-footer"><div class="pair"><span>class</span><span>Athlete</span></div><div class="pair"><span>streak</span><span>22 wk</span></div><div class="pair"><span>top stat</span><span>RES 88</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL -->
+    <section class="final reveal-on-scroll">
+      <h2>Your streak starts<br />when <em>you both</em> show up.</h2>
+      <p>Free for the first 200 duos. No card needed. Bring someone who decided your discipline is their business too.</p>
+      <div class="cta-row">
+        <a href="#" class="btn-dark">Start your duo <span class="arrow">→</span></a>
+        <a href="#how" class="btn-ghost">Read the system ↑</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="left"><div class="wordmark">dovo</div><p>built for two · 2026</p></div>
+      <div class="right">
+        <div class="col"><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="#system">System</a></li><li><a href="#pricing">Pricing</a></li></ul></div>
+        <div class="col"><h4>Trust</h4><ul><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Disclaimer</a></li></ul></div>
+        <div class="col"><h4>Reach</h4><ul><li><a href="#">Partners</a></li><li><a href="#">Contact</a></li><li><a href="#">Instagram</a></li></ul></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.min.js"></script>
+  <script>
+    // ===== Live clock (archar tell) =====
+    const clockEl = document.getElementById('clock');
+    function tickClock() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      const ss = String(d.getSeconds()).padStart(2,'0');
+      clockEl.textContent = `TRAINING TIME — ${hh}:${mm}:${ss}`;
+    }
+    setInterval(tickClock, 1000); tickClock();
+
+    // ===== Hero warm gradient shader (light) =====
+    const canvas = document.getElementById('hero-shader');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
+    renderer.setPixelRatio(0.6 * (window.devicePixelRatio || 1));
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, -1);
+    const uniforms = { resolution: { value: [1,1] }, time: { value: 0 } };
+    const vsh = `attribute vec3 position; void main(){ gl_Position = vec4(position,1.0); }`;
+    const fsh = `
+      precision highp float;
+      uniform vec2 resolution; uniform float time;
+      float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p){ vec2 i=floor(p); vec2 f=fract(p); f=f*f*(3.0-2.0*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y); }
+      void main(){
+        vec2 uv = gl_FragCoord.xy / resolution;
+        float t = time * 0.04;
+        float n  = noise(uv * 2.2 + vec2(t, t*0.6));
+        float n2 = noise(uv * 3.5 - vec2(t*0.5, t));
+        vec3 base     = vec3(0.957, 0.957, 0.965);  // cool near-white #f4f4f6
+        vec3 lavender = vec3(0.720, 0.660, 1.000);  // soft lavender
+        vec3 violet   = vec3(0.427, 0.290, 1.000);  // electric violet #6d4aff
+        float m = smoothstep(0.10, 0.95, uv.x + n*0.30 - uv.y*0.25);
+        vec3 col = mix(base, lavender, m);
+        col = mix(col, violet, smoothstep(0.55, 1.15, uv.x + n2*0.22 - uv.y*0.1));
+        gl_FragColor = vec4(col, 1.0);
+      }`;
+    const pos = new THREE.BufferAttribute(new Float32Array([-1,-1,0, 1,-1,0, -1,1,0, 1,-1,0, -1,1,0, 1,1,0]), 3);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', pos);
+    scene.add(new THREE.Mesh(geo, new THREE.RawShaderMaterial({ vertexShader: vsh, fragmentShader: fsh, uniforms })));
+    function resizeHero() {
+      const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
+      renderer.setSize(w, h, false);
+      uniforms.resolution.value = [canvas.width, canvas.height];
+    }
+    window.addEventListener('resize', resizeHero); resizeHero();
+
+    // ===== Scroll reveal =====
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-in'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => obs.observe(el));
+
+    // ===== Render-stage parallax (subtle 3D feel on scroll) =====
+    const stage = document.getElementById('render-stage');
+    let targetScroll = 0, lastScroll = 0;
+    window.addEventListener('scroll', () => { targetScroll = window.scrollY; }, { passive: true });
+
+    // ===== Parallax engine — archar-style layered depth =====
+    // Elements move at different rates vs viewport center → perceived 3D depth.
+    const pxEls = [
+      ...[...document.querySelectorAll('[data-px]')].map(el => ({ el, speed: parseFloat(el.dataset.px) })),
+      ...[...document.querySelectorAll('.section-title')].map(el => ({ el, speed: 0.06 })),
+    ];
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) {
+      (function loop() {
+        uniforms.time.value += 0.016;
+        renderer.render(scene, camera);
+        lastScroll += (targetScroll - lastScroll) * 0.08;
+
+        const vh2 = window.innerHeight / 2;
+
+        // Render stage — perspective tilt + rise (archar product-render parallax)
+        if (stage) {
+          const rect = stage.getBoundingClientRect();
+          const center = rect.top + rect.height / 2 - vh2;
+          stage.style.transform = `perspective(1400px) rotateX(${(center * -0.004).toFixed(2)}deg) translateY(${(center * -0.03).toFixed(1)}px)`;
+        }
+
+        // Layered parallax — only translate when element is near viewport (perf)
+        for (let i = 0; i < pxEls.length; i++) {
+          const { el, speed } = pxEls[i];
+          const rect = el.getBoundingClientRect();
+          if (rect.bottom < -200 || rect.top > window.innerHeight + 200) continue;
+          const center = rect.top + rect.height / 2 - vh2;
+          el.style.transform = `translate3d(0, ${(-center * speed).toFixed(1)}px, 0)`;
+        }
+
+        requestAnimationFrame(loop);
+      })();
+    }
+  </script>
+</body>
+</html>

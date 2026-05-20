@@ -47,3 +47,21 @@ export async function signInAction(formData: FormData): Promise<ActionResult> {
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
+
+// Google OAuth — método primario de onboarding. Retorna la URL de Google
+// para que el client redirija. El callback /auth/callback maneja el code exchange.
+export async function signInWithGoogle(): Promise<
+  { ok: true; url: string } | { ok: false; error: string }
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: appUrl("/auth/callback"),
+    },
+  });
+  if (error || !data.url) {
+    return { ok: false, error: error?.message ?? "no se pudo iniciar Google" };
+  }
+  return { ok: true, url: data.url };
+}

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signInAction } from "@/lib/actions/auth";
+import GoogleButton from "../_components/GoogleButton";
 
 export default function SignInPage() {
   const [pending, startTransition] = useTransition();
@@ -31,7 +32,15 @@ export default function SignInPage() {
     >
       <div>
         <h1 className="syne text-3xl lowercase mb-2">entrar</h1>
-        <p className="text-sm opacity-70">recibe un link en tu correo.</p>
+        <p className="text-sm opacity-70">con google o tu correo.</p>
+      </div>
+
+      <GoogleButton />
+
+      <div className="flex items-center gap-3 text-xs uppercase tracking-widest opacity-40">
+        <span className="flex-1 h-px bg-ink/20" />
+        o con correo
+        <span className="flex-1 h-px bg-ink/20" />
       </div>
 
       <label className="block">
