@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { updatePulseOptOut } from "@/lib/actions/profile";
 
 export default function PulseOptOutToggle({ initial }: { initial: boolean }) {
+  const t = useTranslations("ajustes");
   const [optOut, setOptOut] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -29,7 +31,7 @@ export default function PulseOptOutToggle({ initial }: { initial: boolean }) {
           onClick={toggle}
           disabled={pending}
           className={`relative w-12 h-6 rounded-full transition-colors ${
-            optOut ? "bg-ink/30" : "bg-ink"
+            optOut ? "bg-ink/25" : "bg-signal"
           } disabled:opacity-50 shrink-0 mt-1`}
           aria-pressed={!optOut}
         >
@@ -40,14 +42,10 @@ export default function PulseOptOutToggle({ initial }: { initial: boolean }) {
           />
         </button>
         <div className="flex-1">
-          <p className="syne lowercase">
-            {optOut ? "fuera de pulse" : "ayudando con pulse"}
+          <p className="display font-semibold lowercase">
+            {optOut ? t("pulseOff") : t("pulseOn")}
           </p>
-          <p className="text-xs opacity-70 mt-1 leading-relaxed">
-            pulse es la capa anonimizada que mide cuánta gente cumple sus
-            metas. nadie ve tus datos individuales, solo agregados. puedes
-            apagarlo cuando quieras.
-          </p>
+          <p className="text-xs opacity-70 mt-1 leading-relaxed">{t("pulseDesc")}</p>
         </div>
       </div>
       {error && <p className="text-xs text-red-600 mt-2">{error}</p>}

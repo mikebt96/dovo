@@ -1,31 +1,127 @@
 @import "tailwindcss";
 
-@theme {
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #1c1c1c;
-  --color-papel: #f5f1ea;
-  --color-papel-dark: #e6e0d5;
-  --color-papel-darker: #cdc5b5;
-  --color-lana: #4a5d3a;
-  --color-lana-light: #6b7d59;
+/* Manual dark override: <html data-theme="dark">. Absence of the attribute
+   means "follow the OS" (handled by the prefers-color-scheme block below). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-  --font-display: "Syne", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+/* Fonts: Geist for display + body, Geist Mono for meta/data, Syne for the
+   wordmark only (per docs/specs/DESIGN.md §4). */
+@theme {
+  --font-display: "Geist", system-ui, sans-serif;
+  --font-body: "Geist", system-ui, sans-serif;
+  --font-mark: "Syne", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
 }
 
-html, body {
-  background: var(--color-papel);
-  color: var(--color-ink);
+/* Map the legacy semantic tokens to theme-reactive CSS vars. `inline` keeps
+   the var() reference in the generated utilities so bg-papel / text-ink flip
+   automatically between light and dark. */
+@theme inline {
+  --color-ink: var(--c-ink);
+  --color-ink-soft: var(--c-ink-soft);
+  --color-papel: var(--c-paper);
+  --color-papel-dark: var(--c-paper-dark);
+  --color-papel-darker: var(--c-paper-darker);
+  --color-lana: var(--c-signal);
+  --color-lana-light: var(--c-signal-deep);
+  --color-signal: var(--c-signal);
+  --color-signal-deep: var(--c-signal-deep);
+}
+
+/* ---- Ultraviolet · light (default) ---- */
+:root {
+  --c-paper: #f4f4f6; /* cool near-white — no warm cream */
+  --c-paper-dark: #e7e7ec; /* subtle track / inset surface */
+  --c-paper-darker: #d8d8df;
+  --c-ink: #08070d; /* blue-black near-black */
+  --c-ink-soft: #2c2b36;
+  --c-signal: #6d4aff; /* electric violet — the single accent */
+  --c-signal-deep: #5a37e0;
+  color-scheme: light;
+}
+
+/* ---- Ultraviolet · dark (OS preference, unless overridden to light) ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-paper: #07060d; /* deep blue-black, not pure black */
+    --c-paper-dark: rgba(255, 255, 255, 0.08);
+    --c-paper-darker: rgba(255, 255, 255, 0.14);
+    --c-ink: #f4f4f6;
+    --c-ink-soft: rgba(255, 255, 255, 0.66);
+    --c-signal: #8262ff; /* a touch brighter for dark contrast */
+    --c-signal-deep: #6d4aff;
+    color-scheme: dark;
+  }
+}
+
+/* ---- Ultraviolet · dark (manual override) ---- */
+:root[data-theme="dark"] {
+  --c-paper: #07060d;
+  --c-paper-dark: rgba(255, 255, 255, 0.08);
+  --c-paper-darker: rgba(255, 255, 255, 0.14);
+  --c-ink: #f4f4f6;
+  --c-ink-soft: rgba(255, 255, 255, 0.66);
+  --c-signal: #8262ff;
+  --c-signal-deep: #6d4aff;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--c-paper);
+  color: var(--c-ink);
   font-family: var(--font-body);
-  font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Wordmark only. */
 .syne {
-  font-family: var(--font-display);
+  font-family: var(--font-mark);
 }
-
+/* Geist display for headings (the app's editorial type). */
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
 .mono {
   font-family: var(--font-mono);
+}
+
+/* Language + theme switchers — color inherits so they read on any surface. */
+.lang-toggle,
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lang-toggle button,
+.theme-toggle button {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.4;
+  transition: opacity 200ms;
+}
+.lang-toggle button[data-active="true"],
+.theme-toggle button[data-active="true"] {
+  opacity: 1;
+}
+.lang-toggle button:hover:not(:disabled),
+.theme-toggle button:hover:not(:disabled) {
+  opacity: 0.8;
+}
+.lang-toggle button:disabled,
+.theme-toggle button:disabled {
+  cursor: default;
+}
+.lang-sep {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.3;
 }

@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import JoinButton from "./JoinButton";
 
-export const metadata = { title: "invitación · dovo" };
 export const dynamic = "force-dynamic";
 
 type Grupo = {
@@ -20,6 +20,8 @@ export default async function InvitePage({
 }) {
   const { token } = await params;
 
+  const t = await getTranslations("invite");
+  const tOnb = await getTranslations("onboarding");
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,30 +37,28 @@ export default async function InvitePage({
     .eq("invite_token", token)
     .maybeSingle<Grupo>();
 
-  if (!grupo) return <Shell title="invitación no existe" />;
+  if (!grupo) return <Shell title={t("notFound")} />;
   if (grupo.estado !== "activo") {
-    return <Shell title="este grupo ya no está activo" />;
+    return <Shell title={t("inactive")} />;
   }
 
   // No autenticado → mandar a sign-up con next al invite
   if (!user) {
     const next = encodeURIComponent(`/invite/${token}`);
     return (
-      <Shell title={`te invitaron a "${grupo.nombre_grupo}"`}>
-        <p className="text-sm opacity-70 mb-6">
-          crea tu cuenta para unirte al grupo.
-        </p>
+      <Shell title={t("invitedTo", { name: grupo.nombre_grupo })}>
+        <p className="text-sm opacity-70 mb-6">{t("signupPrompt")}</p>
         <Link
           href={`/sign-up?next=${next}`}
-          className="block w-full bg-ink text-papel py-3 syne lowercase text-center"
+          className="block w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase text-center hover:bg-signal hover:text-white transition-colors"
         >
-          crear cuenta y unirme
+          {t("createAndJoin")}
         </Link>
         <Link
           href={`/sign-in?next=${next}`}
-          className="block w-full border border-ink py-3 syne lowercase text-center mt-3"
+          className="block w-full border border-ink py-3 rounded-full display font-semibold lowercase text-center mt-3 hover:border-signal transition-colors"
         >
-          ya tengo cuenta
+          {t("haveAccount")}
         </Link>
       </Shell>
     );
@@ -66,10 +66,9 @@ export default async function InvitePage({
 
   // Autenticado → botón unirse
   return (
-    <Shell title={`te invitaron a "${grupo.nombre_grupo}"`}>
+    <Shell title={t("invitedTo", { name: grupo.nombre_grupo })}>
       <p className="text-sm opacity-70 mb-6">
-        grupo {grupo.tipo_grupo}. al unirte empiezas a compartir tu progreso
-        físico con el equipo.
+        {t("joinPrompt", { tipo: tOnb(`tipo.${grupo.tipo_grupo}`) })}
       </p>
       <JoinButton token={token} />
     </Shell>
@@ -91,7 +90,7 @@ function Shell({
       >
         dovo
       </Link>
-      <h1 className="syne text-3xl lowercase mb-6">{title}</h1>
+      <h1 className="display text-3xl font-extrabold lowercase mb-6">{title}</h1>
       {children}
     </main>
   );

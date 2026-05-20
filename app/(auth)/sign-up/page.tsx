@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { signUpAction } from "@/lib/actions/auth";
 import GoogleButton from "../_components/GoogleButton";
 
 export default function SignUpPage() {
+  const t = useTranslations("auth");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -12,10 +14,8 @@ export default function SignUpPage() {
   if (sent) {
     return (
       <div className="text-center">
-        <h1 className="syne text-2xl mb-3 lowercase">revisa tu correo</h1>
-        <p className="text-sm opacity-70">
-          te mandamos un link para entrar a dovo.
-        </p>
+        <h1 className="display text-2xl font-extrabold mb-3 lowercase">{t("checkEmail")}</h1>
+        <p className="text-sm opacity-70">{t("signUp.sentBody")}</p>
       </div>
     );
   }
@@ -33,20 +33,20 @@ export default function SignUpPage() {
       className="space-y-6"
     >
       <div>
-        <h1 className="syne text-3xl lowercase mb-2">hacer dúo</h1>
-        <p className="text-sm opacity-70">empieza con google o tu correo.</p>
+        <h1 className="display text-3xl font-extrabold lowercase mb-2">{t("signUp.title")}</h1>
+        <p className="text-sm opacity-70">{t("signUp.subtitle")}</p>
       </div>
 
       <GoogleButton />
 
       <div className="flex items-center gap-3 text-xs uppercase tracking-widest opacity-40">
         <span className="flex-1 h-px bg-ink/20" />
-        o con correo
+        {t("emailDivider")}
         <span className="flex-1 h-px bg-ink/20" />
       </div>
 
       <label className="block">
-        <span className="text-xs uppercase tracking-widest opacity-60">nombre</span>
+        <span className="text-xs uppercase tracking-widest opacity-60">{t("nameLabel")}</span>
         <input
           name="nombre"
           required
@@ -56,7 +56,7 @@ export default function SignUpPage() {
       </label>
 
       <label className="block">
-        <span className="text-xs uppercase tracking-widest opacity-60">email</span>
+        <span className="text-xs uppercase tracking-widest opacity-60">{t("emailLabel")}</span>
         <input
           name="email"
           type="email"
@@ -66,27 +66,39 @@ export default function SignUpPage() {
         />
       </label>
 
-      {error && (
-        <p className="text-sm text-red-700">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-700">{error}</p>}
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-ink text-papel py-3 syne lowercase disabled:opacity-50"
+        className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
-        {pending ? "mandando..." : "entrar"}
+        {pending ? t("sending") : t("signUp.submit")}
       </button>
 
       <p className="text-xs opacity-60 text-center leading-relaxed">
-        al continuar aceptas los{" "}
-        <a href="/terminos" className="underline">términos</a>{" "}
-        y el{" "}
-        <a href="/privacidad" className="underline">aviso de privacidad</a>.
+        {t.rich("signUp.legal", {
+          terms: (chunks) => (
+            <a href="/terminos" className="underline">
+              {chunks}
+            </a>
+          ),
+          privacy: (chunks) => (
+            <a href="/privacidad" className="underline">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
 
       <p className="text-xs opacity-60 text-center">
-        ¿ya tienes cuenta? <a href="/sign-in" className="underline">entra aquí</a>.
+        {t.rich("signUp.footer", {
+          a: (chunks) => (
+            <a href="/sign-in" className="underline">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
     </form>
   );

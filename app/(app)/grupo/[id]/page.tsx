@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { appUrl } from "@/lib/utils/url";
 import InviteLink from "./InviteLink";
 
-export const metadata = { title: "grupo · dovo" };
 export const dynamic = "force-dynamic";
 
 type Grupo = {
@@ -28,6 +28,8 @@ export default async function GrupoPage({
 }) {
   const { id } = await params;
 
+  const t = await getTranslations("grupo");
+  const tOnb = await getTranslations("onboarding");
   const supabase = await createClient();
   const {
     data: { user },
@@ -60,21 +62,21 @@ export default async function GrupoPage({
       <header className="mb-12 flex items-end justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest opacity-60 mb-2">
-            grupo {grupo.tipo_grupo}
+            {t("eyebrow", { tipo: tOnb(`tipo.${grupo.tipo_grupo}`) })}
           </p>
-          <h1 className="syne text-3xl lowercase">{grupo.nombre_grupo}</h1>
+          <h1 className="display text-3xl font-extrabold lowercase">{grupo.nombre_grupo}</h1>
         </div>
         <Link
           href="/"
           className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
         >
-          ← inicio
+          {t("back")}
         </Link>
       </header>
 
       <section className="mb-10">
         <h2 className="text-xs uppercase tracking-widest opacity-60 mb-4">
-          miembros ({miembros.length})
+          {t("members", { n: miembros.length })}
         </h2>
         <ul className="space-y-2">
           {miembros.map((m) => (
@@ -82,12 +84,12 @@ export default async function GrupoPage({
               key={m.user_id}
               className="flex items-center justify-between border-b border-ink/15 py-3"
             >
-              <span className="syne lowercase">
-                {m.users?.nombre ?? "miembro"}
+              <span className="display font-medium lowercase">
+                {m.users?.nombre ?? t("member")}
               </span>
               {m.role === "creator" && (
-                <span className="text-xs uppercase tracking-widest opacity-50">
-                  creador
+                <span className="text-xs uppercase tracking-widest text-signal opacity-80">
+                  {t("creator")}
                 </span>
               )}
             </li>
@@ -95,11 +97,9 @@ export default async function GrupoPage({
         </ul>
       </section>
 
-      <section className="border-t border-ink pt-8">
-        <h2 className="syne text-xl lowercase mb-3">invita a más</h2>
-        <p className="text-sm opacity-70 mb-6">
-          comparte este link para que se unan al grupo.
-        </p>
+      <section className="border-t border-ink/15 pt-8">
+        <h2 className="display text-xl font-bold lowercase mb-3">{t("inviteTitle")}</h2>
+        <p className="text-sm opacity-70 mb-6">{t("inviteSubtitle")}</p>
         <InviteLink url={inviteUrl} />
       </section>
     </main>

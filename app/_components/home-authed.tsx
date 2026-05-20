@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import LanguageToggle from "./LanguageToggle";
 
 type Character = {
   fue: number;
@@ -35,6 +37,7 @@ function barHeight(v: number): number {
 }
 
 export default async function HomeAuthed() {
+  const t = await getTranslations("home");
   const supabase = await createClient();
   const {
     data: { user },
@@ -82,32 +85,33 @@ export default async function HomeAuthed() {
         <Link href="/" className="syne text-2xl lowercase tracking-tight">
           dovo
         </Link>
-        <nav className="flex gap-4 text-xs uppercase tracking-widest opacity-60">
+        <nav className="flex items-center gap-4 text-xs uppercase tracking-widest opacity-60">
           <Link href="/perfil" className="hover:opacity-100">
-            perfil
+            {t("navProfile")}
           </Link>
           <Link href="/ajustes" className="hover:opacity-100">
-            ajustes
+            {t("navSettings")}
           </Link>
+          <LanguageToggle />
         </nav>
       </header>
 
       {/* Character header: stats compactas + nivel + clase + racha */}
-      <section className="border-t border-b border-ink py-6 mb-8">
+      <section className="border-t border-b border-ink/15 py-6 mb-8">
         <div className="flex items-baseline justify-between mb-4">
-          <p className="syne lowercase">
-            nivel {character.nivel} · {character.class_name}
+          <p className="display font-semibold lowercase">
+            {t("level", { n: character.nivel, clase: character.class_name })}
           </p>
           <p className="text-xs uppercase tracking-widest opacity-60">
-            racha {racha} sem
+            {t("streak", { n: racha })}
           </p>
         </div>
         <div className="flex gap-2 items-end h-16">
           {STAT_LABELS.map(({ key, label }) => (
             <div key={key} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full h-12 bg-papel-dark relative flex items-end">
+              <div className="w-full h-12 bg-papel-dark rounded-sm relative flex items-end overflow-hidden">
                 <div
-                  className="w-full bg-ink"
+                  className="w-full bg-signal"
                   style={{ height: `${barHeight(character[key] as number)}%` }}
                 />
               </div>
@@ -122,25 +126,22 @@ export default async function HomeAuthed() {
       {/* Hoy (placeholder — las tasks reales llegan en F2/F3) */}
       <section className="mb-8">
         <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
-          hoy
+          {t("todayTitle")}
         </h2>
-        <p className="text-sm opacity-50">
-          el check-in con métricas llega en la siguiente actualización. por
-          ahora arma tu rutina y conoce a tu grupo.
-        </p>
+        <p className="text-sm opacity-50">{t("todayBody")}</p>
       </section>
 
       {/* Grupos */}
       <section>
         <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
-          tus grupos
+          {t("groupsTitle")}
         </h2>
         {grupos.length === 0 ? (
           <Link
             href="/onboarding/grupo"
-            className="inline-block bg-ink text-papel px-6 py-3 syne lowercase"
+            className="inline-block bg-ink text-papel px-6 py-3 display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
           >
-            crear o unirme a un grupo →
+            {t("createGroup")}
           </Link>
         ) : (
           <ul className="space-y-2">
@@ -148,9 +149,9 @@ export default async function HomeAuthed() {
               <li key={g.id}>
                 <Link
                   href={`/grupo/${g.id}`}
-                  className="block border border-ink/20 p-4 hover:border-ink transition-colors"
+                  className="block border border-ink/15 rounded-lg p-4 hover:border-signal transition-colors"
                 >
-                  <span className="syne lowercase">{g.nombre_grupo}</span>
+                  <span className="display font-medium lowercase">{g.nombre_grupo}</span>
                   <span className="text-xs opacity-60 ml-2">
                     {g.tipo_grupo}
                   </span>

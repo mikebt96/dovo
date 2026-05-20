@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "perfil · dovo" };
 export const dynamic = "force-dynamic";
 
 type Character = {
@@ -26,16 +26,18 @@ type Perfil = {
   bmr_calculado: number | null;
 };
 
-const STATS: { key: keyof Character; label: string }[] = [
-  { key: "fue", label: "Fuerza" },
-  { key: "res", label: "Resistencia" },
-  { key: "flex", label: "Flexibilidad" },
-  { key: "vel", label: "Velocidad" },
-  { key: "equ", label: "Equilibrio" },
-  { key: "vit", label: "Vitalidad" },
+const STATS: { key: keyof Character; statKey: string }[] = [
+  { key: "fue", statKey: "fue" },
+  { key: "res", statKey: "res" },
+  { key: "flex", statKey: "flex" },
+  { key: "vel", statKey: "vel" },
+  { key: "equ", statKey: "equ" },
+  { key: "vit", statKey: "vit" },
 ];
 
 export default async function PerfilPage() {
+  const t = await getTranslations("perfil");
+  const tStats = await getTranslations("stats");
   const supabase = await createClient();
   const {
     data: { user },
@@ -81,13 +83,13 @@ export default async function PerfilPage() {
       <header className="mb-12 flex items-end justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest opacity-60 mb-2">
-            tu personaje
+            {t("eyebrow")}
           </p>
-          <h1 className="syne text-3xl lowercase">
+          <h1 className="display text-3xl font-extrabold lowercase">
             {meRow?.nombre ?? user.email}
           </h1>
           <p className="text-xs mono opacity-60 mt-1">
-            nivel {character.nivel} · {character.class_name}
+            {t("level", { n: character.nivel, clase: character.class_name })}
             {character.prestige > 0 && ` · prestige ${character.prestige}`}
           </p>
         </div>
@@ -95,21 +97,21 @@ export default async function PerfilPage() {
           href="/"
           className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
         >
-          ← inicio
+          {t("back")}
         </Link>
       </header>
 
-      <section className="border-t border-b border-ink py-8 mb-10">
+      <section className="border-t border-b border-ink/15 py-8 mb-10">
         <p className="text-xs uppercase tracking-widest opacity-60 mb-5">
-          atributos
+          {t("attributes")}
         </p>
         <div className="space-y-3">
-          {STATS.map(({ key, label }) => (
+          {STATS.map(({ key, statKey }) => (
             <div key={key} className="flex items-center gap-4">
-              <span className="text-sm w-28">{label}</span>
-              <div className="flex-1 h-2 bg-papel-dark">
+              <span className="text-sm w-28">{tStats(statKey)}</span>
+              <div className="flex-1 h-2 bg-papel-dark rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-ink"
+                  className="h-full bg-signal"
                   style={{
                     width: `${Math.min(100, Math.round((Math.log10((character[key] as number) + 1) / 2.2) * 100))}%`,
                   }}
@@ -121,26 +123,23 @@ export default async function PerfilPage() {
             </div>
           ))}
         </div>
-        <p className="text-xs opacity-50 mt-6">
-          tus atributos suben con cada check-in (llega en la siguiente
-          actualización).
-        </p>
+        <p className="text-xs opacity-50 mt-6">{t("attributesNote")}</p>
       </section>
 
       {perfil && (
         <section>
           <p className="text-xs uppercase tracking-widest opacity-60 mb-4">
-            datos físicos
+            {t("physicalData")}
           </p>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <Row label="Peso" value={`${perfil.peso_kg} kg`} />
-            <Row label="Altura" value={`${perfil.altura_cm} cm`} />
-            <Row label="Edad" value={`${perfil.edad} años`} />
-            <Row label="Género" value={perfil.genero} />
+            <Row label={t("weight")} value={`${perfil.peso_kg} kg`} />
+            <Row label={t("height")} value={`${perfil.altura_cm} cm`} />
+            <Row label={t("age")} value={t("ageValue", { n: perfil.edad })} />
+            <Row label={t("gender")} value={perfil.genero} />
             {perfil.bmr_calculado && (
               <Row
-                label="Metabolismo basal"
-                value={`${Math.round(perfil.bmr_calculado)} kcal/día`}
+                label={t("bmr")}
+                value={t("bmrValue", { n: Math.round(perfil.bmr_calculado) })}
               />
             )}
           </div>

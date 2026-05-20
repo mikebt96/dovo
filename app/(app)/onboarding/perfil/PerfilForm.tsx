@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { saveProfileFisico } from "@/lib/actions/perfil";
 import {
   NIVELES_ACTIVIDAD,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/schemas/perfil-fisico";
 
 export default function PerfilForm() {
+  const t = useTranslations("onboarding");
   const router = useRouter();
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
@@ -57,46 +59,46 @@ export default function PerfilForm() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-3 gap-3">
-        <Field label="Peso (kg)">
+        <Field label={t("labelWeight")}>
           <input
             type="number"
             inputMode="decimal"
             value={peso}
             onChange={(e) => setPeso(e.target.value)}
-            className="w-full bg-papel border-b border-ink pb-2 focus:outline-none"
+            className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
           />
         </Field>
-        <Field label="Altura (cm)">
+        <Field label={t("labelHeight")}>
           <input
             type="number"
             inputMode="decimal"
             value={altura}
             onChange={(e) => setAltura(e.target.value)}
-            className="w-full bg-papel border-b border-ink pb-2 focus:outline-none"
+            className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
           />
         </Field>
-        <Field label="Edad">
+        <Field label={t("labelAge")}>
           <input
             type="number"
             inputMode="numeric"
             value={edad}
             onChange={(e) => setEdad(e.target.value)}
-            className="w-full bg-papel border-b border-ink pb-2 focus:outline-none"
+            className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
           />
         </Field>
       </div>
 
-      <Field label="Género">
+      <Field label={t("labelGender")}>
         <div className="flex gap-2">
           {(["masculino", "femenino", "otro"] as const).map((g) => (
             <Chip key={g} active={genero === g} onClick={() => setGenero(g)}>
-              {g}
+              {t(`gender.${g}`)}
             </Chip>
           ))}
         </div>
       </Field>
 
-      <Field label="Nivel de actividad">
+      <Field label={t("labelActivity")}>
         <div className="flex flex-wrap gap-2">
           {NIVELES_ACTIVIDAD.map((n) => (
             <Chip
@@ -104,13 +106,13 @@ export default function PerfilForm() {
               active={nivel === n.value}
               onClick={() => setNivel(n.value)}
             >
-              {n.label}
+              {t(`nivel.${n.value}`)}
             </Chip>
           ))}
         </div>
       </Field>
 
-      <Field label="Objetivo">
+      <Field label={t("labelGoal")}>
         <div className="flex flex-wrap gap-2">
           {OBJETIVOS.map((o) => (
             <Chip
@@ -118,7 +120,7 @@ export default function PerfilForm() {
               active={objetivo === o.value}
               onClick={() => setObjetivo(o.value)}
             >
-              {o.label}
+              {t(`objetivo.${o.value}`)}
             </Chip>
           ))}
         </div>
@@ -128,13 +130,13 @@ export default function PerfilForm() {
         <button
           type="button"
           onClick={() => setShowMas(true)}
-          className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100 underline"
+          className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100 underline decoration-signal/40 underline-offset-4"
         >
-          + más datos para mayor personalización
+          {t("moreData")}
         </button>
       ) : (
-        <div className="space-y-6 border-t border-ink/20 pt-6">
-          <Field label="Experiencia">
+        <div className="space-y-6 border-t border-ink/15 pt-6">
+          <Field label={t("labelExperience")}>
             <div className="flex gap-2">
               {EXPERIENCIAS.map((e) => (
                 <Chip
@@ -142,17 +144,17 @@ export default function PerfilForm() {
                   active={experiencia === e.value}
                   onClick={() => setExperiencia(e.value)}
                 >
-                  {e.label}
+                  {t(`experiencia.${e.value}`)}
                 </Chip>
               ))}
             </div>
           </Field>
-          <Field label="Lesiones o limitaciones (separadas por coma)">
+          <Field label={t("labelInjuries")}>
             <input
               value={lesiones}
               onChange={(e) => setLesiones(e.target.value)}
-              placeholder="rodilla, hombro…"
-              className="w-full bg-papel border-b border-ink pb-2 focus:outline-none"
+              placeholder={t("injuriesPlaceholder")}
+              className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
             />
           </Field>
         </div>
@@ -164,9 +166,9 @@ export default function PerfilForm() {
         type="button"
         onClick={submit}
         disabled={pending}
-        className="w-full bg-ink text-papel py-3 syne lowercase disabled:opacity-50"
+        className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
-        {pending ? "guardando…" : "siguiente"}
+        {pending ? t("saving") : t("next")}
       </button>
     </div>
   );
@@ -202,8 +204,10 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-2 text-sm lowercase border transition-colors ${
-        active ? "bg-ink text-papel border-ink" : "border-ink/30 hover:border-ink"
+      className={`px-3 py-2 text-sm lowercase border rounded-full transition-colors ${
+        active
+          ? "bg-signal text-white border-signal"
+          : "border-ink/25 hover:border-signal"
       }`}
     >
       {children}

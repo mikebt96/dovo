@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { crearGrupo, unirseAGrupo } from "@/lib/actions/grupos";
 import { TIPOS_GRUPO } from "@/lib/schemas/grupo";
 
 export default function GrupoForm() {
+  const t = useTranslations("onboarding");
   const router = useRouter();
   const [mode, setMode] = useState<"crear" | "unirse">("crear");
 
@@ -15,20 +17,20 @@ export default function GrupoForm() {
         <button
           type="button"
           onClick={() => setMode("crear")}
-          className={`flex-1 py-3 syne lowercase ${
-            mode === "crear" ? "bg-ink text-papel" : "border border-ink/30"
+          className={`flex-1 py-3 rounded-full display font-semibold lowercase transition-colors ${
+            mode === "crear" ? "bg-ink text-papel" : "border border-ink/25 hover:border-signal"
           }`}
         >
-          crear grupo
+          {t("createGroupTab")}
         </button>
         <button
           type="button"
           onClick={() => setMode("unirse")}
-          className={`flex-1 py-3 syne lowercase ${
-            mode === "unirse" ? "bg-ink text-papel" : "border border-ink/30"
+          className={`flex-1 py-3 rounded-full display font-semibold lowercase transition-colors ${
+            mode === "unirse" ? "bg-ink text-papel" : "border border-ink/25 hover:border-signal"
           }`}
         >
-          unirme a uno
+          {t("joinGroupTab")}
         </button>
       </div>
 
@@ -42,6 +44,7 @@ export default function GrupoForm() {
 }
 
 function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
+  const t = useTranslations("onboarding");
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState<(typeof TIPOS_GRUPO)[number]["value"]>(
     "pareja",
@@ -65,34 +68,34 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
     <div className="space-y-6">
       <label className="block">
         <span className="text-xs uppercase tracking-widest opacity-60 block mb-2">
-          nombre del grupo
+          {t("groupName")}
         </span>
         <input
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          placeholder="Mike & Andy"
-          className="w-full bg-papel border-b border-ink pb-2 focus:outline-none"
+          placeholder={t("groupNamePlaceholder")}
+          className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
         />
       </label>
 
       <div>
         <span className="text-xs uppercase tracking-widest opacity-60 block mb-2">
-          tamaño
+          {t("size")}
         </span>
         <div className="space-y-2">
-          {TIPOS_GRUPO.map((t) => (
+          {TIPOS_GRUPO.map((tg) => (
             <button
-              key={t.value}
+              key={tg.value}
               type="button"
-              onClick={() => setTipo(t.value)}
-              className={`w-full text-left p-4 border transition-colors ${
-                tipo === t.value
-                  ? "bg-ink text-papel border-ink"
-                  : "border-ink/30 hover:border-ink"
+              onClick={() => setTipo(tg.value)}
+              className={`w-full text-left p-4 rounded-lg border transition-colors ${
+                tipo === tg.value
+                  ? "border-signal bg-signal/10"
+                  : "border-ink/20 hover:border-signal"
               }`}
             >
-              <span className="syne lowercase">{t.label}</span>
-              <span className="text-xs opacity-70 ml-2">{t.hint}</span>
+              <span className="display font-medium lowercase">{t(`tipo.${tg.value}`)}</span>
+              <span className="text-xs opacity-70 ml-2">{t(`tipoHint.${tg.value}`)}</span>
             </button>
           ))}
         </div>
@@ -104,15 +107,16 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
         type="button"
         onClick={submit}
         disabled={pending}
-        className="w-full bg-ink text-papel py-3 syne lowercase disabled:opacity-50"
+        className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
-        {pending ? "creando…" : "crear y empezar"}
+        {pending ? t("creating") : t("createStart")}
       </button>
     </div>
   );
 }
 
 function UnirseGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
+  const t = useTranslations("onboarding");
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -135,13 +139,13 @@ function UnirseGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
     <div className="space-y-6">
       <label className="block">
         <span className="text-xs uppercase tracking-widest opacity-60 block mb-2">
-          pega el link o código de invitación
+          {t("inviteLabel")}
         </span>
         <input
           value={token}
           onChange={(e) => setToken(e.target.value)}
-          placeholder="https://dovofit.com/invite/..."
-          className="w-full bg-papel border-b border-ink pb-2 focus:outline-none"
+          placeholder={t("invitePlaceholder")}
+          className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
         />
       </label>
 
@@ -151,9 +155,9 @@ function UnirseGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
         type="button"
         onClick={submit}
         disabled={pending}
-        className="w-full bg-ink text-papel py-3 syne lowercase disabled:opacity-50"
+        className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
-        {pending ? "uniéndote…" : "unirme"}
+        {pending ? t("joining") : t("join")}
       </button>
     </div>
   );
