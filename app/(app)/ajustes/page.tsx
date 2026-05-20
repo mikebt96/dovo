@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { getThemeOverride } from "@/lib/theme";
+import LanguageToggle from "@/app/_components/LanguageToggle";
+import ThemeToggle from "@/app/_components/ThemeToggle";
 import PulseOptOutToggle from "./_components/PulseOptOutToggle";
 import SignOutButton from "./_components/SignOutButton";
 
-export const metadata = { title: "ajustes · dovo" };
 export const dynamic = "force-dynamic";
 
 export default async function AjustesPage() {
+  const t = await getTranslations("ajustes");
   const supabase = await createClient();
   const {
     data: { user },
@@ -22,57 +26,72 @@ export default async function AjustesPage() {
     .maybeSingle();
 
   const optOut = (meRow?.pulse_opt_out as boolean | undefined) ?? false;
+  const currentTheme = (await getThemeOverride()) ?? "system";
 
   return (
     <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
       <header className="mb-12 flex items-end justify-between">
         <div>
-          <p className="text-xs uppercase tracking-widest opacity-60 mb-2">
-            ajustes
-          </p>
-          <h1 className="syne text-3xl lowercase">tu cuenta</h1>
+          <p className="text-xs uppercase tracking-widest opacity-60 mb-2">{t("eyebrow")}</p>
+          <h1 className="display text-3xl font-extrabold lowercase">{t("title")}</h1>
         </div>
         <Link
           href="/"
           className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
         >
-          ← inicio
+          {t("back")}
         </Link>
       </header>
 
-      <section className="border-t border-b border-ink py-8 mb-10 space-y-4">
-        <Row label="Nombre" value={meRow?.nombre ?? "sin nombre"} />
-        <Row label="Email" value={meRow?.email ?? user.email ?? ""} />
+      <section className="border-t border-b border-ink/15 py-8 mb-10 space-y-4">
+        <Row label={t("name")} value={meRow?.nombre ?? t("noName")} />
+        <Row label={t("email")} value={meRow?.email ?? user.email ?? ""} />
       </section>
 
       <section className="mb-10">
-        <h2 className="syne text-xl lowercase mb-5">pulse</h2>
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("appearance")}</h2>
+        <ThemeToggle current={currentTheme} />
+      </section>
+
+      <section className="mb-10">
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("language")}</h2>
+        <LanguageToggle />
+      </section>
+
+      <section className="mb-10">
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("pulse")}</h2>
         <PulseOptOutToggle initial={optOut} />
       </section>
 
       <section className="mb-10">
-        <h2 className="syne text-xl lowercase mb-5">feedback</h2>
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("feedback")}</h2>
         <a
           href="mailto:miguel.butron06@gmail.com?subject=feedback%20dovo"
-          className="text-sm underline opacity-80 hover:opacity-100"
+          className="text-sm underline decoration-signal/40 underline-offset-4 opacity-80 hover:opacity-100"
         >
-          escríbele al equipo →
+          {t("feedbackLink")}
         </a>
       </section>
 
       <section className="mb-10">
-        <h2 className="syne text-xl lowercase mb-5">legal</h2>
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("legal")}</h2>
         <nav className="flex flex-col gap-2 text-sm">
-          <Link href="/privacidad" className="underline opacity-80 hover:opacity-100">
-            aviso de privacidad →
+          <Link
+            href="/privacidad"
+            className="underline decoration-signal/40 underline-offset-4 opacity-80 hover:opacity-100"
+          >
+            {t("privacyLink")}
           </Link>
-          <Link href="/terminos" className="underline opacity-80 hover:opacity-100">
-            términos de servicio →
+          <Link
+            href="/terminos"
+            className="underline decoration-signal/40 underline-offset-4 opacity-80 hover:opacity-100"
+          >
+            {t("termsLink")}
           </Link>
         </nav>
       </section>
 
-      <section className="pt-8 border-t border-ink">
+      <section className="pt-8 border-t border-ink/15">
         <SignOutButton />
       </section>
     </main>

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { signInAction } from "@/lib/actions/auth";
 import GoogleButton from "../_components/GoogleButton";
 
 export default function SignInPage() {
+  const t = useTranslations("auth");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -12,8 +14,8 @@ export default function SignInPage() {
   if (sent) {
     return (
       <div className="text-center">
-        <h1 className="syne text-2xl mb-3 lowercase">revisa tu correo</h1>
-        <p className="text-sm opacity-70">link enviado.</p>
+        <h1 className="display text-2xl font-extrabold mb-3 lowercase">{t("checkEmail")}</h1>
+        <p className="text-sm opacity-70">{t("signIn.sentBody")}</p>
       </div>
     );
   }
@@ -31,20 +33,20 @@ export default function SignInPage() {
       className="space-y-6"
     >
       <div>
-        <h1 className="syne text-3xl lowercase mb-2">entrar</h1>
-        <p className="text-sm opacity-70">con google o tu correo.</p>
+        <h1 className="display text-3xl font-extrabold lowercase mb-2">{t("signIn.title")}</h1>
+        <p className="text-sm opacity-70">{t("signIn.subtitle")}</p>
       </div>
 
       <GoogleButton />
 
       <div className="flex items-center gap-3 text-xs uppercase tracking-widest opacity-40">
         <span className="flex-1 h-px bg-ink/20" />
-        o con correo
+        {t("emailDivider")}
         <span className="flex-1 h-px bg-ink/20" />
       </div>
 
       <label className="block">
-        <span className="text-xs uppercase tracking-widest opacity-60">email</span>
+        <span className="text-xs uppercase tracking-widest opacity-60">{t("emailLabel")}</span>
         <input
           name="email"
           type="email"
@@ -59,13 +61,19 @@ export default function SignInPage() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-ink text-papel py-3 syne lowercase disabled:opacity-50"
+        className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
-        {pending ? "mandando..." : "entrar"}
+        {pending ? t("sending") : t("signIn.submit")}
       </button>
 
       <p className="text-xs opacity-60 text-center">
-        ¿primera vez? <a href="/sign-up" className="underline">crea tu cuenta</a>.
+        {t.rich("signIn.footer", {
+          a: (chunks) => (
+            <a href="/sign-up" className="underline">
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
     </form>
   );
