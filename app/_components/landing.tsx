@@ -7,13 +7,16 @@ import LanguageToggle from "./LanguageToggle";
 import "./landing.css";
 
 /* dovo landing — "Ultraviolet". Ported from prototypes/solar.html.
-   The hero gradient is a raw-WebGL fullscreen shader (no three.js dep).
-   All motion respects prefers-reduced-motion. Copy is bilingual via next-intl. */
+   Hero is video-driven: an abstract Ultraviolet loop as full-bleed background
+   + a documentary duo loop in the portrait zone. Both pause under
+   prefers-reduced-motion (first frame acts as poster).
+   Copy is bilingual via next-intl. */
 export default function Landing() {
   const t = useTranslations("landing");
   const rootRef = useRef<HTMLDivElement>(null);
   const clockRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ambientRef = useRef<HTMLVideoElement>(null);
+  const duoRef = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
   // Renders a "\n"-delimited message as <br>-separated lines (for big titles).
@@ -53,76 +56,15 @@ export default function Landing() {
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // ---- Hero gradient — raw WebGL fullscreen shader ----
+    // ---- Hero videos + parallax (only when motion is allowed; under
+    //      reduced-motion the videos hold their first frame as a poster) ----
     let raf = 0;
     let cleanupListeners: (() => void) | undefined;
-    const canvas = canvasRef.current;
-    const gl =
-      !reduced && canvas ? canvas.getContext("webgl", { antialias: false, alpha: false }) : null;
 
-    if (gl && canvas) {
-      const vsh = `attribute vec2 a_pos; void main(){ gl_Position = vec4(a_pos, 0.0, 1.0); }`;
-      const fsh = `
-        precision highp float;
-        uniform vec2 u_resolution;
-        uniform float u_time;
-        float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-        float noise(vec2 p){
-          vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
-          return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
-                     mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-        }
-        void main(){
-          vec2 uv = gl_FragCoord.xy / u_resolution;
-          float t = u_time * 0.04;
-          float n  = noise(uv * 2.2 + vec2(t, t * 0.6));
-          float n2 = noise(uv * 3.5 - vec2(t * 0.5, t));
-          vec3 base     = vec3(0.957, 0.957, 0.965);
-          vec3 lavender = vec3(0.720, 0.660, 1.000);
-          vec3 violet   = vec3(0.427, 0.290, 1.000);
-          float m = smoothstep(0.10, 0.95, uv.x + n * 0.30 - uv.y * 0.25);
-          vec3 col = mix(base, lavender, m);
-          col = mix(col, violet, smoothstep(0.55, 1.15, uv.x + n2 * 0.22 - uv.y * 0.1));
-          gl_FragColor = vec4(col, 1.0);
-        }`;
-
-      const compile = (type: number, src: string) => {
-        const s = gl.createShader(type)!;
-        gl.shaderSource(s, src);
-        gl.compileShader(s);
-        return s;
-      };
-      const program = gl.createProgram()!;
-      gl.attachShader(program, compile(gl.VERTEX_SHADER, vsh));
-      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fsh));
-      gl.linkProgram(program);
-      gl.useProgram(program);
-
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([-1, -1, 1, -1, -1, 1, 1, -1, -1, 1, 1, 1]),
-        gl.STATIC_DRAW
-      );
-      const aPos = gl.getAttribLocation(program, "a_pos");
-      gl.enableVertexAttribArray(aPos);
-      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-      const uRes = gl.getUniformLocation(program, "u_resolution");
-      const uTime = gl.getUniformLocation(program, "u_time");
-
-      const pr = 0.6 * (window.devicePixelRatio || 1); // cheap render — bloom comes from blur
-      const resize = () => {
-        const w = Math.max(1, Math.floor(canvas.clientWidth * pr));
-        const h = Math.max(1, Math.floor(canvas.clientHeight * pr));
-        canvas.width = w;
-        canvas.height = h;
-        gl.viewport(0, 0, w, h);
-        gl.uniform2f(uRes, w, h);
-      };
-      window.addEventListener("resize", resize);
-      resize();
+    if (!reduced) {
+      for (const v of [ambientRef.current, duoRef.current]) {
+        v?.play().catch(() => {});
+      }
 
       // ---- Parallax engine (archar-style layered depth) ----
       const pxEls: { el: HTMLElement; speed: number }[] = [
@@ -141,18 +83,9 @@ export default function Landing() {
         targetScroll = window.scrollY;
       };
       window.addEventListener("scroll", onScroll, { passive: true });
+      cleanupListeners = () => window.removeEventListener("scroll", onScroll);
 
-      cleanupListeners = () => {
-        window.removeEventListener("resize", resize);
-        window.removeEventListener("scroll", onScroll);
-      };
-
-      let time = 0;
       const loop = () => {
-        time += 0.016;
-        gl.uniform1f(uTime, time);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-
         lastScroll += (targetScroll - lastScroll) * 0.08;
         const vh2 = window.innerHeight / 2;
 
@@ -210,8 +143,29 @@ export default function Landing() {
       <main>
         {/* HERO */}
         <section className="hero" id="hero">
-          <canvas ref={canvasRef} />
-          <div className="portrait" data-px="0.14" />
+          <video
+            ref={ambientRef}
+            className="hero-bg"
+            src="/hero/ambient.mp4"
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-hidden="true"
+          />
+          <div className="portrait" data-px="0.14">
+            <video
+              ref={duoRef}
+              className="portrait-video"
+              src="/hero/duo.mp4"
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+            />
+            <div className="portrait-veil" />
+          </div>
           <div className="inner">
             <div className="labels">
               <div className="l">{t("hero.label1")}</div>
@@ -335,6 +289,7 @@ export default function Landing() {
                   className="cover"
                   style={{ background: "linear-gradient(160deg, #8b6dff, #6d4aff)" }}
                 >
+                  <img className="cover-img" src="/stories/c1-pilates.webp" alt="" loading="lazy" />
                   <span className="ph">{t("stories.c1Sport")}</span>
                 </div>
                 <div className="meta">
@@ -350,6 +305,7 @@ export default function Landing() {
                   className="cover"
                   style={{ background: "linear-gradient(160deg, #0d0b1a, #1f1b38)" }}
                 >
+                  <img className="cover-img" src="/stories/c2-run.webp" alt="" loading="lazy" />
                   <span className="ph">{t("stories.c2Sport")}</span>
                 </div>
                 <div className="meta">
@@ -365,6 +321,7 @@ export default function Landing() {
                   className="cover"
                   style={{ background: "linear-gradient(160deg, #3ac4d6, #2a7a96)" }}
                 >
+                  <img className="cover-img" src="/stories/c3-pool.webp" alt="" loading="lazy" />
                   <span className="ph">{t("stories.c3Sport")}</span>
                 </div>
                 <div className="meta">
@@ -380,6 +337,7 @@ export default function Landing() {
                   className="cover"
                   style={{ background: "linear-gradient(160deg, #aef03c, #6b9620)" }}
                 >
+                  <img className="cover-img" src="/stories/c4-ballet.webp" alt="" loading="lazy" />
                   <span className="ph">{t("stories.c4Sport")}</span>
                 </div>
                 <div className="meta">
