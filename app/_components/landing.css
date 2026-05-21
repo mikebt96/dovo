@@ -75,6 +75,16 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
   justify-content: space-between;
   align-items: center;
 }
+.dv-landing .nav .brand { display: flex; align-items: center; gap: 18px; }
+.dv-landing .nav .nav-wordmark {
+  font-family: var(--font-mark);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+  color: var(--ink);
+  text-decoration: none;
+}
 .dv-landing .nav .clock {
   font-family: var(--font-mono);
   font-size: 11px;

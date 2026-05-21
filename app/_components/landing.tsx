@@ -122,8 +122,13 @@ export default function Landing() {
       <div className="grain" />
 
       <nav className="nav">
-        <div className="clock" ref={clockRef}>
-          TRAINING TIME — --:--:--
+        <div className="brand">
+          <Link href="/" className="nav-wordmark" aria-label="dovo — inicio">
+            dovo
+          </Link>
+          <div className="clock" ref={clockRef}>
+            TRAINING TIME — --:--:--
+          </div>
         </div>
         <div className="links">
           <a href="#how">{t("nav.how")}</a>
