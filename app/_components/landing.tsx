@@ -181,17 +181,16 @@ export default function Landing() {
               </div>
             </div>
             <div>
-              <h1>
-                <span className="reveal">
-                  <span>{t("hero.h1a")}</span>
-                </span>
-                <span className="reveal">
-                  <span>
-                    {t("hero.h1b")}
-                    <span className="dot-end">.</span>
-                  </span>
-                </span>
+              <p className="hero-eyebrow">
+                {t("hero.h1a")} {t("hero.h1b")}.
+              </p>
+              <h1 className="brandmark" aria-label="dovo">
+                <span aria-hidden="true">d</span>
+                <span aria-hidden="true" className="o">o</span>
+                <span aria-hidden="true">v</span>
+                <span aria-hidden="true" className="o">o</span>
               </h1>
+              <p className="hero-decode">{t("hero.decode")}</p>
               <div className="cta-row">
                 <Link href="/sign-up" className="btn-dark">
                   {t("hero.ctaPrimary")} <span className="arrow">→</span>

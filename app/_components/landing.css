@@ -251,23 +251,58 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
   line-height: 1.4;
 }
 .dv-landing .hero .labels .l .star { color: var(--signal); }
-.dv-landing .hero h1 {
-  font-family: var(--font-display);
+.dv-landing .hero .hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1.5vw, 16px);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+  opacity: 0;
+  animation: dv-fade-in 700ms ease-out 120ms forwards;
+}
+.dv-landing .hero .brandmark {
+  font-family: var(--font-mark);
   font-weight: 800;
-  font-size: clamp(88px, 19vw, 320px);
-  line-height: 0.82;
-  letter-spacing: -0.06em;
+  font-size: clamp(120px, 27vw, 440px);
+  line-height: 0.78;
+  letter-spacing: -0.045em;
+  text-transform: lowercase;
   color: var(--ink);
+  display: flex;
 }
-.dv-landing .hero h1 .reveal { display: block; overflow: hidden; }
-.dv-landing .hero h1 .reveal span {
+.dv-landing .hero .brandmark span {
   display: inline-block;
-  transform: translateY(105%);
-  animation: dv-line-rise 1000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(0.34em);
+  animation: dv-letter-in 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.dv-landing .hero h1 .reveal:nth-child(1) span { animation-delay: 800ms; }
-.dv-landing .hero h1 .reveal:nth-child(2) span { animation-delay: 980ms; }
-.dv-landing .hero h1 .dot-end { color: var(--signal); }
+.dv-landing .hero .brandmark span:nth-child(1) { animation-delay: 240ms; }
+.dv-landing .hero .brandmark span:nth-child(2) { animation-delay: 360ms; }
+.dv-landing .hero .brandmark span:nth-child(3) { animation-delay: 480ms; }
+.dv-landing .hero .brandmark span:nth-child(4) { animation-delay: 600ms; }
+/* the two o's = the duo: violet drops that keep breathing once they land */
+.dv-landing .hero .brandmark span.o { color: var(--signal); }
+.dv-landing .hero .brandmark span.o:nth-child(2) {
+  animation:
+    dv-letter-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 360ms both,
+    dv-breathe 3.6s ease-in-out 1500ms infinite;
+}
+.dv-landing .hero .brandmark span.o:nth-child(4) {
+  animation:
+    dv-letter-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 600ms both,
+    dv-breathe 3.6s ease-in-out 2200ms infinite;
+}
+.dv-landing .hero .hero-decode {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 1.2vw, 14px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-ghost, rgba(8, 7, 13, 0.42));
+  margin-top: 20px;
+  opacity: 0;
+  animation: dv-fade-in 800ms ease-out 900ms forwards;
+}
 .dv-landing .hero .cta-row {
   display: flex;
   gap: 16px;
@@ -684,6 +719,14 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
 /* ===== Animations ===== */
 @keyframes dv-fade-in { to { opacity: 1; } }
 @keyframes dv-line-rise { to { transform: translateY(0); } }
+@keyframes dv-letter-in {
+  from { opacity: 0; transform: translateY(0.34em); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes dv-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-0.04em) scale(1.05); }
+}
 .dv-landing .reveal-on-scroll {
   opacity: 0;
   transform: translateY(40px);
