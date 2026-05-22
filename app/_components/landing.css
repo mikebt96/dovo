@@ -743,7 +743,7 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
   .dv-landing .hero .inner { padding: 100px var(--gutter) 40px; }
   /* vw-only sizing: "dovo" keeps a constant share of the viewport, so it
      scales down on any phone instead of clipping against overflow:hidden. */
-  .dv-landing .hero .brandmark { font-size: clamp(56px, 26vw, 200px); line-height: 0.84; }
+  .dv-landing .hero .brandmark { font-size: clamp(48px, 21vw, 200px); line-height: 0.84; }
   .dv-landing .hero .hero-eyebrow { margin-bottom: 12px; }
   .dv-landing .share-block { grid-template-columns: 1fr; gap: 40px; }
   .dv-landing .share-mock { margin: 0 auto; }
