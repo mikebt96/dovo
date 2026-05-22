@@ -7,15 +7,13 @@ import LanguageToggle from "./LanguageToggle";
 import "./landing.css";
 
 /* dovo landing — "Ultraviolet". Ported from prototypes/solar.html.
-   Hero is video-driven: an abstract Ultraviolet loop as full-bleed background
-   + a documentary duo loop in the portrait zone. Both pause under
-   prefers-reduced-motion (first frame acts as poster).
+   Hero shows a single documentary duo loop in the portrait zone; it holds
+   its first frame as a poster under prefers-reduced-motion.
    Copy is bilingual via next-intl. */
 export default function Landing() {
   const t = useTranslations("landing");
   const rootRef = useRef<HTMLDivElement>(null);
   const clockRef = useRef<HTMLDivElement>(null);
-  const ambientRef = useRef<HTMLVideoElement>(null);
   const duoRef = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
@@ -62,9 +60,7 @@ export default function Landing() {
     let cleanupListeners: (() => void) | undefined;
 
     if (!reduced) {
-      for (const v of [ambientRef.current, duoRef.current]) {
-        v?.play().catch(() => {});
-      }
+      duoRef.current?.play().catch(() => {});
 
       // ---- Parallax engine (archar-style layered depth) ----
       const pxEls: { el: HTMLElement; speed: number }[] = [
@@ -148,16 +144,6 @@ export default function Landing() {
       <main>
         {/* HERO */}
         <section className="hero" id="hero">
-          <video
-            ref={ambientRef}
-            className="hero-bg"
-            src="/hero/ambient.mp4"
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-          />
           <div className="portrait" data-px="0.14">
             <video
               ref={duoRef}
