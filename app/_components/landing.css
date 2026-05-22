@@ -264,7 +264,10 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
 .dv-landing .hero .brandmark {
   font-family: var(--font-mark);
   font-weight: 800;
-  font-size: clamp(120px, 27vw, 440px);
+  /* "dovo" in Syne 800 measures 3.80em wide; at 21vw the wordmark is
+     0.80*viewport, staying inside the gutters at every realistic width
+     (27vw overflowed below ~1750px). */
+  font-size: clamp(64px, 21vw, 460px);
   line-height: 0.78;
   letter-spacing: -0.045em;
   text-transform: lowercase;
