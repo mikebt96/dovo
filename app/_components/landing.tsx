@@ -212,6 +212,15 @@ export default function Landing() {
           <p>{t("statement.body")}</p>
         </section>
 
+        {/* PACT — full-bleed violet-duotone band: the handshake = the vow */}
+        <section className="pact reveal-on-scroll">
+          <img className="pact-img" src="/stories/duo-gym.webp" alt={t("statement.pactAlt")} loading="lazy" />
+          <div className="pact-cap">
+            <span className="d" />
+            {t("statement.vow")}
+          </div>
+        </section>
+
         {/* RENDER SHOWCASE */}
         <section className="render reveal-on-scroll">
           <div className="stage" ref={stageRef}>

@@ -23,7 +23,9 @@
     },
     "statement": {
       "title": "Disciplina, compartida",
-      "body": "Las apps individuales optimizan hábitos. Las apps de pareja optimizan check-ins. dovo optimiza el acuerdo entre dos personas que convirtieron su entrenamiento en una promesa compartida."
+      "body": "Las apps individuales optimizan hábitos. Las apps de pareja optimizan check-ins. dovo optimiza el acuerdo entre dos personas que convirtieron su entrenamiento en una promesa compartida.",
+      "vow": "dos · un voto",
+      "pactAlt": "Dos personas cierran su acuerdo de entrenamiento con un apretón en el gimnasio."
     },
     "render": {
       "tier": "nivel 14"

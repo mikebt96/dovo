@@ -23,7 +23,9 @@
     },
     "statement": {
       "title": "Discipline, shared",
-      "body": "Solo apps optimize habits. Couple apps optimize check-ins. dovo optimizes the contract between two people who made their training a shared promise."
+      "body": "Solo apps optimize habits. Couple apps optimize check-ins. dovo optimizes the contract between two people who made their training a shared promise.",
+      "vow": "two · one vow",
+      "pactAlt": "Two people seal their training pact with a handshake at the gym."
     },
     "render": {
       "tier": "level 14"
