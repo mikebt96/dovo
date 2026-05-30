@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import GrupoForm from "./GrupoForm";
+import DuoProof from "@/app/_components/DuoProof";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,9 @@ export default async function OnboardingGrupoPage() {
         <p className="text-sm opacity-70 mt-2">{t("grupoSubtitle")}</p>
       </header>
       <GrupoForm />
+      <div className="mt-12">
+        <DuoProof />
+      </div>
     </main>
   );
 }

@@ -57,6 +57,26 @@ export default async function GrupoPage({
 
   const inviteUrl = appUrl(`/invite/${grupo.invite_token}`);
 
+  const { data: miMiembro } = await supabase
+    .schema("core")
+    .from("trato_miembros")
+    .select("id")
+    .eq("trato_id", id)
+    .eq("user_id", user.id)
+    .maybeSingle<{ id: string }>();
+
+  let tieneRutina = false;
+  if (miMiembro) {
+    const { data: r } = await supabase
+      .schema("core")
+      .from("user_rutinas")
+      .select("id")
+      .eq("miembro_id", miMiembro.id)
+      .eq("is_default", true)
+      .maybeSingle<{ id: string }>();
+    tieneRutina = !!r;
+  }
+
   return (
     <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
       <header className="mb-12 flex items-end justify-between">
@@ -95,6 +115,16 @@ export default async function GrupoPage({
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="border-t border-ink/15 pt-8 mb-10">
+        <h2 className="display text-xl font-bold lowercase mb-3">{t("routineTitle")}</h2>
+        <Link
+          href={`/grupo/${id}/rutina`}
+          className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
+        >
+          {tieneRutina ? t("routineEdit") : t("routineCreate")}
+        </Link>
       </section>
 
       <section className="border-t border-ink/15 pt-8">

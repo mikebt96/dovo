@@ -27,6 +27,14 @@
       "vow": "dos · un voto",
       "pactAlt": "Dos personas cierran su acuerdo de entrenamiento con un apretón en el gimnasio."
     },
+    "evidence": {
+      "eyebrow": "Por qué en dúo",
+      "lead": "El problema\nnunca fue tu disciplina.",
+      "labelSolo": "abandonan entrenando solos",
+      "labelDuo": "abandonan cuando alguien más cuenta con ellos",
+      "body": "Empezar solo es la razón número uno por la que paras. dovo convierte «voy a empezar» en algo que <em>otra persona también espera</em> — y eso lo cambia todo.",
+      "source": "Adherencia a 12 meses, con pareja vs. sin pareja. Wallace, Raglin & Jastremski · J. Sports Med. Phys. Fitness, 1995"
+    },
     "render": {
       "tier": "nivel 14"
     },
@@ -193,9 +201,17 @@
     "level": "nivel {n} · {clase}",
     "streak": "racha {n} sem",
     "todayTitle": "hoy",
-    "todayBody": "el check-in con métricas llega en la siguiente actualización. por ahora arma tu rutina y conoce a tu grupo.",
+    "todayNoGroup": "únete a un grupo para empezar a registrar tu actividad.",
+    "buildRoutine": "arma tu rutina →",
     "groupsTitle": "tus grupos",
     "createGroup": "crear o unirme a un grupo →"
+  },
+  "duoProof": {
+    "eyebrow": "por qué en dúo",
+    "labelSolo": "abandonan entrenando solos",
+    "labelDuo": "cuando alguien más cuenta con ellos",
+    "body": "No es fuerza de voluntad. Quien empieza con alguien que cuenta con él, sostiene el hábito. dovo está hecho sobre ese único hecho.",
+    "source": "Adherencia a 12 meses, con pareja vs. sin pareja · Wallace, Raglin & Jastremski, 1995"
   },
   "perfil": {
     "eyebrow": "tu personaje",
@@ -297,7 +313,10 @@
     "inviteTitle": "invita a más",
     "inviteSubtitle": "comparte este link para que se unan al grupo.",
     "copyLink": "copiar link",
-    "copied": "copiado ✓"
+    "copied": "copiado ✓",
+    "routineTitle": "tu rutina",
+    "routineEdit": "editar rutina →",
+    "routineCreate": "armar mi rutina →"
   },
   "invite": {
     "notFound": "invitación no existe",
@@ -309,5 +328,31 @@
     "joinPrompt": "grupo {tipo}. al unirte empiezas a compartir tu progreso físico con el equipo.",
     "joining": "uniéndote…",
     "joinGroup": "unirme al grupo"
+  },
+  "rutina": {
+    "title": "tu rutina",
+    "subtitle": "elige tus actividades de la semana. cada una suma puntos a tus stats.",
+    "nameLabel": "nombre",
+    "add": "agregar",
+    "remove": "quitar",
+    "freq": "veces/semana",
+    "duration": "min/sesión",
+    "save": "guardar rutina",
+    "saving": "guardando…"
+  },
+  "checkin": {
+    "details": "detalles",
+    "quickLog": "registrar",
+    "logDetailed": "registrar con métricas",
+    "saving": "guardando…",
+    "done": "✓ hecho",
+    "metric": {
+      "peso_kg": "peso (kg)",
+      "reps": "reps",
+      "sets": "sets",
+      "distancia_km": "distancia (km)",
+      "tiempo_min": "tiempo (min)",
+      "intensidad": "intensidad (1-5)"
+    }
   }
 }

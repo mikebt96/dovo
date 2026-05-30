@@ -27,6 +27,14 @@
       "vow": "two · one vow",
       "pactAlt": "Two people seal their training pact with a handshake at the gym."
     },
+    "evidence": {
+      "eyebrow": "Why in a duo",
+      "lead": "It was never\nyour discipline.",
+      "labelSolo": "drop out training alone",
+      "labelDuo": "drop out when someone is counting on them",
+      "body": "Starting alone is the number-one reason you stop. dovo turns «I'll start» into something <em>another person is waiting for</em> — and that changes everything.",
+      "source": "12-month adherence, partnered vs. solo. Wallace, Raglin & Jastremski · J. Sports Med. Phys. Fitness, 1995"
+    },
     "render": {
       "tier": "level 14"
     },
@@ -193,9 +201,17 @@
     "level": "level {n} · {clase}",
     "streak": "streak {n} wk",
     "todayTitle": "today",
-    "todayBody": "Metric-based check-in arrives in the next update. For now, set up your routine and meet your group.",
+    "todayNoGroup": "join a group to start logging your activity.",
+    "buildRoutine": "build your routine →",
     "groupsTitle": "your groups",
     "createGroup": "create or join a group →"
+  },
+  "duoProof": {
+    "eyebrow": "why in a duo",
+    "labelSolo": "drop out training alone",
+    "labelDuo": "when someone is counting on them",
+    "body": "It isn't willpower. People who start with someone counting on them keep the habit. dovo is built on that single fact.",
+    "source": "12-month adherence, partnered vs. solo · Wallace, Raglin & Jastremski, 1995"
   },
   "perfil": {
     "eyebrow": "your character",
@@ -297,7 +313,10 @@
     "inviteTitle": "invite more",
     "inviteSubtitle": "share this link so they can join the group.",
     "copyLink": "copy link",
-    "copied": "copied ✓"
+    "copied": "copied ✓",
+    "routineTitle": "your routine",
+    "routineEdit": "edit routine →",
+    "routineCreate": "build my routine →"
   },
   "invite": {
     "notFound": "invitation not found",
@@ -309,5 +328,31 @@
     "joinPrompt": "{tipo} group. joining starts sharing your fitness progress with the team.",
     "joining": "joining…",
     "joinGroup": "join the group"
+  },
+  "rutina": {
+    "title": "your routine",
+    "subtitle": "pick your weekly activities. each one adds points to your stats.",
+    "nameLabel": "name",
+    "add": "add",
+    "remove": "remove",
+    "freq": "times/week",
+    "duration": "min/session",
+    "save": "save routine",
+    "saving": "saving…"
+  },
+  "checkin": {
+    "details": "details",
+    "quickLog": "log",
+    "logDetailed": "log with metrics",
+    "saving": "saving…",
+    "done": "✓ done",
+    "metric": {
+      "peso_kg": "weight (kg)",
+      "reps": "reps",
+      "sets": "sets",
+      "distancia_km": "distance (km)",
+      "tiempo_min": "time (min)",
+      "intensidad": "intensity (1-5)"
+    }
   }
 }

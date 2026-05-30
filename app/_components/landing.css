@@ -387,6 +387,76 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
   box-shadow: 0 0 14px var(--signal-glow);
 }
 
+/* ===== Evidence — the proof beat (paper results table: 43% vs 6%) ===== */
+.dv-landing .evidence { background: var(--paper); padding: 180px var(--gutter); }
+.dv-landing .evidence .ev-wrap { max-width: 1400px; margin: 0 auto; }
+.dv-landing .evidence .ev-eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1.1vw, 14px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--signal);
+  margin-bottom: 44px;
+}
+.dv-landing .evidence .ev-lead {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(40px, 7vw, 120px);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  max-width: 14ch;
+}
+.dv-landing .evidence .ev-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 88px 0 64px;
+  border-top: 1px solid var(--line);
+}
+.dv-landing .evidence .ev-col {
+  padding: 52px 48px 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+.dv-landing .evidence .ev-col.duo {
+  padding-left: 48px;
+  border-left: 1px solid var(--line);
+}
+.dv-landing .evidence .ev-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(84px, 17vw, 280px);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+.dv-landing .evidence .ev-col.solo .ev-num { color: var(--ink-ghost); }
+.dv-landing .evidence .ev-col.duo .ev-num { color: var(--signal); }
+.dv-landing .evidence .ev-label {
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 1.2vw, 15px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-top: 28px;
+  max-width: 22ch;
+  line-height: 1.4;
+}
+.dv-landing .evidence .ev-body {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.7vw, 27px);
+  line-height: 1.45;
+  color: var(--ink-dim);
+  max-width: 640px;
+}
+.dv-landing .evidence .ev-body em { font-style: normal; color: var(--ink); }
+.dv-landing .evidence .ev-source {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--ink-ghost);
+  margin-top: 40px;
+}
+
 /* ===== Render showcase (3D character-card zone) ===== */
 .dv-landing .render { background: var(--white); padding: 0 var(--gutter) 160px; }
 .dv-landing .render .stage {
@@ -795,6 +865,13 @@ html:has(.dv-landing) { scroll-behavior: smooth; background: #f4f4f6; }
   .dv-landing .process .step .num { font-size: 64px; }
   .dv-landing footer .container { flex-direction: column; align-items: flex-start; }
   .dv-landing footer .right { flex-direction: column; gap: 24px; }
+  /* Evidence: keep the two numbers side by side (that contrast is the point),
+     just tighten the gutters for phones. */
+  .dv-landing .evidence { padding: 120px var(--gutter); }
+  .dv-landing .evidence .ev-grid { margin: 56px 0 44px; }
+  .dv-landing .evidence .ev-col { padding: 32px 16px 28px 0; }
+  .dv-landing .evidence .ev-col.duo { padding-left: 20px; }
+  .dv-landing .evidence .ev-label { letter-spacing: 0.12em; margin-top: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -207,6 +207,31 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* EVIDENCE — the proof beat: emotion (pact) → reason. A paper's
+            results table, 43% ghost vs 6% signal. */}
+        <section className="evidence reveal-on-scroll">
+          <div className="ev-wrap">
+            <p className="ev-eyebrow">{t("evidence.eyebrow")}</p>
+            <h2 className="ev-lead">{renderLines("evidence.lead")}</h2>
+            <div className="ev-grid">
+              <div className="ev-col solo">
+                <div className="ev-num">43%</div>
+                <p className="ev-label">{t("evidence.labelSolo")}</p>
+              </div>
+              <div className="ev-col duo">
+                <div className="ev-num">6%</div>
+                <p className="ev-label">{t("evidence.labelDuo")}</p>
+              </div>
+            </div>
+            <p className="ev-body">
+              {t.rich("evidence.body", {
+                em: (chunks) => <em>{chunks}</em>,
+              })}
+            </p>
+            <p className="ev-source">{t("evidence.source")}</p>
+          </div>
+        </section>
+
         {/* RENDER SHOWCASE */}
         <section className="render reveal-on-scroll">
           <div className="stage" ref={stageRef}>

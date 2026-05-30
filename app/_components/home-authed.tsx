@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import LanguageToggle from "./LanguageToggle";
+import CheckinRow from "./CheckinRow";
+import DuoProof from "./DuoProof";
 
 type Character = {
   fue: number;
@@ -61,7 +63,7 @@ export default async function HomeAuthed() {
   const { data: miembros } = await supabase
     .schema("core")
     .from("trato_miembros")
-    .select("trato_id, tratos!inner(id, nombre_grupo, tipo_grupo)")
+    .select("id, trato_id, tratos!inner(id, nombre_grupo, tipo_grupo)")
     .eq("user_id", user.id);
 
   const character: Character = charRow ?? {
@@ -75,9 +77,54 @@ export default async function HomeAuthed() {
     class_name: "Novato",
   };
   const racha = streakRow?.current_streak_weeks ?? 0;
-  const grupos: Grupo[] = (miembros ?? []).map(
-    (m) => (m.tratos as unknown as Grupo),
-  );
+  const miembrosList = (miembros ?? []) as unknown as Array<{
+    id: string;
+    tratos: Grupo;
+  }>;
+  const grupos: Grupo[] = miembrosList.map((m) => m.tratos as unknown as Grupo);
+
+  // MVP: el primer grupo/miembro maneja la sección "Hoy".
+  const miembroId = miembrosList[0]?.id;
+  const primerGrupoId = grupos[0]?.id;
+
+  type RutinaItem = { actividad_id: string; duracion_min: number };
+  let rutinaItems: RutinaItem[] = [];
+  const actividadMap = new Map<
+    string,
+    { nombre: string; metricas_requeridas: string[] }
+  >();
+
+  if (miembroId) {
+    const { data: rutina } = await supabase
+      .schema("core")
+      .from("user_rutinas")
+      .select("actividades")
+      .eq("miembro_id", miembroId)
+      .eq("is_default", true)
+      .maybeSingle<{ actividades: unknown }>();
+    rutinaItems = Array.isArray(rutina?.actividades)
+      ? (rutina!.actividades as RutinaItem[])
+      : [];
+
+    if (rutinaItems.length) {
+      const ids = rutinaItems.map((i) => i.actividad_id);
+      const { data: acts } = await supabase
+        .schema("core")
+        .from("actividades")
+        .select("id, nombre, metricas_requeridas")
+        .in("id", ids);
+      for (const a of (acts ?? []) as Array<{
+        id: string;
+        nombre: string;
+        metricas_requeridas: string[];
+      }>) {
+        actividadMap.set(a.id, {
+          nombre: a.nombre,
+          metricas_requeridas: a.metricas_requeridas,
+        });
+      }
+    }
+  }
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
@@ -123,12 +170,38 @@ export default async function HomeAuthed() {
         </div>
       </section>
 
-      {/* Hoy (placeholder — las tasks reales llegan en F2/F3) */}
+      {/* Hoy: actividades de la rutina default, registrables con un tap */}
       <section className="mb-8">
         <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
           {t("todayTitle")}
         </h2>
-        <p className="text-sm opacity-50">{t("todayBody")}</p>
+        {!miembroId ? (
+          <p className="text-sm opacity-50">{t("todayNoGroup")}</p>
+        ) : rutinaItems.length === 0 ? (
+          <Link
+            href={`/grupo/${primerGrupoId}/rutina`}
+            className="inline-block bg-ink text-papel px-6 py-3 display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
+          >
+            {t("buildRoutine")}
+          </Link>
+        ) : (
+          <div className="space-y-3">
+            {rutinaItems.map((i) => {
+              const a = actividadMap.get(i.actividad_id);
+              if (!a) return null;
+              return (
+                <CheckinRow
+                  key={i.actividad_id}
+                  miembroId={miembroId}
+                  actividadId={i.actividad_id}
+                  nombre={a.nombre}
+                  metricasRequeridas={a.metricas_requeridas}
+                  duracionDefault={i.duracion_min}
+                />
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Grupos */}
@@ -137,12 +210,15 @@ export default async function HomeAuthed() {
           {t("groupsTitle")}
         </h2>
         {grupos.length === 0 ? (
-          <Link
-            href="/onboarding/grupo"
-            className="inline-block bg-ink text-papel px-6 py-3 display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
-          >
-            {t("createGroup")}
-          </Link>
+          <div className="space-y-6">
+            <DuoProof />
+            <Link
+              href="/onboarding/grupo"
+              className="inline-block bg-ink text-papel px-6 py-3 display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
+            >
+              {t("createGroup")}
+            </Link>
+          </div>
         ) : (
           <ul className="space-y-2">
             {grupos.map((g) => (
