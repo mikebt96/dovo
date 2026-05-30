@@ -1,5 +1,6 @@
 -- F2 · RPC apply_checkin: inserta el check-in + sube las 6 stats + racha semanal, atómico.
 -- Scoring (kcal/puntos/deltas) se calcula en TS (lib/scoring) y se pasa ya resuelto.
+-- user_streak + owns_miembro ya existen (20260520120001_dovofit_core_model).
 create or replace function core.apply_checkin(
   p_miembro_id uuid,
   p_actividad_id uuid,
@@ -75,5 +76,6 @@ begin
 end;
 $$;
 
-grant execute on function core.apply_checkin(uuid, uuid, date, jsonb, numeric, numeric, numeric)
+-- Firma con p_deltas jsonb (no numeric): debe calzar EXACTO con la función o el grant falla.
+grant execute on function core.apply_checkin(uuid, uuid, date, jsonb, numeric, numeric, jsonb)
   to authenticated, service_role;
