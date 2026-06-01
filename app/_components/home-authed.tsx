@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import LanguageToggle from "./LanguageToggle";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
+import { characterSheet } from "@/lib/leveling";
 
 type Character = {
   fue: number;
@@ -13,6 +14,7 @@ type Character = {
   equ: number;
   vit: number;
   nivel: number;
+  prestige: number;
   class_name: string;
 };
 
@@ -49,7 +51,7 @@ export default async function HomeAuthed() {
   const { data: charRow } = await supabase
     .schema("core")
     .from("user_character")
-    .select("fue, res, flex, vel, equ, vit, nivel, class_name")
+    .select("fue, res, flex, vel, equ, vit, nivel, prestige, class_name")
     .eq("user_id", user.id)
     .maybeSingle<Character>();
 
@@ -74,8 +76,11 @@ export default async function HomeAuthed() {
     equ: 0,
     vit: 0,
     nivel: 1,
+    prestige: 0,
     class_name: "Novato",
   };
+  // nivel + clase se derivan de los stats (no de las columnas congeladas). Ver lib/leveling.
+  const sheet = characterSheet(character, character.prestige);
   const racha = streakRow?.current_streak_weeks ?? 0;
   const miembrosList = (miembros ?? []) as unknown as Array<{
     id: string;
@@ -147,7 +152,7 @@ export default async function HomeAuthed() {
       <section className="border-t border-b border-ink/15 py-6 mb-8">
         <div className="flex items-baseline justify-between mb-4">
           <p className="display font-semibold lowercase">
-            {t("level", { n: character.nivel, clase: character.class_name })}
+            {t("level", { n: sheet.nivel, clase: sheet.className })}
           </p>
           <p className="text-xs uppercase tracking-widest opacity-60">
             {t("streak", { n: racha })}

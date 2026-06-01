@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { characterSheet, statDisplay } from "@/lib/leveling";
+import type { StatKey } from "@/lib/scoring/types";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +28,7 @@ type Perfil = {
   bmr_calculado: number | null;
 };
 
-const STATS: { key: keyof Character; statKey: string }[] = [
+const STATS: { key: StatKey; statKey: string }[] = [
   { key: "fue", statKey: "fue" },
   { key: "res", statKey: "res" },
   { key: "flex", statKey: "flex" },
@@ -78,6 +80,10 @@ export default async function PerfilPage() {
     class_name: "Novato",
   };
 
+  // Nivel, clase y tiers se DERIVAN de los stats (fuente de verdad), no de las
+  // columnas nivel/class_name (que F2 dejó congeladas). Ver lib/leveling.
+  const sheet = characterSheet(character, character.prestige);
+
   return (
     <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
       <header className="mb-12 flex items-end justify-between">
@@ -89,8 +95,16 @@ export default async function PerfilPage() {
             {meRow?.nombre ?? user.email}
           </h1>
           <p className="text-xs mono opacity-60 mt-1">
-            {t("level", { n: character.nivel, clase: character.class_name })}
-            {character.prestige > 0 && ` · prestige ${character.prestige}`}
+            {t("level", { n: sheet.nivel, clase: sheet.className })}
+          </p>
+          <div className="mt-2 h-1 w-44 bg-papel-dark rounded-full overflow-hidden">
+            <div
+              className="h-full bg-signal"
+              style={{ width: `${Math.round(sheet.progresoNivel * 100)}%` }}
+            />
+          </div>
+          <p className="text-[10px] mono opacity-40 mt-1">
+            {t("xpToNext", { xp: sheet.xpParaSiguiente, n: sheet.nivel + 1 })}
           </p>
         </div>
         <Link
@@ -113,12 +127,12 @@ export default async function PerfilPage() {
                 <div
                   className="h-full bg-signal"
                   style={{
-                    width: `${Math.min(100, Math.round((Math.log10((character[key] as number) + 1) / 2.2) * 100))}%`,
+                    width: `${Math.min(100, Math.round(statDisplay(character[key] as number) / 1.5))}%`,
                   }}
                 />
               </div>
-              <span className="text-xs mono opacity-60 w-10 text-right">
-                {Math.round(character[key] as number)}
+              <span className="text-[10px] mono uppercase tracking-wider opacity-60 w-16 text-right">
+                {sheet.tiers[key].name}
               </span>
             </div>
           ))}
