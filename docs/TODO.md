@@ -1,5 +1,24 @@
 # dovo — pendientes
 
+## 🚨 BLOQUEADORES para release web a testers (meta inmediata)
+Verificado 2026-06-03 contra prod. La app web responde y el backend está reconciliado,
+pero **el login no está listo** → sin esto, ningún tester puede entrar.
+
+1. **Google OAuth deshabilitado** (confirmado: `provider is not enabled`). El botón
+   "continue with google" (método primario) falla. **Arreglo:** Supabase → Authentication →
+   Providers → Google → habilitar + pegar Client ID y Client Secret de Google Cloud Console
+   (crear credenciales OAuth si no existen; redirect URI autorizado:
+   `https://chyudsvjllcxdjgjafjo.supabase.co/auth/v1/callback`).
+2. **Magic link / email**: verificar que email auth está habilitado y que el SMTP entrega
+   (Supabase default es ~2-3 emails/h; para testers conviene SMTP propio, p.ej. Resend).
+   Supabase → Authentication → Providers → Email + URL Configuration.
+3. **URL Configuration en Supabase Auth**: Site URL = `https://dovofit.com`, Redirect URLs
+   incluyan `https://dovofit.com/auth/callback`.
+
+Lo que SÍ funciona: deploy Vercel (landing + sign-in 200, UI on-brand), backend prod
+reconciliado (loop F2/F3 verificado con smoke test), callback de auth idempotente correcto.
+
+
 ## ⏳ Activar el email de resumen mensual (rápido)
 La edge function `monthly-summary` está desplegada y el cron `resumen-mensual`
 (día 1, 13:00 UTC) ya corre, pero es **fail-soft**: sin `RESEND_API_KEY` cuenta los
