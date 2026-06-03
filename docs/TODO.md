@@ -21,9 +21,18 @@ Verificar luego: invocar la función con un mes que tenga datos y confirmar `sen
 - **Infra fuera del repo**: `reset_core_to_repo`, los 2 pg_cron y la edge function
   se aplicaron vía MCP (one-off / infra Supabase). Si se migra de proyecto, re-crear.
 
-## Siguiente feature (candidatos)
-- **Verificar flujo real end-to-end** en la app desplegada (onboarding → grupo →
-  rutina → check-in → stats/racha) contra el prod reconciliado. *Recomendado primero.*
-- **F4 · Marketplace de recompensas** (CORE en el spec, tier Free): recompensas por racha.
-- **F5 · Nutrición / VIT**: comidas, macros, el stat Vitalidad.
-- **Prestige**: reset con doble gate (nivel 50 + racha 26).
+## Dirección de producto (decidida 2026-06-03)
+**"Hyrox para cualquier disciplina"** — coop-interno + competitivo-externo. Ver
+`docs/ROADMAP_COMPETITIVO.md`. El estándar comparable (puntos normalizados por BMR) ya
+existe; falta la capa competitiva entre dúos.
+
+## Siguiente feature (en orden)
+1. **Verificar flujo real end-to-end** en la app desplegada (onboarding → grupo → rutina
+   → check-in → stats/racha) contra el prod reconciliado. *Primero — de-risking.*
+2. **Fase B · Leaderboard de dúos** — ranking por puntos normalizados del periodo. Mínimo
+   viable competitivo. (Necesita varios dúos activos para significar algo.)
+3. **Fase C · Retos dúo-vs-dúo + boosts internos** (+ verificación ligera: confirmación del
+   dúo / foto efímera).
+4. **Fase D · Ligas/divisiones/power-ups** (con masa de usuarios + verificación seria).
+
+Otros del spec, sin fecha: F4 Marketplace de recompensas (por racha), F5 Nutrición/VIT, Prestige.
