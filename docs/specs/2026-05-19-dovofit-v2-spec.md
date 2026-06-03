@@ -15,6 +15,8 @@ Una persona o grupo se compromete a una **rutina de actividad física** medible 
 
 **La afirmación canónica**: no es una fitness app con gamificación encima — es un RPG donde tu cuerpo real es el protagonista.
 
+**Dirección competitiva (añadido 2026-06-03): "Hyrox para cualquier disciplina."** Coop dentro del dúo + competencia estandarizada entre dúos ("entre ambos se retan y se motivan"). Hyrox estandariza el *formato* para hacer comparables a dos personas; dovo no fija el formato (cada quien su deporte) sino el **esfuerzo normalizado por BMR** — ese es su estándar comparable. Ver §3.16 y `docs/ROADMAP_COMPETITIVO.md`.
+
 ### Diferenciadores
 
 1. **El user es el personaje**: 6 stats físicos (FUE/RES/FLEX/VEL/EQU/VIT) que suben con entrenamiento real
@@ -22,6 +24,7 @@ Una persona o grupo se compromete a una **rutina de actividad física** medible 
 3. **Recompensas reales** (marketplace), no badges cosméticos — desde el tier Free
 4. **AI personalizada**: meal plans + análisis corporal + (post-MVP) lectura de estudios médicos
 5. **Compromiso continuo**: sin fecha fin, decay suave si abandonas, rutinas alternativas para viaje
+6. **Coop + competencia ("Hyrox para cualquier disciplina")**: cooperas con tu dúo (racha compartida, boosts), compites contra otros dúos (leaderboard, retos) — comparables vía puntos normalizados por BMR, sin importar la disciplina
 
 ---
 
@@ -138,6 +141,25 @@ Ver `feedback_dovofit_principles.md` para detalle. Resumen:
 - **Soft disclaimer** "no es advice médico" en onboarding + Términos + outputs AI
 - Datos sensibles policy para estudios médicos (post-MVP)
 - Privacy by architecture (core/pulse)
+
+### 3.16 Competición entre dúos — "Hyrox para cualquier disciplina" (añadido 2026-06-03)
+
+Coop dentro del dúo + competencia entre dúos. Detalle y fases en `docs/ROADMAP_COMPETITIVO.md`.
+
+- **Estándar comparable**: los **puntos normalizados por BMR** (§3.4) hacen justa la
+  comparación entre disciplinas distintas — el equivalente al formato fijo de Hyrox. Ya existe.
+- **Dentro del dúo (coop, positivo)**: racha compartida por compliance (existe) + **boosts**
+  que los miembros se regalan (x2 puntos un día, "energía"). Nunca mecánicas punitivas internas.
+- **Entre dúos (competencia)**: **leaderboard** por puntos normalizados del periodo, **retos
+  dúo-vs-dúo** (duelo de N días), y **power-ups/sabotajes** (congelar el multiplicador del rival)
+  — **solo contra dúos rivales, jamás contra el propio partner**.
+- **Verificación de presencia** (gating anti-trampa, escala por fase): confirmación opcional del
+  dúo + foto efímera; **geo NO obligatoria** (fricción + privacy MX), reservada a duelos "ranked".
+  Pasa de opcional a necesaria cuando hay ranking (la trampa afecta a otros) → además caps por sesión.
+- **Unidad competitiva**: el dúo (el modelo soporta N>2; análogo a singles/dobles/relay de Hyrox).
+- **Fases**: A motor (✅) → B leaderboard de dúos → C retos + boosts + verificación ligera →
+  D ligas/divisiones/power-ups + verificación seria. La competencia es **acelerador, no cimiento**:
+  validar primero que el loop + racha retiene con usuarios reales.
 
 ---
 
