@@ -93,7 +93,7 @@ export default async function AjustesPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-widest opacity-60">{label}</p>
+      <p className="text-[11px] mono uppercase tracking-[0.18em] opacity-70">{label}</p>
       <p className="mt-1">{value}</p>
     </div>
   );

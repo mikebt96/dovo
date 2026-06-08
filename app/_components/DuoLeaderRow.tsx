@@ -44,7 +44,7 @@ export default async function DuoLeaderRow({
     >
       <span
         className={`display font-extrabold tabular-nums text-2xl w-8 sm:w-9 text-center shrink-0 ${
-          podium ? "text-ink/80" : "text-ink/35"
+          podium ? "text-ink/80" : "text-ink/60"
         }`}
       >
         {row.posicion}
@@ -61,7 +61,7 @@ export default async function DuoLeaderRow({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-1 text-[11px] mono uppercase tracking-wider opacity-55">
+        <div className="flex items-center gap-3 mt-1 text-[11px] mono uppercase tracking-wider opacity-70">
           <span>{t("streak", { n: row.racha_duo })}</span>
           {top && (
             <span className="flex items-center gap-1.5">
@@ -79,7 +79,7 @@ export default async function DuoLeaderRow({
         <div className="display font-extrabold tabular-nums text-xl leading-none">
           {Math.round(row.puntos_por_miembro)}
         </div>
-        <div className="text-[10px] mono uppercase tracking-wider opacity-50 mt-1">
+        <div className="text-[10px] mono uppercase tracking-wider opacity-70 mt-1">
           {t("perMember")}
         </div>
       </div>

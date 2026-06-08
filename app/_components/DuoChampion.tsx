@@ -50,7 +50,7 @@ export default async function DuoChampion({
         }}
       />
 
-      <div className="relative flex items-center justify-between text-[11px] mono uppercase tracking-[0.22em] text-white/45">
+      <div className="relative flex items-center justify-between text-[11px] mono uppercase tracking-[0.22em] text-white/60">
         <span>{t("champion")}</span>
         {isYou && <span className="text-signal">{t("you")}</span>}
       </div>
@@ -82,7 +82,7 @@ export default async function DuoChampion({
             </div>
           </div>
           {row.top_clase && (
-            <div className="mt-4 text-[11px] mono uppercase tracking-[0.18em] text-white/35">
+            <div className="mt-4 text-[11px] mono uppercase tracking-[0.18em] text-white/55">
               {row.top_clase}
             </div>
           )}
@@ -95,7 +95,7 @@ export default async function DuoChampion({
           >
             {Math.round(row.puntos_por_miembro)}
           </div>
-          <div className="text-[10px] mono uppercase tracking-wider text-white/45 mt-1.5">
+          <div className="text-[10px] mono uppercase tracking-wider text-white/60 mt-1.5">
             {t("perMember")}
           </div>
         </div>

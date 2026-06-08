@@ -114,7 +114,7 @@ export default async function GrupoPage({
       />
 
       <section className="mb-10">
-        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-4">
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-4">
           {t("members", { n: miembros.length })}
         </h2>
         <ul className="space-y-2">
@@ -136,7 +136,7 @@ export default async function GrupoPage({
                       {nombre}
                     </span>
                     {m.role === "creator" && (
-                      <span className="text-[10px] mono uppercase tracking-widest text-signal/80 shrink-0">
+                      <span className="text-[10px] mono uppercase tracking-widest text-signal shrink-0">
                         {t("creator")}
                       </span>
                     )}

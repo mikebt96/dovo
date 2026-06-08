@@ -1,0 +1,12 @@
+-- Fix: el duelo activo no aparecía en /retos.
+--
+-- La política RLS de SELECT sobre core.retos invoca core.is_reto_party(uuid,uuid,uuid),
+-- pero el rol `authenticated` no tenía EXECUTE sobre esa función. Al consultar la tabla,
+-- Postgres evalúa el predicado de la política como el rol que llama (authenticated) y
+-- lanzaba "permission denied for function is_reto_party" → el server action getRetosDeTrato
+-- ignora el error y devuelve [] → la lista de retos quedaba vacía y el DuelScoreboard nunca
+-- se renderizaba. (marcador_reto sí funciona porque es SECURITY DEFINER y corre como dueño.)
+--
+-- Sus funciones hermanas (owns_miembro, is_trato_member, marcador_reto, cerrar_reto) ya
+-- tenían el grant; is_reto_party era la única sin él. Aplicado a prod vía MCP.
+grant execute on function core.is_reto_party(uuid, uuid, uuid) to authenticated;

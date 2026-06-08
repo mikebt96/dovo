@@ -99,6 +99,9 @@ body {
   color: var(--c-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  /* Red de seguridad mobile-first: ninguna fila de una sola línea (p.ej. AppNav
+     durante FOUT) debe disparar scroll horizontal de toda la página. */
+  overflow-x: hidden;
 }
 
 /* Wordmark only. */

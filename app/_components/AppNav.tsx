@@ -31,11 +31,11 @@ export default async function AppNav({ active }: { active?: NavKey }) {
               key={l.key}
               href={l.href}
               aria-current={active === l.key ? "page" : undefined}
-              className={
+              className={`-my-2 py-2 inline-flex items-center ${
                 active === l.key
                   ? "text-signal"
                   : "opacity-50 hover:opacity-100 transition-opacity"
-              }
+              }`}
             >
               {l.label}
             </Link>

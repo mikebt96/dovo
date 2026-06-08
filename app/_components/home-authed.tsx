@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import AppNav from "./AppNav";
+import Grain from "./Grain";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
 import CharacterCard from "./CharacterCard";
@@ -123,7 +124,7 @@ export default async function HomeAuthed() {
       <AppNav active="home" />
 
       {boost && (
-        <div className="mb-6 rounded-lg border border-signal/40 bg-signal/5 px-4 py-3">
+        <div className="mb-6 rounded-xl border border-signal/40 bg-signal/5 px-4 py-3">
           <p className="text-xs mono uppercase tracking-widest text-signal">
             {t("boostActive", { nombre: boost.de_nombre ?? "tu dúo" })}
           </p>
@@ -148,7 +149,7 @@ export default async function HomeAuthed() {
       <div className="lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
       {/* Hoy: actividades de la rutina default, registrables con un tap */}
       <section className="mb-8 lg:mb-0">
-        <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-3">
           {t("todayTitle")}
         </h2>
         {!miembroId ? (
@@ -156,7 +157,7 @@ export default async function HomeAuthed() {
         ) : rutinaItems.length === 0 ? (
           <Link
             href={`/grupo/${primerGrupoId}/rutina`}
-            className="inline-block bg-ink text-papel px-6 py-3 display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
+            className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
           >
             {t("buildRoutine")}
           </Link>
@@ -182,7 +183,7 @@ export default async function HomeAuthed() {
 
       {/* Grupos */}
       <section>
-        <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-3">
           {t("groupsTitle")}
         </h2>
         {grupos.length === 0 ? (
@@ -190,7 +191,7 @@ export default async function HomeAuthed() {
             <DuoProof />
             <Link
               href="/onboarding/grupo"
-              className="inline-block bg-ink text-papel px-6 py-3 display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
+              className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
             >
               {t("createGroup")}
             </Link>
@@ -201,7 +202,7 @@ export default async function HomeAuthed() {
               <li key={g.id}>
                 <Link
                   href={`/grupo/${g.id}`}
-                  className="block border border-ink/15 rounded-lg p-4 hover:border-signal transition-colors"
+                  className="block border border-ink/15 rounded-xl p-4 hover:border-signal transition-colors"
                 >
                   <span className="display font-medium lowercase">{g.nombre_grupo}</span>
                   <span className="text-xs opacity-60 ml-2">
@@ -214,6 +215,7 @@ export default async function HomeAuthed() {
         )}
       </section>
       </div>
+      <Grain />
     </main>
   );
 }

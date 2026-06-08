@@ -82,15 +82,14 @@ export default async function RetosPage() {
         <span className="text-[11px] mono uppercase tracking-[0.18em] text-signal">
           {t("active")}
         </span>
-        <span className="mt-1 flex items-center gap-2 display font-semibold lowercase text-lg">
+        <span className="mt-1 block display font-semibold lowercase text-lg transition-colors group-hover:text-signal">
           {t("emptyCta")}
-          <span className="transition-transform group-hover:translate-x-1">→</span>
         </span>
       </Link>
 
       {historial.length > 0 && (
         <section>
-          <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-4">
+          <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-4">
             {t("history")}
           </h2>
           <ul className="space-y-2">
