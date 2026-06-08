@@ -4,9 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import LanguageToggle from "./LanguageToggle";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
-import StatBar from "./StatBar";
+import CharacterCard from "./CharacterCard";
 import { characterSheet } from "@/lib/leveling";
-import type { StatKey } from "@/lib/scoring/types";
 import { getBoostActivo } from "@/lib/actions/boosts";
 
 type Character = {
@@ -26,15 +25,6 @@ type Grupo = {
   nombre_grupo: string;
   tipo_grupo: string;
 };
-
-const STAT_LABELS: { key: StatKey; label: string }[] = [
-  { key: "fue", label: "FUE" },
-  { key: "res", label: "RES" },
-  { key: "flex", label: "FLE" },
-  { key: "vel", label: "VEL" },
-  { key: "equ", label: "EQU" },
-  { key: "vit", label: "VIT" },
-];
 
 export default async function HomeAuthed() {
   const t = await getTranslations("home");
@@ -162,26 +152,16 @@ export default async function HomeAuthed() {
         </div>
       )}
 
-      {/* Character header: stats compactas + nivel + clase + racha */}
-      <section className="border-t border-b border-ink/15 py-6 mb-8">
-        <div className="flex items-baseline justify-between mb-4">
-          <p className="display font-semibold lowercase">
-            {t("level", { n: sheet.nivel, clase: sheet.className })}
-          </p>
-          <p className="text-xs uppercase tracking-widest opacity-60">
-            {t("streak", { n: racha })}
-          </p>
-        </div>
-        <div className="flex gap-2 items-end h-16">
-          {STAT_LABELS.map(({ key, label }) => (
-            <StatBar
-              key={key}
-              statKey={key}
-              value={character[key] as number}
-              label={label}
-            />
-          ))}
-        </div>
+      {/* Character card — el ancla de la app (DESIGN.md §6) */}
+      <section className="mb-8">
+        <CharacterCard
+          nivel={sheet.nivel}
+          className={sheet.className}
+          racha={racha}
+          prestige={character.prestige}
+          stats={character}
+          tiers={sheet.tiers}
+        />
       </section>
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
