@@ -63,6 +63,43 @@ Ordenado por impacto. Nada de esto bloquea el demo; es para abrir a usuarios rea
   `public.*`. dovo vive 100% en `core.*` (aislado), pero mover dovo a su propio proyecto
   Supabase elimina confusión a futuro.
 
+### 7. Stripe — pagos (F7) · SANDBOX-FIRST
+
+Hoy la app corre en **modo sandbox**: `/suscripcion` se ve completa, pero "Hazte Pro" abre
+**"próximamente · te avisamos"** (no un Checkout roto), los gates Pro muestran *preview*, y el
+dúo demo se ve como **Pro** para el recorrido del inversionista. **Nada se rompe sin keys.**
+Para encender el cobro real:
+
+**a) Dashboard de Stripe** (haz Test primero, luego repite en Live):
+1. **Products** → crea **dovo Pro** con 2 precios recurrentes en **MXN**: **$139/mes** y **$1,290/año**.
+2. **Products** → crea **dovo Premium**: **$229/mes** y **$2,190/año**.
+3. Copia los **4 Price IDs** (`price_…`).
+4. **Developers → API keys** → copia la **Secret key** (`sk_live_…` / `sk_test_…`).
+5. **Developers → Webhooks → Add endpoint**:
+   - URL: `https://dovofit.com/api/webhooks/stripe`
+   - Eventos: `checkout.session.completed`, `customer.subscription.created`,
+     `customer.subscription.updated`, `customer.subscription.deleted`.
+   - Copia el **Signing secret** (`whsec_…`).
+6. *(Recomendado)* **Billing → Customer portal** → actívalo (para el botón "gestionar suscripción").
+
+**b) Vercel → Settings → Environment Variables (Production)** y **Redeploy**:
+```
+BILLING_ENABLED=true
+STRIPE_SECRET_KEY=sk_live_…
+STRIPE_WEBHOOK_SECRET=whsec_…
+STRIPE_PRICE_PRO_MONTHLY=price_…
+STRIPE_PRICE_PRO_YEARLY=price_…
+STRIPE_PRICE_PREMIUM_MONTHLY=price_…
+STRIPE_PRICE_PREMIUM_YEARLY=price_…
+```
+Con eso: el Checkout cobra de verdad, el webhook actualiza el tier del dúo y los gates Pro
+empiezan a aplicar. Probar local: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
++ `stripe trigger checkout.session.completed`.
+
+> **Regla del dúo:** la suscripción es **del dúo** (`core.subscriptions`, 1 row por `trato_id`).
+> Cualquiera de los dos paga y **ambos** desbloquean. Si uno cancela, el webhook baja el tier.
+> Registrar una feature Pro nueva = 1 línea en `lib/billing/tiers.ts` (`FEATURE_TIERS`).
+
 ---
 
 ## 🔄 Mantener el demo fresco (importante)
@@ -85,4 +122,5 @@ npx tsx scripts/gen-seed-sql.ts      # regenera scripts/seed-demo.sql (idempoten
 Ver `docs/investor/2026-06-07-pricing-gtm.md` para el detalle. Resumen:
 - **Free** (primeros 200 dúos = "Fundadores") · **Pro $139 MXN/mes/dúo** ($1,290/año, ~$70 por
   persona) · **Premium $229/mes**. Freemium permanente + paywall contextual (sin trial de tiempo).
-- Los precios de la landing ya reflejan esto. Stripe Checkout es trabajo futuro (F7 del spec).
+- Los precios de la landing y de `/suscripcion` ya reflejan esto. **F7 (Stripe Checkout +
+  gating) ya está construido en modo sandbox** — ver §7 arriba para encenderlo con tus keys.
