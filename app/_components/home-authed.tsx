@@ -129,7 +129,7 @@ export default async function HomeAuthed() {
   }
 
   return (
-    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
+    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
       <header className="flex justify-between items-start mb-8">
         <Link href="/" className="syne text-2xl lowercase tracking-tight">
           dovo
@@ -184,8 +184,9 @@ export default async function HomeAuthed() {
         </div>
       </section>
 
+      <div className="lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
       {/* Hoy: actividades de la rutina default, registrables con un tap */}
-      <section className="mb-8">
+      <section className="mb-8 lg:mb-0">
         <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
           {t("todayTitle")}
         </h2>
@@ -251,6 +252,7 @@ export default async function HomeAuthed() {
           </ul>
         )}
       </section>
+      </div>
     </main>
   );
 }
