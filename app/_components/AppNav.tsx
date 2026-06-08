@@ -2,7 +2,13 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import LanguageToggle from "./LanguageToggle";
 
-type NavKey = "home" | "leaderboard" | "retos" | "perfil" | "ajustes";
+type NavKey =
+  | "home"
+  | "leaderboard"
+  | "retos"
+  | "recompensas"
+  | "perfil"
+  | "ajustes";
 
 // Nav unificada de la app autenticada (DESIGN.md §6 "Nav": fija, fina, glass).
 // Sticky con backdrop-blur sobre el papel; el link activo va en signal. Reemplaza
@@ -12,6 +18,7 @@ export default async function AppNav({ active }: { active?: NavKey }) {
   const links: { key: NavKey; href: string; label: string }[] = [
     { key: "leaderboard", href: "/leaderboard", label: t("navLeaderboard") },
     { key: "retos", href: "/retos", label: t("navRetos") },
+    { key: "recompensas", href: "/recompensas", label: t("navRewards") },
     { key: "perfil", href: "/perfil", label: t("navProfile") },
     { key: "ajustes", href: "/ajustes", label: t("navSettings") },
   ];
@@ -40,7 +47,10 @@ export default async function AppNav({ active }: { active?: NavKey }) {
               {l.label}
             </Link>
           ))}
-          <LanguageToggle />
+          {/* Toggle de idioma sólo en desktop; en móvil vive en /ajustes (espacio). */}
+          <span className="hidden sm:inline-flex">
+            <LanguageToggle />
+          </span>
         </nav>
       </div>
     </header>

@@ -255,3 +255,8 @@ insert into core.retos (trato_a,trato_b,periodo_inicio,periodo_fin,estado,creado
 -- ════════ BOOSTS ════════
 insert into core.boosts (de_user,para_user,trato_id,tipo,fecha_otorgado,fecha_expira,aplicado) values ('10000000-0000-4000-8000-000000000018','10000000-0000-4000-8000-000000000016','10000000-0000-4000-8000-000000000015','energia',now() - interval '2 days',now() + interval '1 day',false);
 insert into core.boosts (de_user,para_user,trato_id,tipo,fecha_otorgado,fecha_expira,aplicado) select '10000000-0000-4000-8000-00000000000e','10000000-0000-4000-8000-00000000000c',t.id,'escudo',now() - interval '1 day',now() + interval '6 days',false from core.tratos t where t.created_by='10000000-0000-4000-8000-00000000000c' and t.is_demo limit 1;
+-- ════════ WISHLIST ════════
+insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000016','Tenis de trail nuevos');
+insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000016','Reloj con GPS');
+insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000018','Cinturón de fuerza');
+insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000018','Audífonos para correr');

@@ -203,6 +203,18 @@ out.push(`insert into core.boosts (de_user,para_user,trato_id,tipo,fecha_otorgad
 // Sofía → Renata (escudo activo) en En Punta
 out.push(`insert into core.boosts (de_user,para_user,trato_id,tipo,fecha_otorgado,fecha_expira,aplicado) select ${S(retoMeta.sofia!)},${S(retoMeta.renata!)},t.id,'escudo',now() - interval '1 day',now() + interval '6 days',false from core.tratos t where t.created_by=${S(retoMeta.renata!)} and t.is_demo limit 1;`);
 
+// ── Wishlist demo (Iván + Tono) — para que F4 muestre la lista lado a lado ──
+out.push("-- ════════ WISHLIST ════════");
+const wish: [string, string][] = [
+  [retoMeta.ivan!, "Tenis de trail nuevos"],
+  [retoMeta.ivan!, "Reloj con GPS"],
+  [retoMeta.tono!, "Cinturón de fuerza"],
+  [retoMeta.tono!, "Audífonos para correr"],
+];
+for (const [uid, titulo] of wish) {
+  out.push(`insert into core.wishlist (user_id,titulo) values (${S(uid)},${S(titulo)});`);
+}
+
 const sql = out.join("\n") + "\n";
 writeFileSync("scripts/seed-demo.sql", sql);
 console.error(`seed: ${UID} uuids, ${out.length} statements, ${sql.length} bytes → scripts/seed-demo.sql`);
