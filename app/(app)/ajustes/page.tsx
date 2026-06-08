@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getThemeOverride } from "@/lib/theme";
+import { getDuoTier } from "@/lib/billing/tier";
 import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
+import ProBadge from "@/app/_components/ProBadge";
 import LanguageToggle from "@/app/_components/LanguageToggle";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import PulseOptOutToggle from "./_components/PulseOptOutToggle";
@@ -29,6 +31,7 @@ export default async function AjustesPage() {
 
   const optOut = (meRow?.pulse_opt_out as boolean | undefined) ?? false;
   const currentTheme = (await getThemeOverride()) ?? "system";
+  const duo = await getDuoTier();
 
   return (
     <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
@@ -38,6 +41,19 @@ export default async function AjustesPage() {
       <section className="border-t border-b border-ink/15 py-8 mb-10 space-y-4">
         <Row label={t("name")} value={meRow?.nombre ?? t("noName")} />
         <Row label={t("email")} value={meRow?.email ?? user.email ?? ""} />
+      </section>
+
+      <section className="mb-10">
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("plan")}</h2>
+        <Link
+          href="/suscripcion"
+          className="flex items-center gap-3 rounded-xl border border-ink/12 p-4 hover:border-signal transition-colors"
+        >
+          <ProBadge tier={duo.tier} />
+          <span className="ml-auto text-[11px] mono uppercase tracking-[0.14em] text-signal">
+            {t("planView")}
+          </span>
+        </Link>
       </section>
 
       <section className="mb-10">

@@ -212,7 +212,11 @@
     "todayNoGroup": "únete a un grupo para empezar a registrar tu actividad.",
     "buildRoutine": "arma tu rutina →",
     "groupsTitle": "tus grupos",
-    "createGroup": "crear o unirme a un grupo →"
+    "createGroup": "crear o unirme a un grupo →",
+    "proUpsellEyebrow": "pro",
+    "proUpsellTitle": "lleva a tu dúo a pro",
+    "proUpsellBody": "planes de comida con IA, análisis corporal y descuentos premium. una sola suscripción para los dos.",
+    "proUpsellCta": "ver planes →"
   },
   "duoProof": {
     "eyebrow": "por qué en dúo",
@@ -259,7 +263,9 @@
     "appearance": "apariencia",
     "themeAuto": "Auto",
     "themeLight": "Claro",
-    "themeDark": "Oscuro"
+    "themeDark": "Oscuro",
+    "plan": "tu plan",
+    "planView": "ver planes →"
   },
   "onboarding": {
     "step1": "paso 1 de 2",
@@ -479,5 +485,64 @@
     "ctaDemo": "ver demo",
     "ctaSignup": "crear cuenta",
     "foot": "dovo · dovofit.com"
+  },
+  "suscripcion": {
+    "eyebrow": "plan",
+    "title": "tu plan.",
+    "subtitle": "una suscripción por dúo. cualquiera de los dos paga, los dos desbloquean.",
+    "currentPlan": "plan actual",
+    "currentLabel": "tu plan",
+    "demoNote": "dúo demo · acceso pro de cortesía",
+    "freeNote": "estás en el plan gratis",
+    "renewsOn": "se renueva el {date}",
+    "endsOn": "termina el {date}",
+    "manage": "gestionar suscripción",
+    "intervalMonth": "mensual",
+    "intervalYear": "anual",
+    "intervalYearHint": "−23%",
+    "comingSoon": "próximamente · te avisamos",
+    "ctaError": "algo falló, reintenta",
+    "footnote": "comunicamos el precio por persona, pero se cobra una sola suscripción al dúo. anual = casi 3 meses gratis.",
+    "free": {
+      "name": "gratis",
+      "price": "$0",
+      "period": "para los primeros 200 dúos",
+      "included": "incluido para siempre"
+    },
+    "pro": {
+      "tag": "↗ el más elegido",
+      "name": "pro",
+      "priceMonth": "$139",
+      "priceYear": "$1,290",
+      "perCapMonth": "~$70 c/u",
+      "perCapYear": "~$54 c/u",
+      "periodMonth": "por dúo / mes",
+      "periodYear": "por dúo / año",
+      "saveYear": "casi 3 meses gratis",
+      "cta": "hazte pro"
+    },
+    "premium": {
+      "tag": "— próximamente",
+      "name": "premium",
+      "priceMonth": "$229",
+      "priceYear": "$2,190",
+      "periodMonth": "por dúo / mes",
+      "periodYear": "por dúo / año",
+      "cta": "unirme a la lista"
+    },
+    "unlocksTitle": "lo que desbloquea pro",
+    "nutritionTitle": "nutrición con IA",
+    "nutritionBlurb": "planes de comida semanales y lista del súper, hechos para tu objetivo.",
+    "bodyScanTitle": "análisis corporal",
+    "bodyScanBlurb": "estimación de composición desde una foto, con borrado garantizado.",
+    "noDuoTitle": "primero, tu dúo.",
+    "noDuoBody": "la suscripción es del dúo. crea o únete a uno para ver los planes.",
+    "noDuoCta": "crear mi dúo →"
+  },
+  "paywall": {
+    "defaultTitle": "función pro",
+    "defaultBlurb": "esto se desbloquea con el plan pro de tu dúo.",
+    "comingSoon": "próximamente",
+    "unlock": "desbloquear con pro"
   }
 }

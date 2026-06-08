@@ -14,6 +14,16 @@ const serverEnvSchema = envSchema.extend({
     .string()
     .optional()
     .default("dovo <hola@dovofit.com>"),
+  // F7 Pagos · sandbox-first. TODO opcional: sin estas vars el billing queda en "preview"
+  // (pricing visible, CTA "próximamente", gates fail-soft). Miguel las pega en Vercel y
+  // pone BILLING_ENABLED=true para encender Checkout + cobro real. Ver docs/SETUP_APIS_MIGUEL.md.
+  BILLING_ENABLED: z.enum(["true", "false"]).optional().default("false"),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_PRO_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_PRO_YEARLY: z.string().optional(),
+  STRIPE_PRICE_PREMIUM_MONTHLY: z.string().optional(),
+  STRIPE_PRICE_PREMIUM_YEARLY: z.string().optional(),
 });
 
 export const publicEnv = envSchema.parse({

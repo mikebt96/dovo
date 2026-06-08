@@ -212,7 +212,11 @@
     "todayNoGroup": "join a group to start logging your activity.",
     "buildRoutine": "build your routine →",
     "groupsTitle": "your groups",
-    "createGroup": "create or join a group →"
+    "createGroup": "create or join a group →",
+    "proUpsellEyebrow": "pro",
+    "proUpsellTitle": "take your duo to pro",
+    "proUpsellBody": "AI meal plans, body analysis and premium discounts. one subscription for both of you.",
+    "proUpsellCta": "see plans →"
   },
   "duoProof": {
     "eyebrow": "why in a duo",
@@ -259,7 +263,9 @@
     "appearance": "appearance",
     "themeAuto": "Auto",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "plan": "your plan",
+    "planView": "see plans →"
   },
   "onboarding": {
     "step1": "step 1 of 2",
@@ -479,5 +485,64 @@
     "ctaDemo": "see demo",
     "ctaSignup": "create account",
     "foot": "dovo · dovofit.com"
+  },
+  "suscripcion": {
+    "eyebrow": "plan",
+    "title": "your plan.",
+    "subtitle": "one subscription per duo. either of you pays, both unlock.",
+    "currentPlan": "current plan",
+    "currentLabel": "your plan",
+    "demoNote": "demo duo · complimentary pro access",
+    "freeNote": "you're on the free plan",
+    "renewsOn": "renews on {date}",
+    "endsOn": "ends on {date}",
+    "manage": "manage subscription",
+    "intervalMonth": "monthly",
+    "intervalYear": "yearly",
+    "intervalYearHint": "−23%",
+    "comingSoon": "coming soon · we'll tell you",
+    "ctaError": "something failed, retry",
+    "footnote": "we quote the price per person, but it's one subscription billed to the duo. yearly = almost 3 months free.",
+    "free": {
+      "name": "free",
+      "price": "$0",
+      "period": "for the first 200 duos",
+      "included": "included forever"
+    },
+    "pro": {
+      "tag": "↗ most chosen",
+      "name": "pro",
+      "priceMonth": "$139",
+      "priceYear": "$1,290",
+      "perCapMonth": "~$70 ea",
+      "perCapYear": "~$54 ea",
+      "periodMonth": "per duo / mo",
+      "periodYear": "per duo / yr",
+      "saveYear": "almost 3 months free",
+      "cta": "go pro"
+    },
+    "premium": {
+      "tag": "— coming soon",
+      "name": "premium",
+      "priceMonth": "$229",
+      "priceYear": "$2,190",
+      "periodMonth": "per duo / mo",
+      "periodYear": "per duo / yr",
+      "cta": "join the list"
+    },
+    "unlocksTitle": "what pro unlocks",
+    "nutritionTitle": "AI nutrition",
+    "nutritionBlurb": "weekly meal plans and grocery list, built for your goal.",
+    "bodyScanTitle": "body analysis",
+    "bodyScanBlurb": "composition estimate from a photo, with guaranteed deletion.",
+    "noDuoTitle": "your duo first.",
+    "noDuoBody": "the subscription belongs to the duo. create or join one to see the plans.",
+    "noDuoCta": "create my duo →"
+  },
+  "paywall": {
+    "defaultTitle": "pro feature",
+    "defaultBlurb": "this unlocks with your duo's pro plan.",
+    "comingSoon": "coming soon",
+    "unlock": "unlock with pro"
   }
 }

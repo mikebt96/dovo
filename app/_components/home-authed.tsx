@@ -8,6 +8,7 @@ import DuoProof from "./DuoProof";
 import CharacterCard from "./CharacterCard";
 import { characterSheet } from "@/lib/leveling";
 import { getBoostActivo } from "@/lib/actions/boosts";
+import { getDuoTier } from "@/lib/billing/tier";
 
 type Character = {
   fue: number;
@@ -70,6 +71,7 @@ export default async function HomeAuthed() {
   const sheet = characterSheet(character, character.prestige);
   const racha = streakRow?.current_streak_weeks ?? 0;
   const boost = await getBoostActivo();
+  const duo = await getDuoTier();
   const miembrosList = (miembros ?? []) as unknown as Array<{
     id: string;
     tratos: Grupo;
@@ -215,6 +217,31 @@ export default async function HomeAuthed() {
         )}
       </section>
       </div>
+
+      {/* Upsell Pro — editorial, no agresivo. Solo dúos free (oculto para demo=pro). */}
+      {duo.tier === "free" && !duo.isDemo && grupos.length > 0 && (
+        <Link
+          href="/suscripcion"
+          className="group block rounded-2xl border border-signal/30 bg-signal/[0.04] p-6 mt-10 hover:border-signal/60 transition-colors"
+        >
+          <p className="text-[11px] mono uppercase tracking-[0.22em] text-signal mb-2">
+            {t("proUpsellEyebrow")}
+          </p>
+          <div className="flex items-end justify-between gap-4">
+            <div className="min-w-0">
+              <p className="display text-2xl font-bold lowercase">
+                {t("proUpsellTitle")}
+              </p>
+              <p className="text-sm opacity-65 mt-1 max-w-md leading-relaxed">
+                {t("proUpsellBody")}
+              </p>
+            </div>
+            <span className="shrink-0 text-sm mono uppercase tracking-[0.14em] text-signal group-hover:translate-x-1 transition-transform">
+              {t("proUpsellCta")}
+            </span>
+          </div>
+        </Link>
+      )}
       <Grain />
     </main>
   );
