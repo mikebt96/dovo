@@ -13,20 +13,28 @@ type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 // el modal "próximamente" en vez de un toast de error.
 const COMING_SOON = "coming_soon";
 
-async function primerTratoId(): Promise<{ userId: string; email: string | null; tratoId: string | null } | null> {
+type TratoCtx = { userId: string; email: string | null; tratoId: string | null };
+
+async function primerTrato(): Promise<Result<TratoCtx>> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data: miembro } = await supabase
+  if (!user) return { ok: false, error: "sin sesión" };
+  // Regla F7: SIEMPRE checar el error de Supabase — no degradar en silencio (un error de DB
+  // se vería como "sin dúo" y confundiría al usuario y al debug).
+  const { data: miembro, error } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("trato_id")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle<{ trato_id: string }>();
-  return { userId: user.id, email: user.email ?? null, tratoId: miembro?.trato_id ?? null };
+  if (error) return { ok: false, error: error.message };
+  return {
+    ok: true,
+    data: { userId: user.id, email: user.email ?? null, tratoId: miembro?.trato_id ?? null },
+  };
 }
 
 /**
@@ -44,18 +52,21 @@ export async function createCheckout(input: {
   const priceId = priceIdFor(input.tier, input.interval);
   if (!priceId) return { ok: false, error: COMING_SOON };
 
-  const ctx = await primerTratoId();
-  if (!ctx) return { ok: false, error: "sin sesión" };
+  const ctxRes = await primerTrato();
+  if (!ctxRes.ok) return ctxRes;
+  const ctx = ctxRes.data;
   if (!ctx.tratoId) return { ok: false, error: "necesitas un dúo primero" };
 
   // Reutiliza el customer del dúo si ya existe (guardado vía service role, bypass RLS).
   const svc = createServiceClient();
-  const { data: existing } = await svc
+  const { data: existing, error: readErr } = await svc
     .schema("core")
     .from("subscriptions")
     .select("stripe_customer_id")
     .eq("trato_id", ctx.tratoId)
     .maybeSingle<{ stripe_customer_id: string | null }>();
+  // Si la lectura falla NO seguimos: crearíamos un customer Stripe duplicado/huérfano.
+  if (readErr) return { ok: false, error: readErr.message };
 
   let customerId = existing?.stripe_customer_id ?? null;
   if (!customerId) {
@@ -65,13 +76,16 @@ export async function createCheckout(input: {
     });
     customerId = customer.id;
     // Pre-crea la row (tier free / incomplete) para anclar el customer al dúo.
-    await svc
+    // Si falla, abortamos: el webhook no podría matchear trato_id por customer y el pago
+    // quedaría huérfano (usuario paga, sub nunca se activa).
+    const { error: upsertErr } = await svc
       .schema("core")
       .from("subscriptions")
       .upsert(
         { trato_id: ctx.tratoId, stripe_customer_id: customerId, tier: "free", status: "incomplete" },
         { onConflict: "trato_id" },
       );
+    if (upsertErr) return { ok: false, error: upsertErr.message };
   }
 
   const appUrl = publicEnv.NEXT_PUBLIC_APP_URL;
@@ -99,17 +113,20 @@ export async function openBillingPortal(): Promise<Result<{ url: string }>> {
   const stripe = getStripe();
   if (!stripe) return { ok: false, error: COMING_SOON };
 
-  const ctx = await primerTratoId();
-  if (!ctx) return { ok: false, error: "sin sesión" };
+  const ctxRes = await primerTrato();
+  if (!ctxRes.ok) return ctxRes;
+  const ctx = ctxRes.data;
   if (!ctx.tratoId) return { ok: false, error: "sin dúo" };
 
   const svc = createServiceClient();
-  const { data: sub } = await svc
+  const { data: sub, error: readErr } = await svc
     .schema("core")
     .from("subscriptions")
     .select("stripe_customer_id")
     .eq("trato_id", ctx.tratoId)
     .maybeSingle<{ stripe_customer_id: string | null }>();
+  // Distinguir error de DB de "no hay suscripción": no mentir "sin suscripción" ante un fallo.
+  if (readErr) return { ok: false, error: readErr.message };
   if (!sub?.stripe_customer_id) return { ok: false, error: "sin suscripción" };
 
   const portal = await stripe.billingPortal.sessions.create({

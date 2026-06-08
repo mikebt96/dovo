@@ -39,13 +39,18 @@ export async function POST(req: Request) {
 
   const svc = createServiceClient();
 
-  // Idempotencia: si ya lo procesamos, no repetir.
-  const { data: seen } = await svc
+  // Idempotencia: si ya lo procesamos, no repetir. Si la LECTURA falla no podemos garantizar
+  // idempotencia → 500 para que Stripe reintente (mejor que procesar a ciegas y duplicar).
+  const { data: seen, error: seenErr } = await svc
     .schema("core")
     .from("stripe_events")
     .select("id")
     .eq("id", event.id)
     .maybeSingle<{ id: string }>();
+  if (seenErr) {
+    console.error("[stripe-webhook] idempotency read:", seenErr.message);
+    return NextResponse.json({ error: "idempotency check failed" }, { status: 500 });
+  }
   if (seen) return NextResponse.json({ received: true, duplicate: true });
 
   try {
@@ -66,7 +71,7 @@ export async function POST(req: Request) {
       }
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        await svc
+        const { error: delErr } = await svc
           .schema("core")
           .from("subscriptions")
           .update({
@@ -76,14 +81,20 @@ export async function POST(req: Request) {
             cancel_at_period_end: false,
           })
           .eq("stripe_subscription_id", sub.id);
+        if (delErr) throw new Error(`subscription.deleted update: ${delErr.message}`);
         break;
       }
       default:
         break;
     }
 
-    // Marca procesado SOLO si no hubo throw (un 500 hace que Stripe reintente).
-    await svc.schema("core").from("stripe_events").insert({ id: event.id, type: event.type });
+    // Marca procesado SOLO si no hubo throw (un 500 hace que Stripe reintente). El upsert por
+    // trato_id es idempotente, así que reintentar tras un fallo aquí es seguro.
+    const { error: markErr } = await svc
+      .schema("core")
+      .from("stripe_events")
+      .insert({ id: event.id, type: event.type });
+    if (markErr) throw new Error(`mark processed ${event.id}: ${markErr.message}`);
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error(`[stripe-webhook] error en ${event.type}:`, err);
@@ -115,7 +126,7 @@ async function upsertSub(
     null;
   const currentPeriodEnd = periodEndUnix ? new Date(periodEndUnix * 1000).toISOString() : null;
 
-  await svc.schema("core").from("subscriptions").upsert(
+  const { error } = await svc.schema("core").from("subscriptions").upsert(
     {
       trato_id: tratoId,
       tier: tierForPriceId(priceId),
@@ -129,17 +140,21 @@ async function upsertSub(
     },
     { onConflict: "trato_id" },
   );
+  // Throw → el catch del POST devuelve 500 → Stripe reintenta (no dejamos el tier desincronizado).
+  if (error) throw new Error(`upsertSub ${sub.id}: ${error.message}`);
 }
 
 async function tratoIdByCustomer(
   svc: ServiceClient,
   customerId: string,
 ): Promise<string | null> {
-  const { data } = await svc
+  const { data, error } = await svc
     .schema("core")
     .from("subscriptions")
     .select("trato_id")
     .eq("stripe_customer_id", customerId)
     .maybeSingle<{ trato_id: string }>();
+  // Un error de lectura aquí NO es "no hay trato" → throw para no enmascararlo con 500 confuso.
+  if (error) throw new Error(`tratoIdByCustomer ${customerId}: ${error.message}`);
   return data?.trato_id ?? null;
 }

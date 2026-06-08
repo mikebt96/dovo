@@ -47,5 +47,9 @@ export function tierForPriceId(priceId: string | null | undefined): Tier {
   if (priceId === process.env.STRIPE_PRICE_PREMIUM_MONTHLY || priceId === process.env.STRIPE_PRICE_PREMIUM_YEARLY) {
     return "premium";
   }
-  return "pro"; // conservador: si no matchea un price conocido, no des premium gratis
+  // Conservador DE VERDAD: un price desconocido (typo en env, price viejo, cambio en Stripe)
+  // NO debe otorgar acceso pagado → 'free'. Como el Checkout exige un price configurado
+  // (priceIdFor), un webhook nunca llega aquí con un price legítimo; un 'free' aquí + status
+  // 'active' es un estado anómalo y detectable, mejor que regalar Pro.
+  return "free";
 }

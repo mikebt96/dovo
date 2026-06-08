@@ -50,13 +50,16 @@ export async function getDuoTier(): Promise<DuoTier> {
   } = await supabase.auth.getUser();
   if (!user) return { ...FREE_NO_DUO, billingEnabled };
 
-  const { data: miembro } = await supabase
+  const { data: miembro, error: miembroErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("trato_id, tratos!inner(is_demo)")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
+  // Fail-soft OBSERVABLE: no tiramos 500 en la home/ajustes por un read de tier, pero tampoco
+  // tragamos el error en silencio (la lección del grant). Logueamos y degradamos a free.
+  if (miembroErr) console.error("[getDuoTier] trato_miembros:", miembroErr.message);
 
   const row = miembro as unknown as
     | { trato_id: string; tratos: { is_demo: boolean } | null }
@@ -79,7 +82,7 @@ export async function getDuoTier(): Promise<DuoTier> {
   }
 
   // 2/3 · subscription real (o ausencia → free)
-  const { data: sub } = await supabase
+  const { data: sub, error: subErr } = await supabase
     .schema("core")
     .from("subscriptions")
     .select("tier, status, current_period_end, cancel_at_period_end")
@@ -90,6 +93,9 @@ export async function getDuoTier(): Promise<DuoTier> {
       current_period_end: string | null;
       cancel_at_period_end: boolean;
     }>();
+  // Mismo criterio: degradar a free ante error de lectura es preferible a 500ear la página,
+  // pero queda logueado para no esconder un fallo (RLS/grant/timeout) como antes.
+  if (subErr) console.error("[getDuoTier] subscriptions:", subErr.message);
 
   const entitled = !!sub && statusEntitled(sub.status, sub.current_period_end);
   return {
