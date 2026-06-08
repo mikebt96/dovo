@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/privacidad",
   "/terminos",
   "/showcase",
+  "/landing",
 ];
 
 function isPublic(pathname: string) {
