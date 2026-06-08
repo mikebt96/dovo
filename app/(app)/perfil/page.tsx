@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import { characterSheet, statDisplay } from "@/lib/leveling";
-import type { StatKey } from "@/lib/scoring/types";
+import { characterSheet } from "@/lib/leveling";
+import CharacterCard from "@/app/_components/CharacterCard";
 
 export const dynamic = "force-dynamic";
 
@@ -28,28 +28,8 @@ type Perfil = {
   bmr_calculado: number | null;
 };
 
-const STATS: { key: StatKey; statKey: string }[] = [
-  { key: "fue", statKey: "fue" },
-  { key: "res", statKey: "res" },
-  { key: "flex", statKey: "flex" },
-  { key: "vel", statKey: "vel" },
-  { key: "equ", statKey: "equ" },
-  { key: "vit", statKey: "vit" },
-];
-
-// Color por stat (clases estáticas para que Tailwind no las purgue).
-const STAT_BAR: Record<StatKey, string> = {
-  fue: "bg-stat-fue",
-  res: "bg-stat-res",
-  flex: "bg-stat-flex",
-  vel: "bg-stat-vel",
-  equ: "bg-stat-equ",
-  vit: "bg-stat-vit",
-};
-
 export default async function PerfilPage() {
   const t = await getTranslations("perfil");
-  const tStats = await getTranslations("stats");
   const supabase = await createClient();
   const {
     data: { user },
@@ -104,18 +84,6 @@ export default async function PerfilPage() {
           <h1 className="display text-3xl font-extrabold lowercase">
             {meRow?.nombre ?? user.email}
           </h1>
-          <p className="text-xs mono opacity-60 mt-1">
-            {t("level", { n: sheet.nivel, clase: sheet.className })}
-          </p>
-          <div className="mt-2 h-1 w-44 bg-papel-dark rounded-full overflow-hidden">
-            <div
-              className="h-full bg-signal"
-              style={{ width: `${Math.round(sheet.progresoNivel * 100)}%` }}
-            />
-          </div>
-          <p className="text-[10px] mono opacity-40 mt-1">
-            {t("xpToNext", { xp: sheet.xpParaSiguiente, n: sheet.nivel + 1 })}
-          </p>
         </div>
         <Link
           href="/"
@@ -125,27 +93,24 @@ export default async function PerfilPage() {
         </Link>
       </header>
 
-      <section className="border-t border-b border-ink/15 py-8 mb-10">
-        <p className="text-xs uppercase tracking-widest opacity-60 mb-5">
-          {t("attributes")}
-        </p>
-        <div className="space-y-3">
-          {STATS.map(({ key, statKey }) => (
-            <div key={key} className="flex items-center gap-4">
-              <span className="text-sm w-28">{tStats(statKey)}</span>
-              <div className="flex-1 h-2 bg-papel-dark rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${STAT_BAR[key]}`}
-                  style={{
-                    width: `${Math.min(100, Math.round(statDisplay(character[key] as number) / 1.5))}%`,
-                  }}
-                />
-              </div>
-              <span className="text-[10px] mono uppercase tracking-wider opacity-60 w-16 text-right">
-                {sheet.tiers[key].name}
-              </span>
-            </div>
-          ))}
+      <section className="mb-10">
+        <CharacterCard
+          nivel={sheet.nivel}
+          className={sheet.className}
+          prestige={character.prestige}
+          stats={character}
+          tiers={sheet.tiers}
+        />
+        <div className="mt-4">
+          <p className="text-[10px] mono uppercase tracking-widest opacity-50 mb-1">
+            {t("xpToNext", { xp: sheet.xpParaSiguiente, n: sheet.nivel + 1 })}
+          </p>
+          <div className="h-1 bg-papel-dark rounded-full overflow-hidden">
+            <div
+              className="h-full bg-signal"
+              style={{ width: `${Math.round(sheet.progresoNivel * 100)}%` }}
+            />
+          </div>
         </div>
         <p className="text-xs opacity-50 mt-6">{t("attributesNote")}</p>
       </section>

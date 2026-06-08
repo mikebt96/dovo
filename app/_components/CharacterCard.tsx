@@ -24,7 +24,7 @@ export default async function CharacterCard({
 }: {
   nivel: number;
   className: string;
-  racha: number;
+  racha?: number;
   prestige?: number;
   stats: Record<StatKey, number>;
   tiers: Record<StatKey, { name: string }>;
@@ -53,7 +53,9 @@ export default async function CharacterCard({
 
       <div className="relative flex items-center justify-between text-[11px] mono uppercase tracking-[0.22em] text-white/45">
         <span>{t("eyebrow")}</span>
-        <span className="text-signal/90">{racha} sem ✦</span>
+        {racha !== undefined && (
+          <span className="text-signal/90">{racha} sem ✦</span>
+        )}
       </div>
 
       <div className="relative mt-6 flex items-end gap-4">
