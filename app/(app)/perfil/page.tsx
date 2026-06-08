@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { characterSheet } from "@/lib/leveling";
+import AppNav from "@/app/_components/AppNav";
+import PageHero from "@/app/_components/PageHero";
 import CharacterCard from "@/app/_components/CharacterCard";
 
 export const dynamic = "force-dynamic";
@@ -75,23 +76,9 @@ export default async function PerfilPage() {
   const sheet = characterSheet(character, character.prestige);
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
-      <header className="mb-12 flex items-end justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-widest opacity-60 mb-2">
-            {t("eyebrow")}
-          </p>
-          <h1 className="display text-3xl font-extrabold lowercase">
-            {meRow?.nombre ?? user.email}
-          </h1>
-        </div>
-        <Link
-          href="/"
-          className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
-        >
-          {t("back")}
-        </Link>
-      </header>
+    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+      <AppNav active="perfil" />
+      <PageHero eyebrow={t("eyebrow")} title={meRow?.nombre ?? user.email} />
 
       <section className="mb-10">
         <CharacterCard

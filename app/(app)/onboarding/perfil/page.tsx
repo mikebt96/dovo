@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import LanguageToggle from "@/app/_components/LanguageToggle";
+import OnboardingProgress from "@/app/_components/OnboardingProgress";
 import PerfilForm from "./PerfilForm";
 
 export const dynamic = "force-dynamic";
@@ -14,13 +17,37 @@ export default async function OnboardingPerfilPage() {
   if (!user) redirect("/sign-in");
 
   return (
-    <main className="min-h-svh max-w-xl mx-auto px-6 py-12 bg-papel text-ink">
-      <header className="mb-10">
-        <p className="text-xs uppercase tracking-widest opacity-60 mb-2">{t("step1")}</p>
-        <h1 className="display text-3xl font-extrabold lowercase">{t("perfilTitle")}</h1>
-        <p className="text-sm opacity-70 mt-2">{t("perfilSubtitle")}</p>
-      </header>
-      <PerfilForm />
+    <main className="min-h-svh bg-papel text-ink">
+      <div className="mx-auto max-w-5xl px-6 py-10">
+        <div className="flex items-center justify-between mb-12">
+          <Link
+            href="/"
+            className="syne text-2xl lowercase tracking-tight hover:text-signal transition-colors"
+          >
+            dovo
+          </Link>
+          <LanguageToggle />
+        </div>
+
+        <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-start">
+          <div className="mb-10 lg:mb-0 lg:sticky lg:top-10">
+            <OnboardingProgress step={1} />
+            <p className="text-[11px] mono uppercase tracking-[0.22em] text-signal mb-3 mt-6">
+              {t("step1")}
+            </p>
+            <h1 className="display font-extrabold lowercase leading-[0.9] tracking-[-0.03em] text-[clamp(2.5rem,7vw,4rem)] text-balance">
+              {t("perfilTitle")}
+            </h1>
+            <p className="text-sm sm:text-base opacity-60 mt-4 max-w-sm leading-relaxed">
+              {t("perfilSubtitle")}
+            </p>
+          </div>
+
+          <div className="lg:pt-1">
+            <PerfilForm />
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

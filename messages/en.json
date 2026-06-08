@@ -368,6 +368,7 @@
     "eyebrow": "ranking",
     "title": "duo leaderboard",
     "subtitle": "effort normalized by BMR. any discipline, comparable.",
+    "champion": "season leader",
     "tabWeek": "week",
     "tabMonth": "month",
     "rank": "#{n}",

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import LanguageToggle from "./LanguageToggle";
+import AppNav from "./AppNav";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
 import CharacterCard from "./CharacterCard";
@@ -120,26 +120,7 @@ export default async function HomeAuthed() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
-      <header className="flex justify-between items-start mb-8">
-        <Link href="/" className="syne text-2xl lowercase tracking-tight">
-          dovo
-        </Link>
-        <nav className="flex items-center gap-4 text-xs uppercase tracking-widest opacity-60">
-          <Link href="/leaderboard" className="hover:opacity-100">
-            {t("navLeaderboard")}
-          </Link>
-          <Link href="/retos" className="hover:opacity-100">
-            {t("navRetos")}
-          </Link>
-          <Link href="/perfil" className="hover:opacity-100">
-            {t("navProfile")}
-          </Link>
-          <Link href="/ajustes" className="hover:opacity-100">
-            {t("navSettings")}
-          </Link>
-          <LanguageToggle />
-        </nav>
-      </header>
+      <AppNav active="home" />
 
       {boost && (
         <div className="mb-6 rounded-lg border border-signal/40 bg-signal/5 px-4 py-3">

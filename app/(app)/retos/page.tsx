@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import LanguageToggle from "@/app/_components/LanguageToggle";
+import AppNav from "@/app/_components/AppNav";
+import PageHero from "@/app/_components/PageHero";
 import DuelScoreboard from "@/app/_components/DuelScoreboard";
 import {
   getRetosDeTrato,
@@ -15,7 +16,6 @@ export const dynamic = "force-dynamic";
 
 export default async function RetosPage() {
   const t = await getTranslations("retos");
-  const tHome = await getTranslations("home");
   const supabase = await createClient();
   const {
     data: { user },
@@ -30,31 +30,11 @@ export default async function RetosPage() {
     .limit(1)
     .maybeSingle<{ trato_id: string }>();
 
-  const header = (
-    <header className="flex justify-between items-start mb-8">
-      <Link href="/" className="syne text-2xl lowercase tracking-tight">
-        dovo
-      </Link>
-      <nav className="flex items-center gap-4 text-xs uppercase tracking-widest opacity-60">
-        <Link href="/leaderboard" className="hover:opacity-100">
-          {tHome("navLeaderboard")}
-        </Link>
-        <Link href="/perfil" className="hover:opacity-100">
-          {tHome("navProfile")}
-        </Link>
-        <LanguageToggle />
-      </nav>
-    </header>
-  );
-
   if (!miembro) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        {header}
-        <h1 className="display text-3xl font-extrabold lowercase mb-2">
-          {t("title")}
-        </h1>
-        <p className="text-sm opacity-60 mb-6">{t("emptyBody")}</p>
+        <AppNav active="retos" />
+        <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("emptyBody")} />
         <Link
           href="/onboarding/grupo"
           className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
@@ -79,15 +59,8 @@ export default async function RetosPage() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-      {header}
-
-      <section className="mb-8">
-        <p className="text-xs mono uppercase tracking-widest text-signal mb-2">
-          {t("eyebrow")}
-        </p>
-        <h1 className="display text-3xl font-extrabold lowercase">{t("title")}</h1>
-        <p className="text-sm opacity-60 mt-2 max-w-md">{t("subtitle")}</p>
-      </section>
+      <AppNav active="retos" />
+      <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       {activos.length > 0 && (
         <section className="space-y-4 mb-8">
@@ -104,14 +77,20 @@ export default async function RetosPage() {
 
       <Link
         href="/retos/nuevo"
-        className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors mb-10"
+        className="group block rounded-2xl border border-dashed border-signal/40 p-6 mb-10 transition-colors hover:border-signal hover:bg-signal/[0.04]"
       >
-        {t("emptyCta")}
+        <span className="text-[11px] mono uppercase tracking-[0.18em] text-signal">
+          {t("active")}
+        </span>
+        <span className="mt-1 flex items-center gap-2 display font-semibold lowercase text-lg">
+          {t("emptyCta")}
+          <span className="transition-transform group-hover:translate-x-1">→</span>
+        </span>
       </Link>
 
       {historial.length > 0 && (
         <section>
-          <h2 className="text-xs uppercase tracking-widest opacity-60 mb-3">
+          <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-4">
             {t("history")}
           </h2>
           <ul className="space-y-2">
@@ -124,6 +103,12 @@ export default async function RetosPage() {
                   : r.ganador_trato_id === miTratoId
                     ? "won"
                     : "lost";
+              const accent =
+                result === "won"
+                  ? "bg-signal"
+                  : result === "tied"
+                    ? "bg-ink/30"
+                    : "bg-ink/15";
               const resultClass =
                 result === "won"
                   ? "text-signal"
@@ -133,13 +118,17 @@ export default async function RetosPage() {
               return (
                 <li
                   key={r.id}
-                  className="flex items-center justify-between border border-ink/12 rounded-lg p-4"
+                  className="relative flex items-center justify-between gap-3 overflow-hidden rounded-xl border border-ink/10 p-4 pl-5"
                 >
+                  <span
+                    aria-hidden
+                    className={`absolute left-0 top-0 bottom-0 w-1 ${accent}`}
+                  />
                   <span className="display font-medium lowercase truncate">
                     {t("vs")} {rivalNombre}
                   </span>
                   <span
-                    className={`text-xs mono uppercase tracking-widest ${resultClass}`}
+                    className={`text-[11px] mono uppercase tracking-[0.18em] shrink-0 ${resultClass}`}
                   >
                     {t(result)}
                   </span>

@@ -31,19 +31,21 @@ export default async function DuoLeaderRow({
   const t = await getTranslations("leaderboard");
   const top = row.top_stat ? STAT_FROM_LABEL[row.top_stat] : undefined;
   const podium = row.posicion <= 3;
-  const isFirst = row.posicion === 1;
 
   return (
     <li
-      className={`flex items-center gap-3 sm:gap-4 rounded-lg border p-3 sm:p-4 transition-colors ${
-        isYou ? "border-signal" : "border-ink/12"
-      } ${podium ? "bg-papel-dark/40" : ""}`}
+      className={`group flex items-center gap-3 sm:gap-4 rounded-xl border p-3.5 sm:p-4 transition-all hover:-translate-y-0.5 ${
+        isYou
+          ? "border-signal bg-signal/[0.04]"
+          : podium
+            ? "border-ink/15 bg-papel-dark/40"
+            : "border-ink/10 hover:border-ink/25"
+      }`}
     >
       <span
-        className={`display font-extrabold tabular-nums text-xl w-7 sm:w-8 text-center shrink-0 ${
-          isFirst ? "text-signal" : "opacity-50"
+        className={`display font-extrabold tabular-nums text-2xl w-8 sm:w-9 text-center shrink-0 ${
+          podium ? "text-ink/80" : "text-ink/35"
         }`}
-        style={isFirst ? { textShadow: "0 0 24px rgba(109,74,255,0.45)" } : undefined}
       >
         {row.posicion}
       </span>
@@ -59,7 +61,7 @@ export default async function DuoLeaderRow({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-1 text-[11px] mono uppercase tracking-wider opacity-60">
+        <div className="flex items-center gap-3 mt-1 text-[11px] mono uppercase tracking-wider opacity-55">
           <span>{t("streak", { n: row.racha_duo })}</span>
           {top && (
             <span className="flex items-center gap-1.5">

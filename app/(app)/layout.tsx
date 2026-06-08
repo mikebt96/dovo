@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Grain from "@/app/_components/Grain";
 
 export default async function AppLayout({
   children,
@@ -11,5 +12,10 @@ export default async function AppLayout({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <Grain />
+    </>
+  );
 }

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getThemeOverride } from "@/lib/theme";
+import AppNav from "@/app/_components/AppNav";
+import PageHero from "@/app/_components/PageHero";
 import LanguageToggle from "@/app/_components/LanguageToggle";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import PulseOptOutToggle from "./_components/PulseOptOutToggle";
@@ -29,19 +31,9 @@ export default async function AjustesPage() {
   const currentTheme = (await getThemeOverride()) ?? "system";
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
-      <header className="mb-12 flex items-end justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-widest opacity-60 mb-2">{t("eyebrow")}</p>
-          <h1 className="display text-3xl font-extrabold lowercase">{t("title")}</h1>
-        </div>
-        <Link
-          href="/"
-          className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
-        >
-          {t("back")}
-        </Link>
-      </header>
+    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+      <AppNav active="ajustes" />
+      <PageHero eyebrow={t("eyebrow")} title={t("title")} />
 
       <section className="border-t border-b border-ink/15 py-8 mb-10 space-y-4">
         <Row label={t("name")} value={meRow?.nombre ?? t("noName")} />

@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { appUrl } from "@/lib/utils/url";
 import { BOOST_GATING_RACHAS } from "@/lib/scoring/constants";
+import AppNav from "@/app/_components/AppNav";
+import PageHero from "@/app/_components/PageHero";
 import InviteLink from "./InviteLink";
 import BoostButton from "@/app/_components/BoostButton";
 
@@ -104,52 +106,53 @@ export default async function GrupoPage({
     racha < BOOST_GATING_RACHAS ? "gate" : boostReciente ? "cooldown" : "ok";
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
-      <header className="mb-12 flex items-end justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-widest opacity-60 mb-2">
-            {t("eyebrow", { tipo: tOnb(`tipo.${grupo.tipo_grupo}`) })}
-          </p>
-          <h1 className="display text-3xl font-extrabold lowercase">{grupo.nombre_grupo}</h1>
-        </div>
-        <Link
-          href="/"
-          className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
-        >
-          {t("back")}
-        </Link>
-      </header>
+    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+      <AppNav />
+      <PageHero
+        eyebrow={t("eyebrow", { tipo: tOnb(`tipo.${grupo.tipo_grupo}`) })}
+        title={grupo.nombre_grupo}
+      />
 
       <section className="mb-10">
-        <h2 className="text-xs uppercase tracking-widest opacity-60 mb-4">
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-4">
           {t("members", { n: miembros.length })}
         </h2>
         <ul className="space-y-2">
           {miembros.map((m) => {
             const esPartner = m.user_id !== user.id;
+            const nombre = m.users?.nombre ?? t("member");
+            const inicial = nombre.trim().charAt(0).toUpperCase() || "·";
             return (
-              <li key={m.user_id} className="border-b border-ink/15 py-3">
-                <div className="flex items-center justify-between">
-                  <span className="display font-medium lowercase">
-                    {m.users?.nombre ?? t("member")}
-                  </span>
-                  {m.role === "creator" && (
-                    <span className="text-xs uppercase tracking-widest text-signal opacity-80">
-                      {t("creator")}
+              <li
+                key={m.user_id}
+                className="flex items-start gap-3.5 rounded-xl border border-ink/10 p-4"
+              >
+                <span className="grid place-items-center w-10 h-10 rounded-full bg-signal/12 text-signal display font-bold text-lg shrink-0">
+                  {inicial}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="display font-semibold lowercase truncate">
+                      {nombre}
                     </span>
+                    {m.role === "creator" && (
+                      <span className="text-[10px] mono uppercase tracking-widest text-signal/80 shrink-0">
+                        {t("creator")}
+                      </span>
+                    )}
+                  </div>
+                  {esPartner && (
+                    <div className="mt-2">
+                      <BoostButton
+                        tratoId={id}
+                        paraUserId={m.user_id}
+                        paraNombre={nombre}
+                        state={boostState}
+                        gateRacha={BOOST_GATING_RACHAS}
+                      />
+                    </div>
                   )}
                 </div>
-                {esPartner && (
-                  <div className="mt-2">
-                    <BoostButton
-                      tratoId={id}
-                      paraUserId={m.user_id}
-                      paraNombre={m.users?.nombre ?? t("member")}
-                      state={boostState}
-                      gateRacha={BOOST_GATING_RACHAS}
-                    />
-                  </div>
-                )}
               </li>
             );
           })}
@@ -159,26 +162,35 @@ export default async function GrupoPage({
       <section className="mb-10 flex flex-col sm:flex-row gap-3">
         <Link
           href="/leaderboard"
-          className="flex-1 border border-ink/12 rounded-lg p-4 hover:border-signal transition-colors"
+          className="group flex-1 rounded-xl border border-ink/10 p-5 transition-all hover:border-signal hover:-translate-y-0.5"
         >
-          <span className="text-xs mono uppercase tracking-widest text-signal block mb-1">
+          <span className="text-[11px] mono uppercase tracking-[0.18em] text-signal block mb-1.5">
             {tLb("navTab")}
           </span>
-          <span className="text-sm opacity-70">{tLb("title")}</span>
+          <span className="display font-semibold lowercase flex items-center gap-2">
+            {tLb("title")}
+            <span className="opacity-40 transition-transform group-hover:translate-x-1">
+              →
+            </span>
+          </span>
         </Link>
         <Link
           href="/retos"
-          className="flex-1 border border-ink/12 rounded-lg p-4 hover:border-signal transition-colors"
+          className="group flex-1 rounded-xl border border-ink/10 p-5 transition-all hover:border-signal hover:-translate-y-0.5"
         >
-          <span className="text-xs mono uppercase tracking-widest text-signal block mb-1">
+          <span className="text-[11px] mono uppercase tracking-[0.18em] text-signal block mb-1.5">
             {tRetos("navTab")}
           </span>
-          <span className="text-sm opacity-70">{tRetos("challenge")}</span>
+          <span className="display font-semibold lowercase flex items-center gap-2">
+            {tRetos("challenge")}
+          </span>
         </Link>
       </section>
 
-      <section className="border-t border-ink/15 pt-8 mb-10">
-        <h2 className="display text-xl font-bold lowercase mb-3">{t("routineTitle")}</h2>
+      <section className="rounded-2xl border border-ink/10 p-6 mb-4">
+        <h2 className="display text-xl font-bold lowercase mb-4">
+          {t("routineTitle")}
+        </h2>
         <Link
           href={`/grupo/${id}/rutina`}
           className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors"
@@ -187,9 +199,11 @@ export default async function GrupoPage({
         </Link>
       </section>
 
-      <section className="border-t border-ink/15 pt-8">
-        <h2 className="display text-xl font-bold lowercase mb-3">{t("inviteTitle")}</h2>
-        <p className="text-sm opacity-70 mb-6">{t("inviteSubtitle")}</p>
+      <section className="rounded-2xl border border-ink/10 p-6">
+        <h2 className="display text-xl font-bold lowercase mb-2">
+          {t("inviteTitle")}
+        </h2>
+        <p className="text-sm opacity-60 mb-5">{t("inviteSubtitle")}</p>
         <InviteLink url={inviteUrl} />
       </section>
     </main>

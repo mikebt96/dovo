@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import AppNav from "@/app/_components/AppNav";
+import PageHero from "@/app/_components/PageHero";
 import RutinaForm from "./RutinaForm";
 
 export const dynamic = "force-dynamic";
@@ -50,9 +52,9 @@ export default async function RutinaPage({
     .maybeSingle<{ nombre: string; actividades: unknown }>();
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-12 bg-papel text-ink">
-      <h1 className="display text-3xl font-extrabold lowercase mb-2">{t("title")}</h1>
-      <p className="text-sm opacity-60 mb-8">{t("subtitle")}</p>
+    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+      <AppNav />
+      <PageHero title={t("title")} subtitle={t("subtitle")} />
       <RutinaForm
         grupoId={id}
         miembroId={miembro.id}
