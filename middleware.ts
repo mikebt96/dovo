@@ -17,6 +17,9 @@ function isPublic(pathname: string) {
     PUBLIC_PATHS.includes(pathname)
     || pathname.startsWith("/_next")
     || pathname.startsWith("/invite/")
+    // Las rutas API se autentican solas (el webhook de Stripe verifica FIRMA, no sesión).
+    // Sin esto el middleware redirige el POST de Stripe a /sign-in y la entrega falla.
+    || pathname.startsWith("/api/")
   );
 }
 
