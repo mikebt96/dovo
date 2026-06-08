@@ -1,5 +1,17 @@
 # dovo — pendientes
 
+## ✅ 2026-06-07 — Fase B+C + demo inversionista (hecho)
+- **Fase B (leaderboard de dúos)** + **Fase C (retos dúo-vs-dúo + boosts intra-dúo)** construidas,
+  migradas a prod y desplegadas. Ver `docs/plans/2026-06-07-build-brief-fase-bc.md`.
+- **Showcase público** (`/showcase`) + **cuenta demo 1-tap** ("Ver demo" → `demo+ivan@dovofit.com`).
+  Funciona SIN Google OAuth ni SMTP (login email+password contra cuenta demo pre-confirmada).
+- **Datos demo sembrados** (12 dúos, leaderboard vivo). Re-seed: `scripts/gen-seed-sql.ts` → `scripts/seed-demo.sql`.
+- **Materiales inversionista**: `docs/investor/` (deck .pptx/.pdf, one-pager .html/.pdf, modelo .xlsx).
+- **Pricing/GTM** decidido por consejo: `docs/investor/2026-06-07-pricing-gtm.md` (Pro $139 MXN/dúo/mes).
+- **Config de APIs pendiente para Miguel**: `docs/SETUP_APIS_MIGUEL.md` (Google OAuth, Resend, dominio).
+  → El bloqueador de login de testers de abajo queda **mitigado por la cuenta demo**; OAuth sigue
+  pendiente solo para signups reales con Google.
+
 ## 🚨 BLOQUEADORES para release web a testers (meta inmediata)
 Verificado 2026-06-03 contra prod. La app web responde y el backend está reconciliado,
 pero **el login no está listo** → sin esto, ningún tester puede entrar.

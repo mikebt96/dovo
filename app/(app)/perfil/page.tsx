@@ -37,6 +37,16 @@ const STATS: { key: StatKey; statKey: string }[] = [
   { key: "vit", statKey: "vit" },
 ];
 
+// Color por stat (clases estáticas para que Tailwind no las purgue).
+const STAT_BAR: Record<StatKey, string> = {
+  fue: "bg-stat-fue",
+  res: "bg-stat-res",
+  flex: "bg-stat-flex",
+  vel: "bg-stat-vel",
+  equ: "bg-stat-equ",
+  vit: "bg-stat-vit",
+};
+
 export default async function PerfilPage() {
   const t = await getTranslations("perfil");
   const tStats = await getTranslations("stats");
@@ -125,7 +135,7 @@ export default async function PerfilPage() {
               <span className="text-sm w-28">{tStats(statKey)}</span>
               <div className="flex-1 h-2 bg-papel-dark rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-signal"
+                  className={`h-full ${STAT_BAR[key]}`}
                   style={{
                     width: `${Math.min(100, Math.round(statDisplay(character[key] as number) / 1.5))}%`,
                   }}

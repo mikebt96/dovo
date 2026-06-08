@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>dovo · one-pager para inversionistas</title>
+<meta name="description" content="dovo — Hyrox para cualquier disciplina. One-pager pre-seed." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&family=Syne:wght@800&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     dovo · investor one-pager
+     Aesthetic: Editorial Ultraviolet Lab
+     One accent (violet) · big type · instrument-readout mono labels
+     ============================================================ */
+
+  :root{
+    --bg:        #f4f4f6;   /* fondo claro */
+    --ink:       #08070d;   /* tinta */
+    --violet:    #6d4aff;   /* acento único */
+    --violet-2:  #5436e0;   /* acento profundo (impresión segura) */
+    --dark:      #07060d;   /* header oscuro */
+    --paper:     #ffffff;   /* tarjetas */
+    --line:      #d9d9e0;   /* hairlines */
+    --line-dk:   #232233;   /* hairlines sobre dark */
+    --mute:      #6a6976;   /* texto secundario */
+    --mute-dk:   #9b9aac;   /* secundario sobre dark */
+    --violet-wash:#efeaff;  /* lavado violeta para destacados */
+    --ok:        #1f9d6b;   /* señal viva */
+
+    --sans: "Geist", -apple-system, system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+    --display:"Syne", "Geist", sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+
+  body{
+    background:#26262e;          /* gris para enmarcar la hoja en pantalla */
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.45;
+    padding:28px 0;
+  }
+
+  /* ---- Lámina tamaño A4 ------------------------------------- */
+  .sheet{
+    width:210mm;
+    min-height:297mm;
+    margin:0 auto;
+    background:var(--bg);
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.55);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* grano sutil para textura editorial */
+  .sheet::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:.025;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:multiply;
+  }
+
+  /* ---- Tipografía utilitaria -------------------------------- */
+  .label{
+    font-family:var(--mono);
+    font-size:7.5pt;
+    font-weight:500;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--mute);
+  }
+  .label .dot{ color:var(--violet); }
+
+  .wordmark{
+    font-family:var(--display);
+    font-weight:800;
+    letter-spacing:-0.04em;
+    line-height:.9;
+  }
+
+  .mono{ font-family:var(--mono); }
+
+  /* ---- Mark: dos discos paralelos --------------------------- */
+  .mark{ display:inline-block; vertical-align:middle; }
+
+  /* ============================================================
+     HEADER (dark band)
+     ============================================================ */
+  .head{
+    background:var(--dark);
+    color:#f4f4f6;
+    padding:10mm 14mm 9mm;
+    position:relative;
+  }
+  .head__top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:8mm;
+  }
+  .head__top .label{ color:var(--mute-dk); }
+  .tag{
+    font-family:var(--mono);
+    font-size:7.5pt;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#f4f4f6;
+    border:1px solid var(--line-dk);
+    border-radius:999px;
+    padding:4px 11px;
+    white-space:nowrap;
+  }
+  .tag b{ color:var(--violet); font-weight:600; }
+
+  .head__brand{ display:flex; align-items:flex-end; gap:14px; }
+  .head .wordmark{
+    font-size:66pt;
+    color:#f4f4f6;
+  }
+  .head .mark{ margin-bottom:10px; }
+
+  .oneliner{
+    margin-top:6mm;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:20px;
+  }
+  .oneliner h1{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:18pt;
+    letter-spacing:-0.02em;
+    line-height:1.08;
+    max-width:115mm;
+  }
+  .oneliner h1 em{
+    font-style:normal;
+    color:var(--violet);
+  }
+  .oneliner .site{
+    font-family:var(--mono);
+    font-size:9pt;
+    letter-spacing:.04em;
+    color:var(--mute-dk);
+    text-align:right;
+    white-space:nowrap;
+  }
+  .oneliner .site b{ color:#f4f4f6; font-weight:500; }
+
+  /* ============================================================
+     BODY GRID
+     ============================================================ */
+  .body{
+    flex:1;
+    padding:7mm 14mm 0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5.5mm 9mm;
+    align-content:start;
+  }
+
+  .block{ break-inside:avoid; }
+  .block--full{ grid-column:1 / -1; }
+
+  .block__head{
+    display:flex;
+    align-items:baseline;
+    gap:9px;
+    margin-bottom:3.5mm;
+    padding-bottom:2mm;
+    border-bottom:1px solid var(--line);
+  }
+  .block__num{
+    font-family:var(--mono);
+    font-size:8pt;
+    font-weight:600;
+    color:var(--violet);
+    letter-spacing:.04em;
+  }
+  .block__title{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:11.5pt;
+    letter-spacing:-0.01em;
+  }
+
+  p.lead{ font-size:9.3pt; color:var(--ink); line-height:1.5; }
+  p.sub{ font-size:8.6pt; color:var(--mute); line-height:1.5; margin-top:1.5mm; }
+  strong{ font-weight:600; }
+  .hl{ color:var(--violet-2); font-weight:600; }
+
+  /* ---- Stat figure (big numeral) ---------------------------- */
+  .figrow{ display:flex; gap:7mm; margin:3mm 0 1mm; }
+  .fig{ flex:1; }
+  .fig__n{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:30pt;
+    letter-spacing:-0.03em;
+    line-height:.95;
+  }
+  .fig__n.v{ color:var(--violet); }
+  .fig__c{
+    font-family:var(--mono);
+    font-size:7pt;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--mute);
+    margin-top:1.5mm;
+    line-height:1.35;
+  }
+
+  .quote{
+    margin-top:3.5mm;
+    padding:3mm 4mm;
+    background:var(--violet-wash);
+    border-left:2.5px solid var(--violet);
+    border-radius:0 4px 4px 0;
+  }
+  .quote p{ font-size:8.6pt; line-height:1.45; }
+  .quote cite{
+    display:block;
+    font-family:var(--mono);
+    font-style:normal;
+    font-size:6.6pt;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--mute);
+    margin-top:2mm;
+  }
+
+  /* ---- Loop pills ------------------------------------------- */
+  .loop{ display:flex; align-items:center; flex-wrap:wrap; gap:5px; margin-top:3mm; }
+  .pill{
+    font-family:var(--mono);
+    font-size:7.4pt;
+    font-weight:500;
+    letter-spacing:.02em;
+    padding:4px 9px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:var(--paper);
+    white-space:nowrap;
+  }
+  .pill.on{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .arrow{ color:var(--violet); font-weight:700; font-size:9pt; }
+
+  .coop{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    margin-top:3.5mm;
+    border:1px solid var(--line);
+    border-radius:5px;
+    overflow:hidden;
+  }
+  .coop > div{ padding:3mm 3.5mm; }
+  .coop > div:first-child{ border-right:1px solid var(--line); background:var(--paper); }
+  .coop > div:last-child{ background:#fbfbfd; }
+  .coop h4{
+    font-family:var(--mono);
+    font-size:6.8pt;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--violet);
+    margin-bottom:1.5mm;
+  }
+  .coop p{ font-size:8.2pt; line-height:1.4; color:var(--ink); }
+
+  /* ---- MOAT: formula block --------------------------------- */
+  .moat{
+    background:var(--dark);
+    color:#f4f4f6;
+    border-radius:6px;
+    padding:5mm 6mm;
+    margin-top:1mm;
+    position:relative;
+    overflow:hidden;
+  }
+  .moat__grid{ display:flex; gap:8mm; align-items:center; }
+  .formula{
+    font-family:var(--mono);
+    font-size:13pt;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    line-height:1.6;
+    white-space:nowrap;
+  }
+  .formula .op{ color:var(--mute-dk); }
+  .formula .v{ color:var(--violet); }
+  .formula small{
+    display:block;
+    font-size:6.6pt;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--mute-dk);
+    margin-top:2mm;
+    white-space:normal;
+  }
+  .moat__txt{ flex:1; }
+  .moat__txt p{ font-size:8.6pt; color:#dcdce4; line-height:1.5; }
+  .moat__badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--mono);
+    font-size:6.8pt; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink); background:var(--violet);
+    padding:3px 9px; border-radius:999px; font-weight:600;
+    margin-top:3mm;
+  }
+  .blip{ width:6px; height:6px; border-radius:50%; background:var(--ink); display:inline-block; }
+
+  /* ---- Market / model -------------------------------------- */
+  .funnel{ display:flex; gap:5px; margin-top:3mm; align-items:stretch; }
+  .tier{
+    flex:1;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:2.6mm 2.4mm;
+    background:var(--paper);
+    text-align:center;
+  }
+  .tier.pro{ border-color:var(--violet); background:var(--violet-wash); }
+  .tier h5{ font-family:var(--mono); font-size:7.2pt; letter-spacing:.08em; text-transform:uppercase; }
+  .tier span{ display:block; font-size:6.8pt; color:var(--mute); margin-top:1mm; line-height:1.3; }
+
+  .tamrow{ display:flex; gap:0; margin-top:3.5mm; }
+  .tam{ flex:1; text-align:center; padding:0 2mm; position:relative; }
+  .tam + .tam::before{
+    content:""; position:absolute; left:0; top:10%; bottom:10%; width:1px; background:var(--line);
+  }
+  .tam b{ display:block; font-family:var(--sans); font-weight:700; font-size:14pt; letter-spacing:-0.02em; }
+  .tam b.v{ color:var(--violet); }
+  .tam small{ font-family:var(--mono); font-size:6.4pt; letter-spacing:.12em; text-transform:uppercase; color:var(--mute); display:block; margin-top:.8mm; }
+
+  /* ---- Competition table ----------------------------------- */
+  table.cmp{ width:100%; border-collapse:collapse; margin-top:1mm; }
+  table.cmp th, table.cmp td{
+    text-align:left;
+    padding:2.3mm 2.2mm;
+    font-size:7.7pt;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  table.cmp thead th{
+    font-family:var(--mono);
+    font-size:6.4pt;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--mute);
+    font-weight:500;
+    border-bottom:1.5px solid var(--ink);
+  }
+  table.cmp td:first-child, table.cmp th:first-child{ font-weight:500; }
+  table.cmp tr.dovo td{
+    background:var(--violet-wash);
+    font-weight:500;
+    border-bottom:1px solid var(--violet);
+  }
+  table.cmp tr.dovo td:first-child{ color:var(--violet-2); font-weight:700; }
+  .yes{ color:var(--violet-2); font-weight:700; }
+  .no{ color:var(--mute); }
+  td .wm{ font-family:var(--display); font-weight:800; letter-spacing:-0.04em; }
+
+  /* ---- Status & ask ---------------------------------------- */
+  .ask{
+    display:grid;
+    grid-template-columns:1.15fr 1fr;
+    gap:7mm;
+  }
+  .statlist{ list-style:none; }
+  .statlist li{
+    display:flex; gap:8px; align-items:baseline;
+    font-size:8.7pt; line-height:1.4; padding:1.6mm 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .statlist li:last-child{ border-bottom:none; }
+  .statlist .k{ font-family:var(--mono); font-size:6.6pt; letter-spacing:.12em; text-transform:uppercase; color:var(--violet); min-width:24mm; flex-shrink:0; }
+  .honest{ color:var(--ink); }
+  .honest b{ color:var(--violet-2); }
+
+  .roadmap{ display:flex; flex-direction:column; gap:0; margin-top:1mm; }
+  .stage{ display:flex; gap:8px; align-items:flex-start; padding:1.8mm 0; }
+  .stage:not(:last-child){ border-bottom:1px solid var(--line); }
+  .stage .ph{
+    font-family:var(--mono); font-size:6.6pt; font-weight:600;
+    color:var(--bg); background:var(--ink);
+    padding:2px 5px; border-radius:3px; letter-spacing:.06em; flex-shrink:0; margin-top:.5mm;
+  }
+  .stage.live .ph{ background:var(--violet); color:var(--ink); }
+  .stage p{ font-size:8.2pt; line-height:1.35; }
+  .stage p b{ font-weight:600; }
+  .stage .now{ font-family:var(--mono); font-size:6.2pt; letter-spacing:.12em; text-transform:uppercase; color:var(--ok); }
+
+  /* ============================================================
+     METRICS STRIP (footer band)
+     ============================================================ */
+  .metrics{
+    margin-top:auto;
+    background:var(--dark);
+    color:#f4f4f6;
+    padding:5mm 14mm 5mm;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6mm;
+  }
+  .metrics__lab{
+    font-family:var(--mono);
+    font-size:6.6pt;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--mute-dk);
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    align-self:stretch;
+    display:flex; align-items:center;
+    border-right:1px solid var(--line-dk);
+    padding-right:5mm; margin-right:1mm;
+  }
+  .metrics__grid{ display:flex; flex:1; justify-content:space-between; gap:5mm; }
+  .metric{ }
+  .metric b{
+    font-family:var(--sans); font-weight:700;
+    font-size:21pt; letter-spacing:-0.03em; line-height:1; display:block;
+  }
+  .metric b.v{ color:var(--violet); }
+  .metric small{
+    font-family:var(--mono); font-size:6.4pt; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--mute-dk); display:block; margin-top:2mm;
+  }
+
+  /* ---- Foot line ------------------------------------------- */
+  .foot{
+    background:var(--bg);
+    padding:3.5mm 14mm 4.5mm;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--line);
+  }
+  .foot .wordmark{ font-size:15pt; }
+  .foot .label{ font-size:6.8pt; }
+  .foot .assume{ color:var(--mute); }
+
+  /* ============================================================
+     PRINT
+     ============================================================ */
+  @page{
+    size:A4;
+    margin:0;
+  }
+  @media print{
+    body{ background:#fff; padding:0; }
+    .sheet{
+      box-shadow:none;
+      margin:0;
+      width:210mm;
+      min-height:0;
+      height:296mm;          /* fixed, a hair under A4 to absorb print rounding */
+      page-break-after:avoid;
+      page-break-inside:avoid;
+      break-inside:avoid;
+    }
+    .sheet::after{ opacity:.02; }
+    .screen-note{ display:none !important; }
+    .head, .moat, .metrics{
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+
+  .screen-note{
+    max-width:210mm; margin:0 auto 14px; color:#b9b9c4;
+    font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-note">vista de pantalla · imprime a PDF (A4) para la versión final · Ctrl/Cmd + P</div>
+
+<main class="sheet">
+
+  <!-- ============ HEADER ============ -->
+  <header class="head">
+    <div class="head__top">
+      <span class="label">one-pager <span class="dot">·</span> inversionistas</span>
+      <span class="tag">pre-seed <b>·</b> méxico <b>·</b> 2026</span>
+    </div>
+
+    <div class="head__brand">
+      <!-- mark: dos discos paralelos (no entrelazados) -->
+      <svg class="mark" width="58" height="24" viewBox="0 0 24 10" aria-label="dovo mark" fill="none">
+        <circle cx="5" cy="5" r="5" fill="#6d4aff"/>
+        <circle cx="19" cy="5" r="5" fill="#f4f4f6"/>
+      </svg>
+      <span class="wordmark">dovo</span>
+    </div>
+
+    <div class="oneliner">
+      <h1>Hyrox para <em>cualquier&nbsp;disciplina.</em></h1>
+      <div class="site">
+        <b>dovofit.com</b><br/>
+        commitment device · para dúos
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ BODY ============ -->
+  <section class="body">
+
+    <!-- 1 · PROBLEMA -->
+    <article class="block">
+      <div class="block__head">
+        <span class="block__num">01</span>
+        <span class="block__title">El problema</span>
+      </div>
+      <p class="lead">Entrenar solo no falla por falta de apps — falla por falta de quién te espere. <strong>La adherencia es el verdadero producto;</strong> nadie la resuelve.</p>
+      <p class="sub">El "social" de los competidores es cosmético: feeds, likes, kudos. No cambia si entrenas o no mañana.</p>
+
+      <div class="quote">
+        <p><strong>43%</strong> abandona entrenando solo vs <strong class="hl">6%</strong> con pareja, a 12 meses — cerca de <strong>7×</strong> mejor retención.</p>
+        <cite>Wallace, Raglin &amp; Jastremski · 1995</cite>
+      </div>
+    </article>
+
+    <!-- 2 · SOLUCIÓN -->
+    <article class="block">
+      <div class="block__head">
+        <span class="block__num">02</span>
+        <span class="block__title">La solución</span>
+      </div>
+      <p class="lead">El <span class="hl">dúo</span> como unidad atómica. Dos personas, un trato, una racha que ninguno quiere romper — y la retención de pareja como motor.</p>
+
+      <div class="loop">
+        <span class="pill on">check-in</span>
+        <span class="arrow">→</span>
+        <span class="pill">puntos normalizados</span>
+        <span class="arrow">→</span>
+        <span class="pill">6 stats · personaje</span>
+        <span class="arrow">→</span>
+        <span class="pill">racha compartida</span>
+      </div>
+
+      <div class="coop">
+        <div>
+          <h4>↔ coop · dentro del dúo</h4>
+          <p>Racha compartida y boosts que se regalan. Solo cosas positivas: ambos aparecen.</p>
+        </div>
+        <div>
+          <h4>⚔ competencia · entre dúos</h4>
+          <p>Leaderboard, retos dúo-vs-dúo y power-ups. Se retan, sano, tipo liga.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- 3 · FOSO TÉCNICO (full) -->
+    <article class="block block--full">
+      <div class="block__head">
+        <span class="block__num">03</span>
+        <span class="block__title">Foso técnico — esfuerzo normalizado por BMR</span>
+      </div>
+      <div class="moat">
+        <div class="moat__grid">
+          <div class="formula">
+            puntos <span class="op">=</span> round<span class="op">(</span> <span class="v">kcal</span> <span class="op">/</span> <span class="op">(</span>BMR<span class="op">/</span>1440<span class="op">)</span> <span class="op">)</span>
+            <small>kcal del esfuerzo ÷ gasto basal por minuto</small>
+          </div>
+          <div class="moat__txt">
+            <p>Hyrox fija el <em>formato</em> para comparar gente. dovo no puede — cada quien hace su deporte. Su estándar es el esfuerzo <strong>relativo al cuerpo de cada quien</strong>: un check-in de pilates y uno de gym valen lo mismo si cuestan el mismo esfuerzo. Eso hace justa la competencia <strong>cross-disciplina</strong>.</p>
+            <span class="moat__badge"><span class="blip"></span> ya en producción</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 4 · MERCADO & MODELO -->
+    <article class="block">
+      <div class="block__head">
+        <span class="block__num">04</span>
+        <span class="block__title">Mercado &amp; modelo</span>
+      </div>
+      <p class="lead"><span class="hl">$99 MXN/mes por dúo</span> — no por usuario. Margen bruto <strong>&gt;80%</strong>. Categoría sin ocupar en LatAm.</p>
+
+      <div class="funnel">
+        <div class="tier"><h5>Free</h5><span>200 dúos · semilla</span></div>
+        <div class="tier pro"><h5>Pro</h5><span>$99 · core</span></div>
+        <div class="tier"><h5>Premium</h5><span>ligas · extras</span></div>
+      </div>
+
+      <div class="tamrow">
+        <div class="tam"><b>4–5M</b><small>tam · dúos mx</small></div>
+        <div class="tam"><b>750K–1M</b><small>sam</small></div>
+        <div class="tam"><b class="v">5K–25K</b><small>som</small></div>
+      </div>
+      <p class="sub" style="margin-top:2.5mm;">TAM/SAM/SOM = <strong>supuestos</strong> de trabajo, a validar con datos reales de adopción.</p>
+    </article>
+
+    <!-- 5 · COMPETENCIA -->
+    <article class="block">
+      <div class="block__head">
+        <span class="block__num">05</span>
+        <span class="block__title">Competencia</span>
+      </div>
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>—</th>
+            <th>idioma</th>
+            <th>unidad</th>
+            <th>rivalidad</th>
+            <th>multi · rpg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>stickK</td><td>EN</td><td>por usuario</td><td class="no">no</td><td class="no">no</td></tr>
+          <tr><td>Fitness Pact</td><td>EN</td><td>por usuario</td><td class="no">no</td><td class="no">no</td></tr>
+          <tr><td>OATH</td><td>EN</td><td>por usuario</td><td class="no">no</td><td class="no">no</td></tr>
+          <tr><td>Sweatmates</td><td>EN</td><td>por usuario</td><td class="no">no</td><td class="no">no</td></tr>
+          <tr class="dovo">
+            <td><span class="wm">dovo</span></td>
+            <td>es-MX</td>
+            <td>por dúo</td>
+            <td class="yes">sí</td>
+            <td class="yes">sí · bmr</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="sub" style="margin-top:2.5mm;">Todos: inglés, per-user, una disciplina, sin rivalidad. dovo: es-MX, per-dúo, rivalidad explícita, multideporte normalizado por BMR.</p>
+    </article>
+
+    <!-- 6 · ESTADO & ASK (full) -->
+    <article class="block block--full">
+      <div class="block__head">
+        <span class="block__num">06</span>
+        <span class="block__title">Estado &amp; ask</span>
+      </div>
+      <div class="ask">
+        <div>
+          <ul class="statlist">
+            <li><span class="k">motor</span><span class="honest"><b>Fase A en producción</b> — loop, BMR, 6 stats y racha del dúo, funcionando.</span></li>
+            <li><span class="k">tracción</span><span class="honest"><b>0 usuarios reales</b> hoy (honesto). El estándar comparable ya existe; falta validarlo con gente.</span></li>
+            <li><span class="k">el ask</span><span class="honest"><b>Pre-seed</b> para validar retención del dúo y activar la capa competitiva. <strong>Runway 18 meses.</strong></span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="roadmap">
+            <div class="stage live">
+              <span class="ph">A</span>
+              <p><b>Motor</b> · check-in → BMR → stats → racha <span class="now">— en prod</span></p>
+            </div>
+            <div class="stage">
+              <span class="ph">B</span>
+              <p><b>Leaderboard</b> de dúos · ranking por puntos normalizados</p>
+            </div>
+            <div class="stage">
+              <span class="ph">C</span>
+              <p><b>Retos</b> dúo-vs-dúo + boosts internos · verificación ligera</p>
+            </div>
+            <div class="stage">
+              <span class="ph">D</span>
+              <p><b>Ligas</b> / divisiones / power-ups · con masa de usuarios</p>
+            </div>
+          </div>
+          <p class="sub" style="margin-top:2.5mm;">Plataforma: web mobile-first / PWA → apps nativas iOS &amp; Android → smartwatches.</p>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============ METRICS STRIP ============ -->
+  <section class="metrics">
+    <span class="metrics__lab">escenario base</span>
+    <div class="metrics__grid">
+      <div class="metric"><b class="v">$1,512</b><small>ltv · mxn</small></div>
+      <div class="metric"><b>~6×</b><small>ltv : cac</small></div>
+      <div class="metric"><b>~3.3<span style="font-size:12pt">m</span></b><small>payback</small></div>
+      <div class="metric"><b>$109K</b><small>mrr · m36 · mxn</small></div>
+    </div>
+  </section>
+
+  <!-- ============ FOOT ============ -->
+  <footer class="foot">
+    <span class="wordmark">dovo</span>
+    <span class="label assume">cifras de modelo · supuestos pre-seed sujetos a validación · 2026</span>
+  </footer>
+
+</main>
+
+</body>
+</html>

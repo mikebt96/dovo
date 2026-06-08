@@ -2,6 +2,23 @@
 -- grupos N-miembros, rutinas, check-ins con métricas, character system, streak.
 -- Reusa core.set_updated_at() (creada en core.users, no borrada).
 
+-- Clean up existing tables from partial or failed runs
+drop table if exists core.user_streak cascade;
+drop table if exists core.user_character cascade;
+drop table if exists core.checkins cascade;
+drop table if exists core.user_rutinas cascade;
+drop table if exists core.trato_miembros cascade;
+drop table if exists core.tratos cascade;
+drop table if exists core.actividades cascade;
+drop table if exists core.user_perfil_fisico cascade;
+
+-- Clean up existing types from partial or failed runs
+drop type if exists core.nivel_actividad cascade;
+drop type if exists core.objetivo_fisico cascade;
+drop type if exists core.experiencia_nivel cascade;
+drop type if exists core.tipo_grupo cascade;
+drop type if exists core.trato_estado cascade;
+
 -- ════════════════════════════════════════════════════════════════════
 -- ENUMS
 -- ════════════════════════════════════════════════════════════════════

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { signInAction } from "@/lib/actions/auth";
 import GoogleButton from "../_components/GoogleButton";
+import DemoLoginButton from "@/app/_components/DemoLoginButton";
 
 export default function SignInPage() {
   const t = useTranslations("auth");
@@ -75,6 +76,12 @@ export default function SignInPage() {
           ),
         })}
       </p>
+
+      <div className="text-center pt-2 border-t border-ink/10">
+        <div className="pt-4">
+          <DemoLoginButton variant="ghost" />
+        </div>
+      </div>
     </form>
   );
 }

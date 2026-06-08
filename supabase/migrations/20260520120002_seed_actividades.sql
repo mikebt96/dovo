@@ -6,4 +6,5 @@ insert into core.actividades (slug, nombre, modality, kcal_por_min, metricas_req
   ('gym',     'Gym',      'fuerza', 6.0,  array['peso_kg','reps','sets'],        array['FUE'],        array['VEL','VIT']),
   ('running', 'Running',  'cardio', 10.0, array['distancia_km','tiempo_min'],    array['RES'],        array['VEL']),
   ('ballet',  'Ballet',   'danza',  6.5,  array['tiempo_min','intensidad'],      array['FLEX','EQU'], array['RES']),
-  ('pilates', 'Pilates',  'control',4.0,  array['tiempo_min','intensidad'],      array['FLEX','EQU'], array['FUE']);
+  ('pilates', 'Pilates',  'control',4.0,  array['tiempo_min','intensidad'],      array['FLEX','EQU'], array['FUE'])
+on conflict (slug) do nothing;

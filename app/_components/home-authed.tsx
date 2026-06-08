@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import LanguageToggle from "./LanguageToggle";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
+import StatBar from "./StatBar";
 import { characterSheet } from "@/lib/leveling";
+import type { StatKey } from "@/lib/scoring/types";
+import { getBoostActivo } from "@/lib/actions/boosts";
 
 type Character = {
   fue: number;
@@ -24,7 +27,7 @@ type Grupo = {
   tipo_grupo: string;
 };
 
-const STAT_LABELS: { key: keyof Character; label: string }[] = [
+const STAT_LABELS: { key: StatKey; label: string }[] = [
   { key: "fue", label: "FUE" },
   { key: "res", label: "RES" },
   { key: "flex", label: "FLE" },
@@ -32,13 +35,6 @@ const STAT_LABELS: { key: keyof Character; label: string }[] = [
   { key: "equ", label: "EQU" },
   { key: "vit", label: "VIT" },
 ];
-
-// Mapea un stat (log sin cap) a una altura de barra 0-100% para display.
-// Tier display real llega en F3; por ahora una escala simple log.
-function barHeight(v: number): number {
-  if (v <= 0) return 4;
-  return Math.min(100, Math.round((Math.log10(v + 1) / 2.2) * 100));
-}
 
 export default async function HomeAuthed() {
   const t = await getTranslations("home");
@@ -82,6 +78,7 @@ export default async function HomeAuthed() {
   // nivel + clase se derivan de los stats (no de las columnas congeladas). Ver lib/leveling.
   const sheet = characterSheet(character, character.prestige);
   const racha = streakRow?.current_streak_weeks ?? 0;
+  const boost = await getBoostActivo();
   const miembrosList = (miembros ?? []) as unknown as Array<{
     id: string;
     tratos: Grupo;
@@ -138,6 +135,12 @@ export default async function HomeAuthed() {
           dovo
         </Link>
         <nav className="flex items-center gap-4 text-xs uppercase tracking-widest opacity-60">
+          <Link href="/leaderboard" className="hover:opacity-100">
+            {t("navLeaderboard")}
+          </Link>
+          <Link href="/retos" className="hover:opacity-100">
+            {t("navRetos")}
+          </Link>
           <Link href="/perfil" className="hover:opacity-100">
             {t("navProfile")}
           </Link>
@@ -147,6 +150,17 @@ export default async function HomeAuthed() {
           <LanguageToggle />
         </nav>
       </header>
+
+      {boost && (
+        <div className="mb-6 rounded-lg border border-signal/40 bg-signal/5 px-4 py-3">
+          <p className="text-xs mono uppercase tracking-widest text-signal">
+            {t("boostActive", { nombre: boost.de_nombre ?? "tu dúo" })}
+          </p>
+          {boost.tipo === "energia" && (
+            <p className="text-xs opacity-60 mt-1">{t("boostActiveEnergia")}</p>
+          )}
+        </div>
+      )}
 
       {/* Character header: stats compactas + nivel + clase + racha */}
       <section className="border-t border-b border-ink/15 py-6 mb-8">
@@ -160,17 +174,12 @@ export default async function HomeAuthed() {
         </div>
         <div className="flex gap-2 items-end h-16">
           {STAT_LABELS.map(({ key, label }) => (
-            <div key={key} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full h-12 bg-papel-dark rounded-sm relative flex items-end overflow-hidden">
-                <div
-                  className="w-full bg-signal"
-                  style={{ height: `${barHeight(character[key] as number)}%` }}
-                />
-              </div>
-              <span className="text-[10px] uppercase tracking-wider opacity-60">
-                {label}
-              </span>
-            </div>
+            <StatBar
+              key={key}
+              statKey={key}
+              value={character[key] as number}
+              label={label}
+            />
           ))}
         </div>
       </section>

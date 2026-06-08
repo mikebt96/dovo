@@ -26,6 +26,14 @@
   --color-lana-light: var(--c-signal-deep);
   --color-signal: var(--c-signal);
   --color-signal-deep: var(--c-signal-deep);
+  /* 6-stat color system (docs/specs/DESIGN.md §3). Used by StatBar / character
+     sheet / leaderboard. Theme-reactive via the vars below. */
+  --color-stat-fue: var(--stat-fue);
+  --color-stat-res: var(--stat-res);
+  --color-stat-flex: var(--stat-flex);
+  --color-stat-vel: var(--stat-vel);
+  --color-stat-equ: var(--stat-equ);
+  --color-stat-vit: var(--stat-vit);
 }
 
 /* ---- Ultraviolet · light (default) ---- */
@@ -37,6 +45,13 @@
   --c-ink-soft: #2c2b36;
   --c-signal: #6d4aff; /* electric violet — the single accent */
   --c-signal-deep: #5a37e0;
+  /* 6-stat spectrum (bars/accents only — not flat text on light, see WCAG note) */
+  --stat-fue: #6d4aff; /* Fuerza — violet */
+  --stat-res: #3a86ff; /* Resistencia — electric blue */
+  --stat-flex: #c44aff; /* Flexibilidad — magenta */
+  --stat-vel: #3ac4d6; /* Velocidad — cyan */
+  --stat-equ: #3ac49a; /* Equilibrio — teal */
+  --stat-vit: #aef03c; /* Vitalidad — acid lime */
   color-scheme: light;
 }
 
@@ -50,6 +65,12 @@
     --c-ink-soft: rgba(255, 255, 255, 0.66);
     --c-signal: #8262ff; /* a touch brighter for dark contrast */
     --c-signal-deep: #6d4aff;
+    --stat-fue: #8262ff;
+    --stat-res: #5a9bff;
+    --stat-flex: #d06bff;
+    --stat-vel: #54d2e2;
+    --stat-equ: #52d2ac;
+    --stat-vit: #c2f24f;
     color-scheme: dark;
   }
 }
@@ -63,6 +84,12 @@
   --c-ink-soft: rgba(255, 255, 255, 0.66);
   --c-signal: #8262ff;
   --c-signal-deep: #6d4aff;
+  --stat-fue: #8262ff;
+  --stat-res: #5a9bff;
+  --stat-flex: #d06bff;
+  --stat-vel: #54d2e2;
+  --stat-equ: #52d2ac;
+  --stat-vit: #c2f24f;
   color-scheme: dark;
 }
 

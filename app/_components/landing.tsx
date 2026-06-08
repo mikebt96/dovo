@@ -131,6 +131,7 @@ export default function Landing() {
           <a href="#system">{t("nav.system")}</a>
           <a href="#stories">{t("nav.stories")}</a>
           <a href="#pricing">{t("nav.pricing")}</a>
+          <Link href="/showcase">{t("nav.demo")}</Link>
           <Link href="/sign-in">{t("nav.signIn")}</Link>
         </div>
         <div className="nav-actions">
@@ -181,9 +182,9 @@ export default function Landing() {
                 <Link href="/sign-up" className="btn-dark">
                   {t("hero.ctaPrimary")} <span className="arrow">→</span>
                 </Link>
-                <a href="#how" className="btn-ghost">
-                  {t("hero.ctaSecondary")}
-                </a>
+                <Link href="/showcase" className="btn-ghost">
+                  {t("nav.demo")} <span className="arrow">→</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -446,10 +447,7 @@ export default function Landing() {
               <div className="tier featured">
                 <div className="tag">{t("pricing.proTag")}</div>
                 <h3>{t("pricing.proName")}</h3>
-                <div className="price">
-                  {t("pricing.proPrice")}
-                  <span className="cents">.99</span>
-                </div>
+                <div className="price">{t("pricing.proPrice")}</div>
                 <div className="period">{t("pricing.proPeriod")}</div>
                 <ul>
                   <li>{t("pricing.proF1")}</li>
@@ -466,10 +464,7 @@ export default function Landing() {
               <div className="tier">
                 <div className="tag">{t("pricing.premiumTag")}</div>
                 <h3>{t("pricing.premiumName")}</h3>
-                <div className="price">
-                  {t("pricing.premiumPrice")}
-                  <span className="cents">.99</span>
-                </div>
+                <div className="price">{t("pricing.premiumPrice")}</div>
                 <div className="period">{t("pricing.premiumPeriod")}</div>
                 <ul>
                   <li>{t("pricing.premiumF1")}</li>

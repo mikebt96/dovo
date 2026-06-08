@@ -20,6 +20,11 @@ next-env.d.ts
 # env (NUNCA committear)
 .env
 .env*.local
+.env.production
+.env.development
+
+# scripts temporales (utilidades de dev, no se versionan)
+scripts/_*
 
 # vercel
 .vercel

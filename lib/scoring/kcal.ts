@@ -4,6 +4,7 @@ import {
   INTENSIDAD_BASE,
   INTENSIDAD_STEP,
   FACTOR_DEFAULT,
+  CAP_DURACION_MIN,
 } from "./constants";
 
 // Solo actividades con métrica `intensidad` (ballet/pilates) escalan; el resto = 1.0.
@@ -23,7 +24,9 @@ export function calcularKcal(
   duracionMin: number,
 ): number {
   const durRaw = metricas.tiempo_min ?? duracionMin;
-  const minutos = Number.isFinite(durRaw) && durRaw > 0 ? durRaw : 0;
+  const minutosRaw = Number.isFinite(durRaw) && durRaw > 0 ? durRaw : 0;
+  // Cap duración por check-in (anti-trampa): nadie entrena 8h en una sesión.
+  const minutos = Math.min(minutosRaw, CAP_DURACION_MIN);
   const peso = perfil.peso_kg > 0 ? perfil.peso_kg : PESO_REFERENCIA_KG;
   const pesoFactor = peso / PESO_REFERENCIA_KG;
   const kcal = actividad.kcal_por_min * minutos * pesoFactor * factorIntensidad(actividad, metricas);
