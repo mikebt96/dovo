@@ -162,6 +162,11 @@ hoy sin que hagas nada.
 > Orden recomendado: valida con la PWA (Fase 1, ya está) → Play Store con tracción → App Store
 > al final (es el mayor costo/fricción y el mismo producto).
 
+### 11. OG Image / SEO (ya activo, $0)
+Sin hacer nada. La imagen dinámica (1200×630, Ultraviolet dark) se genera on-demand
+en Edge Runtime y se sirve en `/opengraph-image`. WhatsApp/Twitter/iMessage usarán
+la preview automáticamente. `robots.txt` y `sitemap.xml` también están activos.
+
 ---
 
 ## 🔄 Mantener el demo fresco (importante)
