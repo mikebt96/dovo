@@ -26,6 +26,8 @@ function isPublic(pathname: string) {
     // SEO: crawlers no tienen sesión.
     || pathname === "/robots.txt"
     || pathname === "/sitemap.xml"
+    // Digital Asset Links (Android TWA) + futuros .well-known: sin sesión.
+    || pathname.startsWith("/.well-known/")
   );
 }
 
