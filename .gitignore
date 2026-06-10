@@ -41,3 +41,6 @@ supabase/.temp/
 .vscode/
 .idea/
 .antigravitycli/
+
+# artefactos temporales de editores/agentes
+*.tmp.*
