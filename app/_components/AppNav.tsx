@@ -4,6 +4,7 @@ import LanguageToggle from "./LanguageToggle";
 
 type NavKey =
   | "home"
+  | "entrenar"
   | "leaderboard"
   | "retos"
   | "nutricion"
@@ -17,6 +18,9 @@ type NavKey =
 export default async function AppNav({ active }: { active?: NavKey }) {
   const t = await getTranslations("home");
   const links: { key: NavKey; href: string; label: string }[] = [
+    // entrenar primero: es LA acción diaria de la app (F11 — antes la rutina prescrita
+    // vivía enterrada en grupo → rutina y nadie la encontraba).
+    { key: "entrenar", href: "/entrenamiento", label: t("navTrain") },
     { key: "leaderboard", href: "/leaderboard", label: t("navLeaderboard") },
     { key: "retos", href: "/retos", label: t("navRetos") },
     { key: "nutricion", href: "/nutricion", label: t("navNutrition") },

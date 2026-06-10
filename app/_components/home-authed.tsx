@@ -9,6 +9,8 @@ import CharacterCard from "./CharacterCard";
 import { characterSheet } from "@/lib/leveling";
 import { getBoostActivo } from "@/lib/actions/boosts";
 import { getDuoTier } from "@/lib/billing/tier";
+import { diaSemanaCDMX } from "@/lib/workout/fecha";
+import { DIAS_SEMANA, type WorkoutPlanContent } from "@/lib/workout/types";
 
 type Character = {
   fue: number;
@@ -28,8 +30,20 @@ type Grupo = {
   tipo_grupo: string;
 };
 
+// claves i18n sin acentos para los días del plan (mismo patrón que /nutricion y /rutina).
+const DAY_KEY: Record<string, string> = {
+  lunes: "lunes",
+  martes: "martes",
+  "miércoles": "miercoles",
+  jueves: "jueves",
+  viernes: "viernes",
+  "sábado": "sabado",
+  domingo: "domingo",
+};
+
 export default async function HomeAuthed() {
   const t = await getTranslations("home");
+  const tDias = await getTranslations("nutricion.dias");
   const supabase = await createClient();
   const {
     data: { user },
@@ -89,6 +103,33 @@ export default async function HomeAuthed() {
     { nombre: string; metricas_requeridas: string[] }
   >();
 
+  // F11 · La sesión PRESCRITA de hoy (F9) como héroe de la home: la app abre con
+  // "hoy te toca", no con un dashboard. Lectura ligera del plan jsonb.
+  let planContent: WorkoutPlanContent | null = null;
+  if (miembroId) {
+    const { data: wp, error: wpErr } = await supabase
+      .schema("core")
+      .from("workout_plans")
+      .select("plan")
+      .eq("miembro_id", miembroId)
+      .maybeSingle<{ plan: WorkoutPlanContent }>();
+    if (wpErr) console.error("[home] workout plan:", wpErr.message);
+    planContent = wp?.plan ?? null;
+  }
+  const hoyNombre = diaSemanaCDMX();
+  const sesionHoy = planContent?.dias.find((d) => d.dia === hoyNombre) ?? null;
+  // Día libre: la próxima sesión en orden de semana (con vuelta al lunes).
+  const proxima = (() => {
+    if (!planContent || sesionHoy) return null;
+    const idxHoy = DIAS_SEMANA.indexOf(hoyNombre as (typeof DIAS_SEMANA)[number]);
+    for (let i = 1; i <= 7; i++) {
+      const dia = DIAS_SEMANA[(idxHoy + i) % 7];
+      const d = planContent.dias.find((x) => x.dia === dia);
+      if (d) return d;
+    }
+    return null;
+  })();
+
   if (miembroId) {
     const { data: rutina } = await supabase
       .schema("core")
@@ -134,6 +175,70 @@ export default async function HomeAuthed() {
             <p className="text-xs opacity-60 mt-1">{t("boostActiveEnergia")}</p>
           )}
         </div>
+      )}
+
+      {/* F11 · Héroe del día: la acción antes que las stats. Panel oscuro premium
+          (mismo lenguaje que DuelScoreboard/macros) con la sesión prescrita de hoy. */}
+      {planContent && (
+        <section className="mb-8 anim-fade-up">
+          <Link
+            href="/entrenamiento"
+            className="anim-lift group block relative overflow-hidden rounded-3xl p-7 sm:p-8 text-white"
+            style={{
+              background:
+                "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
+              boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
+            }}
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
+              style={{ background: "radial-gradient(circle, rgba(109,74,255,0.5), transparent 70%)" }}
+            />
+            <p className="relative text-[11px] mono uppercase tracking-[0.22em] text-signal mb-3">
+              {sesionHoy ? t("heroEyebrow") : t("heroRest")}
+            </p>
+            {sesionHoy ? (
+              <>
+                <h2 className="relative display font-extrabold lowercase leading-none text-3xl sm:text-4xl">
+                  {sesionHoy.actividad_slug} · {sesionHoy.titulo}
+                </h2>
+                <ul className="relative mt-5 space-y-1.5">
+                  {sesionHoy.bloques.slice(0, 4).map((b) => (
+                    <li key={b.exercise_slug} className="flex items-baseline gap-3 text-sm">
+                      <span className="text-white/85">{b.nombre}</span>
+                      <span className="mono tabular-nums text-[11px] text-white/45">
+                        {b.series}×{b.reps}
+                      </span>
+                    </li>
+                  ))}
+                  {sesionHoy.bloques.length > 4 && (
+                    <li className="text-[11px] mono text-white/35">
+                      +{sesionHoy.bloques.length - 4}
+                    </li>
+                  )}
+                </ul>
+              </>
+            ) : (
+              <>
+                <h2 className="relative display font-extrabold lowercase leading-none text-3xl sm:text-4xl">
+                  {t("heroRestBody")}
+                </h2>
+                {proxima && (
+                  <p className="relative mt-4 text-sm text-white/60">
+                    {t("heroNext", {
+                      dia: tDias(DAY_KEY[proxima.dia] ?? proxima.dia),
+                      titulo: proxima.titulo,
+                    })}
+                  </p>
+                )}
+              </>
+            )}
+            <span className="relative mt-6 inline-flex items-center text-[12px] mono uppercase tracking-[0.16em] text-signal group-hover:translate-x-1 transition-transform">
+              {sesionHoy ? t("heroCta") : t("heroVerSemana")}
+            </span>
+          </Link>
+        </section>
       )}
 
       {/* Character card — el ancla de la app (DESIGN.md §6) */}

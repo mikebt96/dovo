@@ -12,6 +12,7 @@ import type { SerieLog } from "@/lib/workout/types";
 import RutinaForm from "./RutinaForm";
 import LogExerciseButton from "./LogExerciseButton";
 import AiWorkoutButton from "./AiWorkoutButton";
+import CheckinRow from "@/app/_components/CheckinRow";
 
 export const dynamic = "force-dynamic";
 // La action de IA (regenerateWorkoutAi) puede tardar: extiende el límite de la ruta.
@@ -88,7 +89,7 @@ export default async function RutinaPage({
   if (!rutina) {
     return (
       <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
-        <AppNav />
+        <AppNav active="entrenar" />
         <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
         <p className="text-sm opacity-60 mb-6">{t("noPlanHint")}</p>
         <RutinaForm
@@ -107,7 +108,7 @@ export default async function RutinaPage({
   if (!data.fisico) {
     return (
       <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
-        <AppNav />
+        <AppNav active="entrenar" />
         <PageHero eyebrow={t("eyebrow")} title={t("noFisicoTitle")} subtitle={t("noFisicoBody")} />
         <Link
           href="/onboarding/perfil"
@@ -123,9 +124,27 @@ export default async function RutinaPage({
   const hoy = diaSemanaCDMX();
   const loggedHoy = new Map(data.logsHoy.map((l) => [l.exercise_slug, l.id]));
 
+  // F11 · Check-in conectado: la sesión de hoy cierra el loop AQUÍ (plan → ejecutar →
+  // registrar → puntos), sin brincar a la home.
+  const sesionHoy = plan?.plan.dias.find((d) => d.dia === hoy) ?? null;
+  const actividadHoy = sesionHoy
+    ? (((actividades ?? []) as Actividad[]).find((a) => a.slug === sesionHoy.actividad_slug) ?? null)
+    : null;
+  // Actividad del plan ya no existe/activa ⇒ el módulo de check-in se omite, pero que
+  // quede traza (un plan apuntando a una actividad desactivada es un bug de datos).
+  if (sesionHoy && !actividadHoy) {
+    console.error("[rutina] actividad del plan sin match en catálogo:", sesionHoy.actividad_slug);
+  }
+  const rutinaItemsRaw = Array.isArray(rutina.actividades)
+    ? (rutina.actividades as { actividad_id: string; duracion_min: number }[])
+    : [];
+  const duracionHoy = actividadHoy
+    ? (rutinaItemsRaw.find((i) => i.actividad_id === actividadHoy.id)?.duracion_min ?? 45)
+    : 45;
+
   return (
     <main className="min-h-svh max-w-2xl lg:max-w-5xl mx-auto px-6 py-10 bg-papel text-ink">
-      <AppNav />
+      <AppNav active="entrenar" />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("planSubtitle")} />
 
       {plan && (
@@ -150,16 +169,11 @@ export default async function RutinaPage({
             />
           </div>
 
-          {/* Recordatorio de check-in cuando ya registró ejercicios hoy */}
+          {/* Recordatorio de check-in cuando ya registró ejercicios hoy — el módulo de
+              check-in vive en la tarjeta de HOY, ya no hay que brincar a la home (F11). */}
           {data.logsHoy.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-signal/30 bg-signal/5 px-4 py-3 mb-6">
+            <div className="rounded-2xl border border-signal/30 bg-signal/5 px-4 py-3 mb-6">
               <p className="text-sm">{t("checkinReminder")}</p>
-              <Link
-                href="/"
-                className="text-[10px] mono uppercase tracking-[0.16em] text-signal underline underline-offset-2"
-              >
-                {t("checkinLink")} →
-              </Link>
             </div>
           )}
 
@@ -248,6 +262,23 @@ export default async function RutinaPage({
                       );
                     })}
                   </ul>
+
+                  {/* F11 · El loop se cierra aquí: terminaste la sesión ⇒ check-in en la
+                      misma tarjeta (puntos, stats, racha — el motor de siempre). */}
+                  {esHoy && actividadHoy && (
+                    <div className="mt-5 border-t border-ink/10 pt-4">
+                      <p className="text-[10px] mono uppercase tracking-[0.18em] opacity-60 mb-3">
+                        {t("checkinHoyTitle")}
+                      </p>
+                      <CheckinRow
+                        miembroId={miembro.id}
+                        actividadId={actividadHoy.id}
+                        nombre={actividadHoy.nombre}
+                        metricasRequeridas={actividadHoy.metricas_requeridas}
+                        duracionDefault={duracionHoy}
+                      />
+                    </div>
+                  )}
                 </section>
               );
             })}
