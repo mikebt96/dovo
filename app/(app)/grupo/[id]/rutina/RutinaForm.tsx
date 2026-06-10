@@ -59,7 +59,10 @@ export default function RutinaForm({
         setError(res.error);
         return;
       }
-      router.push(`/grupo/${grupoId}`);
+      // Edición desde /rutina (inicial != null): quédate y muestra el plan regenerado.
+      // Onboarding (sin rutina previa): el flujo original al grupo.
+      if (inicial) router.refresh();
+      else router.push(`/grupo/${grupoId}`);
     });
   }
 

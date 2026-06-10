@@ -102,7 +102,7 @@ out.push("-- ════════ INSERTS ════════");
 
 const ACTSEL = (slug: string) => `(select id from core.actividades where slug='${slug}')`;
 
-const retoMeta: { hibridos?: string; cinco?: string; inquebrantables?: string; fierro?: string; ritmo?: string; cerro?: string; ivan?: string; tono?: string; renata?: string; sofia?: string; ritmoTrato?: string } = {};
+const retoMeta: { hibridos?: string; cinco?: string; inquebrantables?: string; fierro?: string; ritmo?: string; cerro?: string; ivan?: string; ivanMiembro?: string; tono?: string; renata?: string; sofia?: string; ritmoTrato?: string } = {};
 
 for (const duo of DUOS) {
   const tratoId = uuid();
@@ -175,7 +175,7 @@ for (const duo of DUOS) {
   }
 
   // guarda refs para retos/boosts
-  if (duo.grupo === "Híbridos") { retoMeta.hibridos = tratoId; retoMeta.ivan = memberRows[0].uid; retoMeta.tono = memberRows[1].uid; }
+  if (duo.grupo === "Híbridos") { retoMeta.hibridos = tratoId; retoMeta.ivan = memberRows[0].uid; retoMeta.ivanMiembro = memberRows[0].miembroId; retoMeta.tono = memberRows[1].uid; }
   if (duo.grupo === "Cinco Disciplinas") retoMeta.cinco = tratoId;
   if (duo.grupo === "Los Inquebrantables") retoMeta.inquebrantables = tratoId;
   if (duo.grupo === "Fierro Parejo") retoMeta.fierro = tratoId;
@@ -220,6 +220,41 @@ for (const [uid, titulo] of wish) {
 // Mismo insert que scripts/seed-demo-nutrition.sql, ahora DENTRO del pipeline de re-seed.
 out.push("-- ════════ NUTRICIÓN (F5) ════════");
 out.push(`insert into core.nutrition_profiles (user_id,restricciones,presupuesto,comidas_por_dia,preferencias) values (${S(retoMeta.ivan!)},'{}'::text[],'medio',4,'me gusta picante; nada de hígado') on conflict (user_id) do nothing;`);
+
+// ── F9 · Logs de progresión de Iván: 3 semanas de full body a/b con pesos ascendentes.
+// El plan sample (gym 2× + ganar_musculo ⇒ full body a/b) prescribe exactamente estos
+// slugs, así que la página muestra "la vez pasada / hoy intenta" en el recorrido demo.
+out.push("-- ════════ EXERCISE LOGS (F9, progresión Iván) ════════");
+const logIvan = (offsetDias: number, slug: string, series: [number, number][]) => {
+  const d = new Date(weekMon);
+  d.setUTCDate(d.getUTCDate() + offsetDias);
+  if (d > today) return; // nunca loguear el futuro
+  const arr = JSON.stringify(series.map(([reps, peso]) => ({ reps, peso_kg: peso })));
+  out.push(`insert into core.exercise_logs (miembro_id,fecha,exercise_slug,series) values (${S(retoMeta.ivanMiembro!)},${S(isoDate(d))},${S(slug)},${S(arr)}::jsonb);`);
+};
+// semana -2 · A (lun) y B (jue)
+logIvan(-14, "sentadilla", [[8, 70], [8, 70], [8, 70], [8, 70]]);
+logIvan(-14, "press-banca", [[8, 60], [8, 60], [8, 60], [7, 60]]);
+logIvan(-14, "remo-barra", [[8, 55], [8, 55], [8, 55], [8, 55]]);
+logIvan(-14, "curl-biceps", [[10, 12.5], [10, 12.5], [9, 12.5]]);
+logIvan(-11, "hip-thrust", [[8, 80], [8, 80], [8, 80], [8, 80]]);
+logIvan(-11, "press-militar", [[8, 35], [8, 35], [7, 35], [7, 35]]);
+logIvan(-11, "jalon-al-pecho", [[9, 50], [9, 50], [8, 50], [8, 50]]);
+logIvan(-11, "extension-triceps-polea", [[10, 20], [10, 20], [10, 20]]);
+// semana -1 · A y B (B en su mejor sesión: todas las series al tope ⇒ sugerencia +2.5)
+logIvan(-7, "sentadilla", [[9, 72.5], [9, 72.5], [8, 72.5], [8, 72.5]]);
+logIvan(-7, "press-banca", [[9, 60], [9, 60], [9, 60], [8, 60]]);
+logIvan(-7, "remo-barra", [[9, 57.5], [9, 57.5], [8, 57.5], [8, 57.5]]);
+logIvan(-7, "curl-biceps", [[12, 12.5], [11, 12.5], [10, 12.5]]);
+logIvan(-4, "hip-thrust", [[10, 90], [10, 90], [10, 90], [10, 90]]);
+logIvan(-4, "press-militar", [[9, 35], [9, 35], [8, 35], [8, 35]]);
+logIvan(-4, "jalon-al-pecho", [[10, 52.5], [9, 52.5], [9, 52.5], [8, 52.5]]);
+logIvan(-4, "extension-triceps-polea", [[12, 20], [11, 20], [10, 20]]);
+// semana actual · A (lunes — ya ocurrió si hoy ≥ lunes)
+logIvan(0, "sentadilla", [[9, 75], [9, 75], [8, 75], [8, 75]]);
+logIvan(0, "press-banca", [[8, 62.5], [8, 62.5], [8, 62.5], [7, 62.5]]);
+logIvan(0, "remo-barra", [[9, 60], [9, 60], [8, 60], [8, 60]]);
+logIvan(0, "curl-biceps", [[10, 15], [10, 15], [9, 15]]);
 
 const sql = out.join("\n") + "\n";
 writeFileSync("scripts/seed-demo.sql", sql);

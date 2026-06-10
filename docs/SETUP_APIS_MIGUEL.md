@@ -169,6 +169,21 @@ la preview automáticamente. `robots.txt` y `sitemap.xml` también están activo
 
 ---
 
+## 🏋️ F9 · Rutina específica con IA (opcional — el plan base ya funciona solo)
+
+La página de rutina (`/grupo/<id>/rutina`) ya prescribe ejercicios (series×reps según la
+meta) y registra pesos con sugerencia de progresión — **eso es free y no necesita keys**.
+Lo único gateado es "personalizar con ia" (equipo disponible, lesiones):
+
+1. Misma `ANTHROPIC_API_KEY` de F5/F6 (si ya la pegaste, no hay paso nuevo).
+2. Agrega `WORKOUT_AI_LIVE=true` en Vercel → redeploy.
+3. **Haz 1 generación de humo y verifica el badge "personalizado con ia"** (no asumas:
+   si el badge sigue en "plan base", revisa `/admin` — los fallos de IA quedan logueados).
+4. Control de costo ya en código: 1 regeneración IA por semana por miembro (editar la
+   rutina resetea el plan a base y rehabilita una pasada de IA).
+
+---
+
 ## 🔄 Mantener el demo fresco (importante)
 
 Los datos demo se siembran en la **semana actual** (para que el leaderboard "semana" salga

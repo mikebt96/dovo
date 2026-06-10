@@ -31,6 +31,8 @@ const serverEnvSchema = envSchema.extend({
   NUTRITION_MODEL: z.string().optional(),
   // F6 Análisis corporal · misma ANTHROPIC_API_KEY; flag aparte para encender por separado.
   BODY_SCAN_LIVE: z.enum(["true", "false"]).optional().default("false"),
+  // F9 Rutina específica · misma ANTHROPIC_API_KEY; el plan base es free y determinista.
+  WORKOUT_AI_LIVE: z.enum(["true", "false"]).optional().default("false"),
   // F8 Push · VAPID self-served (sin cuenta de terceros): genera con scripts/gen-vapid.mjs
   // y pega las 2 keys en Vercel. Sin keys el envío es no-op y la UI muestra "próximamente".
   VAPID_PUBLIC_KEY: z.string().optional(),

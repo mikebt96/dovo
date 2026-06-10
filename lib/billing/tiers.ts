@@ -12,12 +12,13 @@ export function meetsTier(have: Tier, need: Tier): boolean {
 }
 
 // Features gateables. El gate es CONFIG, no hardcode: F5/F6 sólo agregan su llave aquí.
-export type Feature = "nutrition" | "body_scan" | "partner_premium";
+export type Feature = "nutrition" | "body_scan" | "partner_premium" | "workout_ai";
 
 export const FEATURE_TIERS: Record<Feature, Tier> = {
   nutrition: "pro", // F5 · planes de comida con IA
   body_scan: "pro", // F6 · análisis de composición corporal
   partner_premium: "pro", // F4 · descuentos premium de partners
+  workout_ai: "pro", // F9 · personalización del plan de entrenamiento (el plan base es free)
 };
 
 // Todo lo que NO está en el mapa = free (motor completo: check-ins, stats, niveles,
