@@ -9,6 +9,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
+    metadataBase: new URL("https://dovofit.com"),
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      url: "https://dovofit.com",
+      siteName: "dovo",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+    },
+    manifest: "/manifest.webmanifest",
   };
 }
 

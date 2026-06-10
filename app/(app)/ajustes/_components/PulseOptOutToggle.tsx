@@ -30,14 +30,15 @@ export default function PulseOptOutToggle({ initial }: { initial: boolean }) {
           type="button"
           onClick={toggle}
           disabled={pending}
-          className={`relative w-12 h-6 rounded-full transition-colors ${
+          className={`relative w-14 h-8 rounded-full transition-colors ${
             optOut ? "bg-ink/25" : "bg-signal"
           } disabled:opacity-50 shrink-0 mt-1`}
           aria-pressed={!optOut}
         >
+          {/* Mínimo 44×44px de área táctil (WCAG 2.1 SC 2.5.5): padding extendido via wrapper */}
           <span
-            className={`absolute top-0.5 w-5 h-5 rounded-full bg-papel transition-transform ${
-              optOut ? "translate-x-0.5" : "translate-x-[26px]"
+            className={`absolute top-1 w-6 h-6 rounded-full bg-papel transition-transform ${
+              optOut ? "translate-x-1" : "translate-x-[32px]"
             }`}
           />
         </button>

@@ -69,7 +69,7 @@ export default function ScanFlow({ live }: { live: boolean }) {
           <Big label={t("fat")} value={result.grasa_pct} color="#c44aff" />
           <Big label={t("muscle")} value={result.musculo_pct} color="#aef03c" />
         </div>
-        <p className="text-[10px] mono uppercase tracking-widest text-white/40 mt-4">
+        <p className="text-[11px] mono uppercase tracking-widest text-white/70 mt-4">
           {t("confidence")}: {t(`conf.${result.confianza}`)}
         </p>
         <ul className="mt-6 space-y-2 text-sm text-white/80">
@@ -117,10 +117,15 @@ export default function ScanFlow({ live }: { live: boolean }) {
 
   return (
     <div className="rounded-2xl border border-ink/10 p-6 space-y-6">
-      {/* Doble consentimiento ANTES de poder elegir foto */}
-      <div className="space-y-3">
+      {/* Consentimiento ANTES de poder elegir foto — doble pero compacto */}
+      <div>
         <Consent checked={consent1} onChange={setConsent1} label={t("consent1")} />
         <Consent checked={consent2} onChange={setConsent2} label={t("consent2")} />
+        {canShoot && (
+          <p className="text-[10px] mono uppercase tracking-[0.16em] text-signal mt-3">
+            ✓ {t("consentReady")}
+          </p>
+        )}
       </div>
 
       <div className={canShoot ? "" : "opacity-40 pointer-events-none select-none"}>

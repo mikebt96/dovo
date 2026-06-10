@@ -125,7 +125,7 @@ export default function PlanGrid({
         />
       </div>
 
-      <p className="text-[11px] mono uppercase tracking-[0.16em] opacity-45 mt-6 max-w-md leading-relaxed">
+      <p className="text-[11px] mono uppercase tracking-[0.16em] opacity-70 mt-6 max-w-md leading-relaxed">
         {t("footnote")}
       </p>
     </div>
@@ -204,7 +204,7 @@ function CurrentPill({ label, accent = false }: { label: string; accent?: boolea
     <span
       className={`block text-center rounded-full px-6 py-3 text-sm mono uppercase tracking-[0.14em] ${
         accent
-          ? "border border-signal/40 bg-signal/[0.06] text-signal"
+          ? "border border-signal/50 bg-signal/[0.15] text-signal"
           : "border border-ink/15 opacity-60"
       }`}
     >

@@ -11,6 +11,7 @@ import { getNutritionData } from "@/lib/actions/nutrition";
 import type { Comida, DiaPlan } from "@/lib/nutrition/types";
 import NutritionProfileForm from "./_components/NutritionProfileForm";
 import FoodLogQuickAdd from "./_components/FoodLogQuickAdd";
+import FoodFab from "./_components/FoodFab";
 import AiRegenButton from "./_components/AiRegenButton";
 
 export const dynamic = "force-dynamic";
@@ -179,8 +180,8 @@ export default async function NutricionPage() {
         </>
       )}
 
-      {/* Logging de hoy (funciona siempre, sin IA) */}
-      <section className="mb-10">
+      {/* Logging de hoy — inline en desktop, FAB + bottom-sheet en mobile */}
+      <section className="mb-10 hidden lg:block">
         <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-1">
           {t("logTitle")}
         </h2>
@@ -188,7 +189,10 @@ export default async function NutricionPage() {
         <FoodLogQuickAdd logs={data.logsHoy} />
       </section>
 
-      <p className="text-[10px] mono uppercase tracking-[0.16em] opacity-40 max-w-md leading-relaxed">
+      {/* FAB bottom-sheet — solo mobile (lg:hidden dentro del componente) */}
+      <FoodFab logs={data.logsHoy} />
+
+      <p className="text-[10px] mono uppercase tracking-[0.16em] opacity-40 max-w-md leading-relaxed pb-20 lg:pb-0">
         {t("disclaimer")}
       </p>
     </main>
@@ -201,7 +205,7 @@ function Macro({ label, value, color }: { label: string; value: number; color: s
       <div className="display font-bold text-2xl tabular-nums" style={{ color }}>
         {value}g
       </div>
-      <div className="text-[10px] mono uppercase tracking-widest text-white/50 mt-1">{label}</div>
+      <div className="text-[10px] mono uppercase tracking-widest text-white/70 mt-1">{label}</div>
     </div>
   );
 }
