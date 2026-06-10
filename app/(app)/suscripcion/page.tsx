@@ -24,7 +24,7 @@ export default async function SuscripcionPage() {
 
   if (!duo.tratoId) {
     return (
-      <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
+      <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-4xl mx-auto">
         <AppNav />
         <PageHero
           eyebrow={t("eyebrow")}

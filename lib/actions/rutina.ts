@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { rutinaSchema, type RutinaInput } from "@/lib/schemas/rutina";
+import { logAppError } from "@/lib/observability/log";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -99,8 +100,13 @@ async function regenerarPlanSample(
         },
         { onConflict: "miembro_id" },
       );
-    if (error) console.error("[rutina] regen plan:", error.message);
+    if (error) {
+      console.error("[rutina] regen plan:", error.message);
+      void logAppError({ origen: "rutina-regen-plan", mensaje: error.message });
+    }
   } catch (err) {
-    console.error("[rutina] regen plan:", err instanceof Error ? err.message : err);
+    const mensaje = err instanceof Error ? err.message : String(err);
+    console.error("[rutina] regen plan:", mensaje);
+    void logAppError({ origen: "rutina-regen-plan", mensaje });
   }
 }

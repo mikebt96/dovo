@@ -77,11 +77,12 @@ export default async function PerfilPage() {
   const sheet = characterSheet(character, character.prestige);
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+    <main className="min-h-svh max-w-2xl lg:max-w-5xl mx-auto px-6 py-10 bg-papel text-ink">
       <AppNav active="perfil" />
       <PageHero eyebrow={t("eyebrow")} title={meRow?.nombre ?? user.email} />
 
-      <section className="mb-10">
+      <div className="lg:grid lg:grid-cols-[1.1fr_1fr] lg:gap-10 lg:items-start">
+      <section className="mb-10 anim-fade-up">
         <CharacterCard
           nivel={sheet.nivel}
           className={sheet.className}
@@ -103,8 +104,9 @@ export default async function PerfilPage() {
         <p className="text-xs opacity-50 mt-6">{t("attributesNote")}</p>
       </section>
 
+      <div>
       {/* F6 · Análisis corporal — acción desde el perfil (no es tab) */}
-      <section className="mb-10">
+      <section className="mb-10 anim-fade-up" style={{ "--anim-delay": "80ms" } as React.CSSProperties}>
         <Link
           href="/perfil/scan"
           className="group flex items-center gap-4 rounded-2xl border border-signal/30 bg-signal/[0.04] p-5 hover:border-signal/60 transition-colors"
@@ -139,6 +141,8 @@ export default async function PerfilPage() {
           </div>
         </section>
       )}
+      </div>
+      </div>
     </main>
   );
 }

@@ -92,7 +92,8 @@ export default function LogExerciseButton({
           type="button"
           onClick={borrar}
           disabled={pending}
-          className="text-[10px] mono uppercase tracking-[0.16em] opacity-40 hover:opacity-80 underline underline-offset-2 disabled:opacity-30"
+          aria-label={t("removeLog")}
+          className="text-[10px] mono uppercase tracking-[0.16em] opacity-60 hover:opacity-100 underline underline-offset-2 disabled:opacity-40 py-2"
         >
           {t("removeLog")}
         </button>
@@ -109,7 +110,7 @@ export default function LogExerciseButton({
           type="button"
           onClick={marcarCompletado}
           disabled={pending}
-          className="text-[10px] mono uppercase tracking-[0.16em] border border-ink/20 rounded-full px-3 py-1.5 hover:border-signal hover:text-signal transition-colors disabled:opacity-50"
+          className="text-[10px] mono uppercase tracking-[0.16em] border border-ink/20 rounded-full px-4 py-2.5 hover:border-signal hover:text-signal transition-colors disabled:opacity-50"
         >
           {pending ? "…" : t("logDone")}
         </button>
@@ -123,7 +124,8 @@ export default function LogExerciseButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-[10px] mono uppercase tracking-[0.16em] border border-ink/20 rounded-full px-3 py-1.5 hover:border-signal hover:text-signal transition-colors"
+        aria-expanded={false}
+        className="text-[10px] mono uppercase tracking-[0.16em] border border-ink/20 rounded-full px-4 py-2.5 hover:border-signal hover:text-signal transition-colors"
       >
         {t("logCta")}
       </button>
@@ -131,11 +133,11 @@ export default function LogExerciseButton({
   }
 
   return (
-    <div className="w-full mt-2 rounded-xl border border-ink/15 p-3 space-y-2">
+    <div className="w-full mt-2 rounded-xl border border-ink/15 p-3 space-y-2" role="group" aria-label={t("seriesLabel")}>
       {series.map((s, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <span className="text-[10px] mono uppercase tracking-wider opacity-50 w-4">{i + 1}</span>
-          <label className="flex items-center gap-1.5">
+        <div key={i} className="flex items-center gap-2 min-h-11">
+          <span className="text-[10px] mono uppercase tracking-wider opacity-60 w-4">{i + 1}</span>
+          <label className="flex items-center gap-1.5 min-h-11">
             <input
               type="number"
               inputMode="numeric"
@@ -145,12 +147,13 @@ export default function LogExerciseButton({
               onChange={(e) =>
                 patch(i, "reps", e.target.value === "" ? null : Number(e.target.value))
               }
-              className="w-14 bg-transparent border-b border-ink/30 pb-0.5 text-sm tabular-nums focus:outline-none focus:border-signal"
+              aria-label={t("logReps")}
+              className="w-14 bg-transparent border-b border-ink/30 py-2 text-sm tabular-nums focus:outline-none focus:border-signal"
             />
-            <span className="text-[10px] mono uppercase opacity-50">{t("logReps")}</span>
+            <span className="text-[10px] mono uppercase opacity-60">{t("logReps")}</span>
           </label>
           {conPeso && (
-            <label className="flex items-center gap-1.5">
+            <label className="flex items-center gap-1.5 min-h-11">
               <input
                 type="number"
                 inputMode="decimal"
@@ -161,16 +164,17 @@ export default function LogExerciseButton({
                 onChange={(e) =>
                   patch(i, "peso_kg", e.target.value === "" ? null : Number(e.target.value))
                 }
-                className="w-16 bg-transparent border-b border-ink/30 pb-0.5 text-sm tabular-nums focus:outline-none focus:border-signal"
+                aria-label={t("logKg")}
+                className="w-16 bg-transparent border-b border-ink/30 py-2 text-sm tabular-nums focus:outline-none focus:border-signal"
               />
-              <span className="text-[10px] mono uppercase opacity-50">{t("logKg")}</span>
+              <span className="text-[10px] mono uppercase opacity-60">{t("logKg")}</span>
             </label>
           )}
           {series.length > 1 && (
             <button
               type="button"
               onClick={() => setSeries((prev) => prev.filter((_, j) => j !== i))}
-              className="ml-auto text-[10px] opacity-40 hover:opacity-80"
+              className="ml-auto text-base opacity-60 hover:opacity-100 h-11 w-11 -my-2 flex items-center justify-center"
               aria-label={t("removeLog")}
             >
               ×
@@ -185,7 +189,7 @@ export default function LogExerciseButton({
             onClick={() =>
               setSeries((prev) => [...prev, prev[prev.length - 1] ?? { reps: 10, peso_kg: null }])
             }
-            className="text-[10px] mono uppercase tracking-[0.16em] opacity-60 hover:opacity-100"
+            className="text-[10px] mono uppercase tracking-[0.16em] opacity-70 hover:opacity-100 py-2"
           >
             {t("addSerie")}
           </button>
@@ -194,7 +198,7 @@ export default function LogExerciseButton({
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-[10px] mono uppercase tracking-[0.16em] opacity-50 hover:opacity-80"
+          className="text-[10px] mono uppercase tracking-[0.16em] opacity-70 hover:opacity-100 py-2"
         >
           {t("logCancel")}
         </button>
@@ -202,7 +206,7 @@ export default function LogExerciseButton({
           type="button"
           onClick={save}
           disabled={pending}
-          className="text-[10px] mono uppercase tracking-[0.16em] bg-ink text-papel rounded-full px-4 py-1.5 hover:bg-signal hover:text-white transition-colors disabled:opacity-50"
+          className="text-[10px] mono uppercase tracking-[0.16em] bg-ink text-papel rounded-full px-5 py-2.5 hover:bg-signal hover:text-white transition-colors disabled:opacity-50"
         >
           {pending ? "…" : t("logSave")}
         </button>

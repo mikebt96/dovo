@@ -93,10 +93,12 @@ export default function RutinaForm({
               <button
                 type="button"
                 onClick={() => toggle(a.id)}
-                className="flex items-center justify-between w-full"
+                aria-pressed={active}
+                aria-label={`${a.nombre} — ${active ? t("remove") : t("add")}`}
+                className="flex items-center justify-between w-full min-h-11"
               >
                 <span className="display font-medium lowercase">{a.nombre}</span>
-                <span className="text-xs uppercase tracking-widest opacity-60">
+                <span className="text-xs uppercase tracking-widest opacity-70">
                   {active ? t("remove") : t("add")}
                 </span>
               </button>

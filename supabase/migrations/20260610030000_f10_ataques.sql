@@ -212,3 +212,20 @@ end; $$;
 revoke execute on function core.lanzar_ataque(uuid, text, uuid) from public;
 revoke execute on function core.lanzar_ataque(uuid, text, uuid) from anon;
 grant execute on function core.lanzar_ataque(uuid, text, uuid) to authenticated, service_role;
+
+-- ── Nombres de los participantes del duelo (picker de congelamiento + feed) ──
+-- La RLS de core.users solo permite co-miembros; las partes del reto necesitan
+-- los nombres del rival. Gated por is_reto_party — nada anon, cero PII extra.
+create or replace function core.miembros_reto(p_reto_id uuid)
+returns table (user_id uuid, nombre text, trato_id uuid)
+language sql security definer stable set search_path = core, pg_temp as $$
+  select u.id, u.nombre, m.trato_id
+  from core.retos r
+  join core.trato_miembros m on m.trato_id in (r.trato_a, r.trato_b)
+  join core.users u on u.id = m.user_id
+  where r.id = p_reto_id
+    and (core.is_reto_party(r.trato_a, r.trato_b, auth.uid()) or auth.role() = 'service_role');
+$$;
+revoke execute on function core.miembros_reto(uuid) from public;
+revoke execute on function core.miembros_reto(uuid) from anon;
+grant execute on function core.miembros_reto(uuid) to authenticated, service_role;

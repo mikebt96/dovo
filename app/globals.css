@@ -155,3 +155,51 @@ body {
   font-size: 11px;
   opacity: 0.3;
 }
+
+/* ── F10 · Animaciones globales (editorial, sutiles). Todas se apagan con
+   prefers-reduced-motion — la app funciona idéntica sin movimiento. ── */
+@keyframes anim-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes anim-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes anim-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px) rotate(-0.5deg); }
+  40% { transform: translateX(6px) rotate(0.4deg); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+}
+@keyframes anim-frost {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+@keyframes anim-shield-flash {
+  0% { box-shadow: 0 0 0 0 rgba(58, 196, 154, 0.0); }
+  35% { box-shadow: 0 0 0 6px rgba(58, 196, 154, 0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(58, 196, 154, 0); }
+}
+@keyframes anim-float-away {
+  0% { opacity: 0; transform: translateY(4px) scale(0.9); }
+  25% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+  100% { opacity: 0; transform: translateY(-26px) scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .anim-fade-up {
+    opacity: 0;
+    animation: anim-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: var(--anim-delay, 0ms);
+  }
+  .anim-pop { animation: anim-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+  .anim-shake { animation: anim-shake 0.45s ease-in-out; }
+  .anim-frost { animation: anim-frost 2.4s ease-in-out infinite; }
+  .anim-shield-flash { animation: anim-shield-flash 0.8s ease-out; }
+  .anim-float-away { animation: anim-float-away 1.4s ease-out forwards; }
+  .anim-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .anim-lift:hover { transform: translateY(-2px); }
+}

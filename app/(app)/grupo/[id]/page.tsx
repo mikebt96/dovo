@@ -106,7 +106,7 @@ export default async function GrupoPage({
     racha < BOOST_GATING_RACHAS ? "gate" : boostReciente ? "cooldown" : "ok";
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+    <main className="min-h-svh max-w-2xl lg:max-w-4xl mx-auto px-6 py-10 bg-papel text-ink">
       <AppNav />
       <PageHero
         eyebrow={t("eyebrow", { tipo: tOnb(`tipo.${grupo.tipo_grupo}`) })}

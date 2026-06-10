@@ -38,7 +38,7 @@ export default async function AjustesPage() {
   const pushPrefs = await getNotificationPrefs();
 
   return (
-    <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
+    <main className="min-h-svh max-w-2xl lg:max-w-4xl mx-auto px-6 py-10 bg-papel text-ink">
       <AppNav active="ajustes" />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} />
 
@@ -47,6 +47,7 @@ export default async function AjustesPage() {
         <Row label={t("email")} value={meRow?.email ?? user.email ?? ""} />
       </section>
 
+      <div className="lg:grid lg:grid-cols-2 lg:gap-x-12">
       <section className="mb-10">
         <h2 className="display text-xl font-bold lowercase mb-5">{t("plan")}</h2>
         <Link
@@ -107,6 +108,7 @@ export default async function AjustesPage() {
           </Link>
         </nav>
       </section>
+      </div>
 
       {/* Consola — solo visible para el admin (es-only, superficie interna) */}
       {isAdminEmail(user.email) && (

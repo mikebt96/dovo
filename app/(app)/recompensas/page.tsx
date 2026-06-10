@@ -44,7 +44,7 @@ export default async function RecompensasPage() {
   const proximas = data.rewards.filter((r) => !r.unlocked);
 
   return (
-    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-3xl mx-auto">
+    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-3xl lg:max-w-5xl mx-auto">
       <AppNav active="recompensas" />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 

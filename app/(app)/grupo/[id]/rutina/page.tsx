@@ -177,19 +177,21 @@ export default async function RutinaPage({
                     esHoy ? "border-signal shadow-[0_8px_30px_-12px_rgba(109,74,255,0.35)]" : "border-ink/12"
                   }`}
                 >
-                  <header className="flex items-center gap-2 mb-4">
-                    <span className="display font-semibold lowercase">
-                      {tDias(DAY_KEY[d.dia] ?? d.dia)}
-                    </span>
-                    {esHoy && (
-                      <span className="text-[9px] mono uppercase tracking-[0.18em] bg-signal text-white rounded-full px-2 py-0.5">
-                        {t("today")}
-                      </span>
-                    )}
-                    <span className="flex-1" />
-                    <span className="text-[10px] mono uppercase tracking-[0.16em] opacity-50">
+                  {/* El día ancla la tarjeta (DESIGN.md §4); actividad+título como caption (review F9). */}
+                  <header className="mb-4">
+                    <div className="flex items-center gap-2">
+                      <h3 className="display text-xl font-bold lowercase leading-none">
+                        {tDias(DAY_KEY[d.dia] ?? d.dia)}
+                      </h3>
+                      {esHoy && (
+                        <span className="text-[9px] mono uppercase tracking-[0.18em] bg-signal text-white rounded-full px-2 py-0.5">
+                          {t("today")}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] mono uppercase tracking-[0.16em] opacity-60 mt-1.5">
                       {d.actividad_slug} · {d.titulo}
-                    </span>
+                    </p>
                   </header>
 
                   <ul className="space-y-4">
@@ -204,7 +206,7 @@ export default async function RutinaPage({
                               {b.series}×{b.reps}
                             </span>
                             {b.descanso_seg > 0 && (
-                              <span className="text-[10px] mono uppercase tracking-wider opacity-40">
+                              <span className="text-[10px] mono uppercase tracking-wider opacity-60">
                                 {t("restLabel")} {b.descanso_seg}s
                               </span>
                             )}
@@ -225,16 +227,22 @@ export default async function RutinaPage({
                               />
                             )}
                           </div>
-                          {b.nota && <p className="text-xs opacity-50 mt-1">{b.nota}</p>}
+                          {b.nota && <p className="text-xs opacity-60 mt-1">{b.nota}</p>}
                           {prog && (
-                            <p className="text-[11px] mono tabular-nums opacity-60 mt-1">
-                              {t("lastTime")}: {fmtSeries(prog.ultima_series)}
+                            <div className="mt-1.5">
+                              <p className="text-[10px] mono tabular-nums opacity-60">
+                                {t("lastTime")}: {fmtSeries(prog.ultima_series)}
+                              </p>
+                              {/* "hoy intenta X" como objetivo motivacional, no un dato más (review F9). */}
                               {prog.sugerencia_kg != null && (
-                                <span className="text-signal">
-                                  {" "}· {t("suggested")} {prog.sugerencia_kg} kg
-                                </span>
+                                <p
+                                  className="display font-bold text-signal text-base mt-0.5"
+                                  style={{ textShadow: "0 0 16px rgba(109,74,255,0.3)" }}
+                                >
+                                  {t("suggested")} {prog.sugerencia_kg} kg ↗
+                                </p>
                               )}
-                            </p>
+                            </div>
                           )}
                         </li>
                       );

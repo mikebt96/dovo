@@ -206,6 +206,7 @@ export async function getWorkoutData(grupoId: string): Promise<WorkoutData> {
       );
       for (const row of (recientes ?? []) as Pick<ExerciseLogRow, "fecha" | "exercise_slug" | "series">[]) {
         if (progresion[row.exercise_slug]) continue; // ya tenemos el más reciente
+        if (!Array.isArray(row.series)) continue; // defensa: series jsonb malformado (review F9)
         progresion[row.exercise_slug] = {
           exercise_slug: row.exercise_slug,
           ultima_fecha: row.fecha,

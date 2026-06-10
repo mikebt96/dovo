@@ -11,6 +11,9 @@ import {
   type Marcador,
   type RetoRow,
 } from "@/lib/actions/retos";
+import { getDuelContext } from "@/lib/actions/ataques";
+import AttackPanel from "./_components/AttackPanel";
+import DuelFeed from "./_components/DuelFeed";
 
 export const dynamic = "force-dynamic";
 
@@ -57,27 +60,69 @@ export default async function RetosPage() {
   );
   const historial = pairs.filter((p) => p.r.estado === "cerrado");
 
+  // F10 · Contexto de ataque por duelo realmente activo (munición, rivales, feed).
+  const enCurso = activos.filter((p) => p.r.estado === "activo");
+  const contextos = await Promise.all(
+    enCurso.map((p) => getDuelContext(p.r.id, miTratoId)),
+  );
+  const ctxDe = new Map(enCurso.map((p, i) => [p.r.id, contextos[i]]));
+
   return (
-    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
+    <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
       <AppNav active="retos" />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       {activos.length > 0 && (
-        <section className="space-y-4 mb-8">
-          {activos.map(({ r, m }) => (
-            <DuelScoreboard
-              key={r.id}
-              m={m}
-              miTratoId={miTratoId}
-              canRespond={r.creado_por !== user.id}
-            />
-          ))}
+        <section className="space-y-8 mb-8">
+          {activos.map(({ r, m }) => {
+            const ctx = ctxDe.get(r.id);
+            const nombresDuo: Record<string, string> = {
+              [m.trato_a]: m.nombre_a,
+              [m.trato_b]: m.nombre_b,
+            };
+            return (
+              <div key={r.id} className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:items-start">
+                <div className="space-y-4">
+                  <div className="anim-fade-up">
+                    <DuelScoreboard
+                      m={m}
+                      miTratoId={miTratoId}
+                      canRespond={r.creado_por !== user.id}
+                    />
+                  </div>
+                  {ctx && (
+                    <div className="rounded-2xl border border-ink/12 p-5">
+                      <h3 className="text-[11px] mono uppercase tracking-[0.22em] opacity-50 mb-3">
+                        {t("atkTitle")}
+                      </h3>
+                      <AttackPanel
+                        retoId={r.id}
+                        municion={ctx.municion}
+                        yaAtacoHoy={ctx.yaAtacoHoy}
+                        rivales={ctx.rivales}
+                      />
+                    </div>
+                  )}
+                </div>
+                {ctx && (
+                  <div className="mt-4 lg:mt-0">
+                    <DuelFeed
+                      ataques={ctx.ataques}
+                      miembros={ctx.miembros}
+                      nombresDuo={nombresDuo}
+                      congelados={ctx.congelados}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </section>
       )}
 
       <Link
         href="/retos/nuevo"
-        className="group block rounded-2xl border border-dashed border-signal/40 p-6 mb-10 transition-colors hover:border-signal hover:bg-signal/[0.04]"
+        className="anim-lift group block rounded-2xl border border-dashed border-signal/40 p-6 mb-10 transition-colors hover:border-signal hover:bg-signal/[0.04]"
       >
         <span className="text-[11px] mono uppercase tracking-[0.18em] text-signal">
           {t("active")}
@@ -92,8 +137,8 @@ export default async function RetosPage() {
           <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-4">
             {t("history")}
           </h2>
-          <ul className="space-y-2">
-            {historial.map(({ r, m }) => {
+          <ul className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+            {historial.map(({ r, m }, i) => {
               const mineIsA = m.trato_a === miTratoId;
               const rivalNombre = mineIsA ? m.nombre_b : m.nombre_a;
               const result =
@@ -117,7 +162,8 @@ export default async function RetosPage() {
               return (
                 <li
                   key={r.id}
-                  className="relative flex items-center justify-between gap-3 overflow-hidden rounded-xl border border-ink/10 p-4 pl-5"
+                  className="anim-fade-up relative flex items-center justify-between gap-3 overflow-hidden rounded-xl border border-ink/10 p-4 pl-5"
+                  style={{ "--anim-delay": `${Math.min(i, 6) * 50}ms` } as React.CSSProperties}
                 >
                   <span
                     aria-hidden

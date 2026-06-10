@@ -25,7 +25,9 @@ export function sugerirPeso(
   if (pesos.length === 0) return null;
   const peso = Math.max(...pesos);
   const tope = topeReps(repsObjetivo);
-  if (tope === null) return peso;
+  // reps por tiempo/distancia (6×400m, 30 min) → no aplica sugerencia de peso (null, no el
+  // último peso: evita "hoy intenta 50 kg" en un rodaje). Review F9 2026-06-10.
+  if (tope === null) return null;
   const completadas = ultimaSeries.every((s) => s.reps >= tope);
   return completadas ? Math.round((peso + 2.5) * 10) / 10 : peso;
 }
