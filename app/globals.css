@@ -198,6 +198,11 @@ body {
   opacity: 0;
 }
 
+/* Las barras se llenan desde 0 hasta su width/height inline (game-feel F12).
+   Server-component friendly: el "to" implícito es el estilo inline. */
+@keyframes anim-bar-w { from { width: 0%; } }
+@keyframes anim-bar-h { from { height: 0%; } }
+
 @media (prefers-reduced-motion: no-preference) {
   .anim-fade-up {
     opacity: 0;
@@ -211,4 +216,24 @@ body {
   .anim-float-away { animation: anim-float-away 1.4s ease-out forwards; }
   .anim-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; }
   .anim-lift:hover { transform: translateY(-2px); }
+  /* press feedback de juego: el tap se siente (F12) */
+  .anim-lift:active { transform: translateY(0) scale(0.98); }
+  .anim-press { transition: transform 0.12s ease; }
+  .anim-press:active { transform: scale(0.96); }
+  .anim-bar-w { animation: anim-bar-w 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+  .anim-bar-h { animation: anim-bar-h 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+  /* Cascada para listas (F12): los hijos entran escalonados sin tocar el JSX. */
+  .anim-stagger > * {
+    opacity: 0;
+    animation: anim-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .anim-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .anim-stagger > *:nth-child(2) { animation-delay: 45ms; }
+  .anim-stagger > *:nth-child(3) { animation-delay: 90ms; }
+  .anim-stagger > *:nth-child(4) { animation-delay: 135ms; }
+  .anim-stagger > *:nth-child(5) { animation-delay: 180ms; }
+  .anim-stagger > *:nth-child(6) { animation-delay: 225ms; }
+  .anim-stagger > *:nth-child(7) { animation-delay: 270ms; }
+  .anim-stagger > *:nth-child(8) { animation-delay: 315ms; }
+  .anim-stagger > *:nth-child(n + 9) { animation-delay: 360ms; }
 }

@@ -14,7 +14,7 @@ export async function crearCheckin(input: {
   fecha: string; // YYYY-MM-DD
   metricas: Metricas;
   duracionMin: number;
-}): Promise<Result> {
+}): Promise<Result<{ puntos: number }>> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -111,5 +111,7 @@ export async function crearCheckin(input: {
   }
 
   revalidatePath("/");
-  return { ok: true, data: undefined };
+  // Los puntos ganados vuelven al cliente: el momento de recompensa se CELEBRA en la UI
+  // (game-feel F12), no se pierde en silencio.
+  return { ok: true, data: { puntos: Math.round(puntos) } };
 }

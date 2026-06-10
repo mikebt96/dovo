@@ -59,8 +59,9 @@ export default async function CharacterCard({
       </div>
 
       <div className="relative mt-6 flex items-end gap-4">
+        {/* El nivel ENTRA como en un juego (pop) — F12. */}
         <div
-          className="display font-extrabold leading-[0.8] text-6xl sm:text-7xl tabular-nums"
+          className="anim-pop display font-extrabold leading-[0.8] text-6xl sm:text-7xl tabular-nums"
           style={{ textShadow: "0 0 44px rgba(109,74,255,0.45)" }}
         >
           {nivel}

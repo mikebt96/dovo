@@ -66,10 +66,13 @@ export default async function LeaderboardPage({
       ) : (
         <div className="space-y-3">
           {champion && (
-            <DuoChampion row={champion} isYou={mineSet.has(champion.trato_id)} />
+            <div className="anim-fade-up">
+              <DuoChampion row={champion} isYou={mineSet.has(champion.trato_id)} />
+            </div>
           )}
+          {/* Stagger de juego (F12): la tabla entra en cascada vía nth-child (DuoLeaderRow ya es <li>). */}
           {rest.length > 0 && (
-            <ul className="space-y-2 pt-3">
+            <ul className="space-y-2 pt-3 anim-stagger">
               {rest.map((row) => (
                 <DuoLeaderRow
                   key={row.trato_id}

@@ -96,7 +96,7 @@ export default async function PerfilPage() {
           </p>
           <div className="h-1 bg-papel-dark rounded-full overflow-hidden">
             <div
-              className="h-full bg-signal"
+              className="h-full bg-signal anim-bar-w"
               style={{ width: `${Math.round(sheet.progresoNivel * 100)}%` }}
             />
           </div>

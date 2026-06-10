@@ -27,6 +27,7 @@ export default function CheckinRow({
   const [open, setOpen] = useState(false);
   const [vals, setVals] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [puntosGanados, setPuntosGanados] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -45,6 +46,7 @@ export default function CheckinRow({
         return;
       }
       setDone(true);
+      setPuntosGanados(res.data?.puntos ?? null);
       setOpen(false);
       router.refresh(); // refresca stats + racha del home
     });
@@ -61,7 +63,17 @@ export default function CheckinRow({
   }
 
   return (
-    <div className="border border-ink/15 rounded-lg p-4">
+    <div className={`relative border rounded-lg p-4 ${done ? "border-signal/40 anim-pop" : "border-ink/15"}`}>
+      {/* Game-feel (F12): los puntos ganados se CELEBRAN — flotan y se van. */}
+      {puntosGanados !== null && puntosGanados > 0 && (
+        <span
+          aria-hidden
+          className="anim-float-away absolute -top-2 right-6 display font-extrabold text-signal text-lg"
+          style={{ textShadow: "0 0 18px rgba(109,74,255,0.45)" }}
+        >
+          +{puntosGanados} pts
+        </span>
+      )}
       <div className="flex items-center justify-between">
         <span className="display font-medium lowercase">{nombre}</span>
         <div className="flex items-center gap-3">
@@ -76,9 +88,13 @@ export default function CheckinRow({
             type="button"
             onClick={quickLog}
             disabled={pending || done}
-            className="bg-ink text-papel px-4 py-2 rounded-full text-sm lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
+            className={`anim-press px-4 py-2 rounded-full text-sm lowercase disabled:opacity-100 transition-colors ${
+              done
+                ? "bg-signal text-white"
+                : "bg-ink text-papel hover:bg-signal hover:text-white disabled:opacity-50"
+            }`}
           >
-            {done ? t("done") : pending ? t("saving") : t("quickLog")}
+            {done ? `✓ ${t("done")}` : pending ? t("saving") : t("quickLog")}
           </button>
         </div>
       </div>

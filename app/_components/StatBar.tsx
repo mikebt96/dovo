@@ -36,7 +36,7 @@ export default function StatBar({
         )}
         <div className="flex-1 h-1.5 bg-papel-dark rounded-full overflow-hidden">
           <div
-            className={`h-full ${BAR_CLASS[statKey]} rounded-full transition-[width] duration-500`}
+            className={`h-full ${BAR_CLASS[statKey]} rounded-full transition-[width] duration-500 anim-bar-w`}
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -48,7 +48,7 @@ export default function StatBar({
     <div className="flex-1 flex flex-col items-center gap-1">
       <div className="w-full h-12 bg-papel-dark rounded-sm relative flex items-end overflow-hidden">
         <div
-          className={`w-full ${BAR_CLASS[statKey]} transition-[height] duration-500`}
+          className={`w-full ${BAR_CLASS[statKey]} transition-[height] duration-500 anim-bar-h`}
           style={{ height: `${pct}%` }}
         />
       </div>
