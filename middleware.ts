@@ -20,6 +20,9 @@ function isPublic(pathname: string) {
     // Las rutas API se autentican solas (el webhook de Stripe verifica FIRMA, no sesión).
     // Sin esto el middleware redirige el POST de Stripe a /sign-in y la entrega falla.
     || pathname.startsWith("/api/")
+    // El service worker DEBE ser público: el browser lo registra sin sesión y un
+    // redirect a /sign-in rompe el registro del push (F8).
+    || pathname === "/sw.js"
   );
 }
 
