@@ -572,7 +572,7 @@
     "setupTitle": "your food profile.",
     "setupSubtitle": "two minutes. this is how we build your weekly plan.",
     "formRestricciones": "restrictions",
-    "formRestriccionesHint": "mark the ones that apply — the plan respects them.",
+    "formRestriccionesHint": "mark the ones that apply — the AI plan fully respects them; the base plan is general.",
     "restriccion": {
       "vegetariano": "vegetarian",
       "vegano": "vegan",

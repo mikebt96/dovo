@@ -572,7 +572,7 @@
     "setupTitle": "tu perfil de comida.",
     "setupSubtitle": "dos minutos. con esto armamos tu plan semanal.",
     "formRestricciones": "restricciones",
-    "formRestriccionesHint": "marca las que apliquen — el plan las respeta.",
+    "formRestriccionesHint": "marca las que apliquen — el plan con ia las respeta al 100%; el plan base es general.",
     "restriccion": {
       "vegetariano": "vegetariano",
       "vegano": "vegano",

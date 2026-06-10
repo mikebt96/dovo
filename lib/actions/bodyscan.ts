@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAnthropic, NUTRITION_MODEL } from "@/lib/anthropic";
 import { getEntitlement } from "@/lib/billing/tier";
+import { logAppError } from "@/lib/observability/log";
 import type { PerfilFisico } from "@/lib/nutrition/types";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
@@ -92,15 +93,22 @@ function sampleScan(f: PerfilFisico): Omit<BodyScan, "id" | "created_at"> {
   return { grasa_pct: grasa, musculo_pct: musculo, confianza: "baja", recomendaciones, source: "sample" };
 }
 
+// OJO: structured outputs solo acepta un SUBSET de JSON Schema — minimum/maximum y
+// minItems/maxItems>1 producen un 400 de la API (verificado contra los docs vigentes).
+// Los rangos se validan/clampan en código tras el parse; el conteo va en description.
 const SCAN_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: ["grasa_pct", "musculo_pct", "confianza", "recomendaciones"],
   properties: {
-    grasa_pct: { type: "number", minimum: 2, maximum: 70 },
-    musculo_pct: { type: "number", minimum: 10, maximum: 70 },
+    grasa_pct: { type: "number", description: "porcentaje de grasa corporal, entre 2 y 70" },
+    musculo_pct: { type: "number", description: "porcentaje de músculo esquelético, entre 10 y 70" },
     confianza: { type: "string", enum: ["baja", "media", "alta"] },
-    recomendaciones: { type: "array", minItems: 3, maxItems: 3, items: { type: "string" } },
+    recomendaciones: {
+      type: "array",
+      description: "exactamente 3 recomendaciones",
+      items: { type: "string" },
+    },
   },
 } as const;
 
@@ -147,6 +155,24 @@ export async function runBodyScan(formData: FormData): Promise<Result<BodyScan>>
     const client = getAnthropic();
     if (!client) return { ok: false, error: "coming_soon" };
 
+    // Control de costo (contrato del setup doc): máx 3 análisis con IA por usuario por día.
+    // Si el conteo falla, NO se hace la llamada cara — mejor reintentar que gastar a ciegas.
+    const desde = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error: cntErr } = await supabase
+      .schema("core")
+      .from("body_scans")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("source", "ai")
+      .gte("created_at", desde);
+    if (cntErr) {
+      console.error("[bodyscan] límite:", cntErr.message);
+      return { ok: false, error: "no se pudo verificar tu límite diario — intenta de nuevo" };
+    }
+    if ((count ?? 0) >= 3) {
+      return { ok: false, error: "límite diario alcanzado (3 análisis con foto) — vuelve mañana" };
+    }
+
     try {
       const b64 = Buffer.from(await file.arrayBuffer()).toString("base64");
       const msg = await client.messages
@@ -184,10 +210,31 @@ export async function runBodyScan(formData: FormData): Promise<Result<BodyScan>>
       const textBlock = msg.content.find((b) => b.type === "text");
       if (!textBlock || textBlock.type !== "text") throw new Error("respuesta sin texto");
       const parsed = JSON.parse(textBlock.text) as Omit<BodyScan, "id" | "created_at" | "source">;
-      scan = { ...parsed, source: "ai" };
+      // Rangos en código (el schema ya no los lleva): clamp a los CHECKs del SQL.
+      if (
+        typeof parsed.grasa_pct !== "number" || Number.isNaN(parsed.grasa_pct) ||
+        typeof parsed.musculo_pct !== "number" || Number.isNaN(parsed.musculo_pct)
+      ) throw new Error("respuesta sin porcentajes");
+      const clamp1 = (v: number, lo: number, hi: number) =>
+        Math.min(hi, Math.max(lo, Math.round(v * 10) / 10));
+      const recos = (Array.isArray(parsed.recomendaciones) ? parsed.recomendaciones : [])
+        .filter((r): r is string => typeof r === "string" && r.length > 0)
+        .slice(0, 3);
+      if (recos.length === 0) throw new Error("respuesta sin recomendaciones");
+      scan = {
+        grasa_pct: clamp1(parsed.grasa_pct, 2, 70),
+        musculo_pct: clamp1(parsed.musculo_pct, 10, 70),
+        confianza: (["baja", "media", "alta"] as const).find((c) => c === parsed.confianza) ?? "media",
+        recomendaciones: recos,
+        source: "ai",
+      };
     } catch (err) {
       // Fail-soft observable: la visión falla ⇒ estimación antropométrica, nunca un 500.
-      console.error("[bodyscan-ai] fallback a sample:", err instanceof Error ? err.message : err);
+      // logAppError ⇒ visible en /admin (si solo quedara en Vercel logs, un modo live roto
+      // degradaría a sample para siempre sin que nadie lo note).
+      const mensaje = err instanceof Error ? err.message : String(err);
+      console.error("[bodyscan-ai] fallback a sample:", mensaje);
+      void logAppError({ origen: "bodyscan-ai", mensaje, userId: user.id });
       scan = sampleScan(fisico);
     }
     // La foto (b64/file) queda fuera de alcance aquí — nunca se persiste.

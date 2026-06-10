@@ -186,6 +186,25 @@ export async function regenerateWithAi(): Promise<Result<{ source: "sample" | "a
   if (nutriErr) return { ok: false, error: nutriErr.message };
   if (!nutriRow) return { ok: false, error: "completa tu perfil nutricional primero" };
 
+  // Control de costo (contrato del setup doc y de la migración F5): la regeneración con
+  // Claude es SEMANAL — si el plan de esta semana ya es source='ai', no se vuelve a llamar.
+  // Editar el perfil regenera el sample (source='sample'), lo que rehabilita 1 pasada de IA.
+  const week = weekStartISO();
+  const { data: existing, error: exErr } = await supabase
+    .schema("core")
+    .from("meal_plans")
+    .select("source")
+    .eq("user_id", user.id)
+    .eq("week_start", week)
+    .maybeSingle<{ source: string }>();
+  if (exErr) {
+    console.error("[nutrition] límite semanal:", exErr.message);
+    return { ok: false, error: "no se pudo verificar tu plan — intenta de nuevo" };
+  }
+  if (existing?.source === "ai") {
+    return { ok: false, error: "tu plan de esta semana ya es personalizado — la ia regenera cada semana" };
+  }
+
   const generated = await generateWithAi(fisico, nutriRow);
 
   const { error: upErr } = await supabase

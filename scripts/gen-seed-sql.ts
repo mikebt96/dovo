@@ -215,6 +215,12 @@ for (const [uid, titulo] of wish) {
   out.push(`insert into core.wishlist (user_id,titulo) values (${S(uid)},${S(titulo)});`);
 }
 
+// ── Perfil nutricional demo (Iván) — sin esto, tras cada re-seed /nutricion cae al
+// onboarding en vez del plan con macros (el delete de users cascadea nutrition_profiles).
+// Mismo insert que scripts/seed-demo-nutrition.sql, ahora DENTRO del pipeline de re-seed.
+out.push("-- ════════ NUTRICIÓN (F5) ════════");
+out.push(`insert into core.nutrition_profiles (user_id,restricciones,presupuesto,comidas_por_dia,preferencias) values (${S(retoMeta.ivan!)},'{}'::text[],'medio',4,'me gusta picante; nada de hígado') on conflict (user_id) do nothing;`);
+
 const sql = out.join("\n") + "\n";
 writeFileSync("scripts/seed-demo.sql", sql);
 console.error(`seed: ${UID} uuids, ${out.length} statements, ${sql.length} bytes → scripts/seed-demo.sql`);

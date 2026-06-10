@@ -1,5 +1,6 @@
 import "server-only";
 import { getAnthropic, isNutritionAiLive, NUTRITION_MODEL } from "@/lib/anthropic";
+import { logAppError } from "@/lib/observability/log";
 import type { MealPlanContent, NutritionProfile, PerfilFisico } from "./types";
 import { macrosObjetivo } from "./macros";
 import { buildSamplePlan } from "./sample-plans";
@@ -36,10 +37,11 @@ const PLAN_SCHEMA = {
         grasa: { type: "integer" },
       },
     },
+    // OJO: structured outputs solo acepta un SUBSET de JSON Schema — minItems/maxItems>1
+    // producen un 400 de la API. El conteo va en description + se valida en assertPlanShape.
     dias: {
       type: "array",
-      minItems: 7,
-      maxItems: 7,
+      description: "exactamente 7 días, lunes a domingo",
       items: {
         type: "object",
         additionalProperties: false,
@@ -48,8 +50,7 @@ const PLAN_SCHEMA = {
           dia: { type: "string", enum: ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"] },
           comidas: {
             type: "array",
-            minItems: 3,
-            maxItems: 5,
+            description: "entre 3 y 5 comidas según comidas_por_dia del usuario",
             items: {
               type: "object",
               additionalProperties: false,
@@ -107,9 +108,12 @@ function buildPrompt(fisico: PerfilFisico, nutricion: NutritionProfile): string 
     .join("\n");
 }
 
-/** Valida lo mínimo que la UI asume (defensa extra sobre el structured output). */
+/** Valida lo mínimo que la UI asume (defensa extra sobre el structured output).
+ *  Los conteos viven aquí, no en el schema (structured outputs no soporta min/maxItems>1). */
 function assertPlanShape(p: MealPlanContent): void {
   if (!Array.isArray(p.dias) || p.dias.length !== 7) throw new Error("plan sin 7 días");
+  if (p.dias.some((d) => !Array.isArray(d.comidas) || d.comidas.length < 3 || d.comidas.length > 5))
+    throw new Error("día con comidas fuera de 3-5");
   if (!Array.isArray(p.lista_super) || p.lista_super.length === 0) throw new Error("plan sin lista del súper");
 }
 
@@ -144,8 +148,11 @@ export async function generateWithAi(
     assertPlanShape(plan);
     return { source: "ai", plan };
   } catch (err) {
-    // Fail-soft observable: la IA nunca rompe la experiencia — cae al plan base y queda log.
-    console.error("[nutrition-ai] fallback a sample:", err instanceof Error ? err.message : err);
+    // Fail-soft observable: la IA nunca rompe la experiencia — cae al plan base y queda log
+    // en /admin (sin esto, un modo live roto degradaría a sample para siempre sin señal).
+    const mensaje = err instanceof Error ? err.message : String(err);
+    console.error("[nutrition-ai] fallback a sample:", mensaje);
+    void logAppError({ origen: "nutrition-ai", mensaje });
     return generateSample(fisico, nutricion);
   }
 }
