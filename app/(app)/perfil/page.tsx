@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -100,6 +101,23 @@ export default async function PerfilPage() {
           </div>
         </div>
         <p className="text-xs opacity-50 mt-6">{t("attributesNote")}</p>
+      </section>
+
+      {/* F6 · Análisis corporal — acción desde el perfil (no es tab) */}
+      <section className="mb-10">
+        <Link
+          href="/perfil/scan"
+          className="group flex items-center gap-4 rounded-2xl border border-signal/30 bg-signal/[0.04] p-5 hover:border-signal/60 transition-colors"
+        >
+          <span className="text-2xl">📸</span>
+          <span className="flex-1 min-w-0">
+            <span className="block display font-semibold lowercase">{t("scanCta")}</span>
+            <span className="block text-xs opacity-60 mt-0.5">{t("scanCtaSub")}</span>
+          </span>
+          <span className="text-signal mono text-sm group-hover:translate-x-1 transition-transform">
+            →
+          </span>
+        </Link>
       </section>
 
       {perfil && (

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calcularCheckin, type Metricas } from "@/lib/scoring";
 import { CAP_PUNTOS_DIA } from "@/lib/scoring/constants";
+import { sendPushToComembers } from "@/lib/push/send";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -88,6 +89,26 @@ export async function crearCheckin(input: {
     p_deltas: deltas,
   });
   if (error) return { ok: false, error: error.message };
+
+  // F8 · "tu compañero entrenó" — push al resto del dúo. El helper NUNCA lanza y sin
+  // VAPID keys es no-op inmediato: jamás afecta el check-in.
+  const { data: miembroRow } = await supabase
+    .schema("core")
+    .from("trato_miembros")
+    .select("trato_id, users!inner(nombre)")
+    .eq("id", input.miembroId)
+    .maybeSingle();
+  const miembro = miembroRow as unknown as
+    | { trato_id: string; users: { nombre: string } | null }
+    | null;
+  if (miembro?.trato_id) {
+    await sendPushToComembers(miembro.trato_id, user.id, "checkin_companero", {
+      title: "dovo",
+      body: `${miembro.users?.nombre ?? "tu compañero"} ya entrenó hoy — te toca.`,
+      url: "/",
+      tag: "checkin-duo",
+    });
+  }
 
   revalidatePath("/");
   return { ok: true, data: undefined };

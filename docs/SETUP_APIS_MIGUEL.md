@@ -100,6 +100,68 @@ empiezan a aplicar. Probar local: `stripe listen --forward-to localhost:3000/api
 > Cualquiera de los dos paga y **ambos** desbloquean. Si uno cancela, el webhook baja el tier.
 > Registrar una feature Pro nueva = 1 línea en `lib/billing/tiers.ts` (`FEATURE_TIERS`).
 
+### 8. Claude API — nutrición IA (F5) · SANDBOX-FIRST
+
+Hoy `/nutricion` funciona completa **sin key**: plan semanal **base** determinista (platillos
+mexicanos reales + macros por fórmula desde el BMR del usuario), lista del súper y logging
+diario. El botón de IA muestra "IA próximamente". **Nada se rompe sin key.** Para encender
+la personalización real:
+
+**a) Consola de Anthropic** (https://console.anthropic.com):
+1. Crea una **API key** (Settings → API keys).
+2. Pon un **límite de gasto mensual** (Settings → Limits) — recomendado al inicio: $10-20 USD.
+
+**b) Vercel → Settings → Environment Variables (Production)** y **Redeploy**:
+```
+NUTRITION_AI_LIVE=true
+ANTHROPIC_API_KEY=sk-ant-…
+NUTRITION_MODEL=claude-opus-4-6        # opcional; default claude-opus-4-6
+```
+Con eso: el botón "personalizar con IA" regenera el plan de la semana con Claude
+(respeta restricciones/presupuesto/preferencias del perfil). La generación es **semanal y
+cacheada** (1 llamada por usuario por semana como máximo, vía botón) — control de costo.
+
+> **Costo estimado** (1 plan/semana/usuario): con `claude-opus-4-6` ≈ $1.0-1.5 USD/mes/usuario
+> (≈ $2-3/dúo). Si el COGS aprieta, cambia `NUTRITION_MODEL=claude-haiku-4-5` (≈ $0.05-0.10
+> /mes/usuario) **sin tocar código** — solo esa env var. El plan base (sin IA) cuesta $0.
+> La misma `ANTHROPIC_API_KEY` servirá para F6 (análisis corporal con Vision) — una sola key.
+
+### 9. Push notifications (F8) · VAPID self-served — NO necesitas cuenta de terceros
+
+La infra ya está en vivo: service worker, suscripción por device, preferencias por usuario
+(en /ajustes → avisos) y 3 triggers conectados (compañero entrenó · reto recibido · reto
+aceptado). Sin keys el envío es no-op y la UI dice "avisos próximamente". Para encender:
+
+1. En tu terminal del repo: `node scripts/gen-vapid.mjs` (o pídeme las keys — las genero yo).
+2. Pega la salida (3 líneas) en **Vercel → Environment Variables (Production)** y Redeploy:
+```
+VAPID_PUBLIC_KEY=…
+VAPID_PRIVATE_KEY=…
+VAPID_SUBJECT=mailto:hola@dovofit.com
+```
+> Plataformas: Android/desktop completo. iPhone: requiere agregar dovo a pantalla de inicio
+> (iOS 16.4+) — la UI ya se lo explica al usuario.
+
+### 10. dovo como APP (Apple / Android) · estrategia por fases
+
+**Fase 1 — PWA instalable (YA en vivo, $0):** manifest completo + service worker. En Android
+Chrome ofrece "Instalar app" (WebAPK con icono y splash); en iOS "Agregar a inicio". Funciona
+hoy sin que hagas nada.
+
+**Fase 2 — Google Play (cuando quieras estar en la tienda):**
+- Compra: cuenta **Google Play Console** ($25 USD una sola vez) → play.google.com/console
+- La app se empaqueta como **TWA** (Trusted Web Activity) con Bubblewrap — yo la genero del
+  manifest existente; tú solo subes el .aab y llenas la ficha. Sin código nuevo.
+
+**Fase 3 — App Store (Apple):**
+- Compra: **Apple Developer Program** ($99 USD/año) → developer.apple.com
+- Apple no acepta PWA "wrappeada" sin más: la ruta es **Capacitor** (mismo código web en un
+  shell nativo + push nativo APNs). Es un proyecto de empaquetado que hago cuando tengas la
+  cuenta; el producto web no cambia.
+
+> Orden recomendado: valida con la PWA (Fase 1, ya está) → Play Store con tracción → App Store
+> al final (es el mayor costo/fricción y el mismo producto).
+
 ---
 
 ## 🔄 Mantener el demo fresco (importante)

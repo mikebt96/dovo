@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { logAppError } from "@/lib/observability/log";
 import { FEATURE_TIERS, meetsTier, type Feature, type Tier } from "./tiers";
 
 /** Flag maestro de cobro. Sandbox-first: sin BILLING_ENABLED=true, billing está "preview". */
@@ -58,8 +59,11 @@ export async function getDuoTier(): Promise<DuoTier> {
     .limit(1)
     .maybeSingle();
   // Fail-soft OBSERVABLE: no tiramos 500 en la home/ajustes por un read de tier, pero tampoco
-  // tragamos el error en silencio (la lección del grant). Logueamos y degradamos a free.
-  if (miembroErr) console.error("[getDuoTier] trato_miembros:", miembroErr.message);
+  // tragamos el error en silencio (la lección del grant). Log + consola admin + degrade a free.
+  if (miembroErr) {
+    console.error("[getDuoTier] trato_miembros:", miembroErr.message);
+    await logAppError({ origen: "tier-resolver", mensaje: `trato_miembros: ${miembroErr.message}`, userId: user.id });
+  }
 
   const row = miembro as unknown as
     | { trato_id: string; tratos: { is_demo: boolean } | null }
@@ -94,8 +98,11 @@ export async function getDuoTier(): Promise<DuoTier> {
       cancel_at_period_end: boolean;
     }>();
   // Mismo criterio: degradar a free ante error de lectura es preferible a 500ear la página,
-  // pero queda logueado para no esconder un fallo (RLS/grant/timeout) como antes.
-  if (subErr) console.error("[getDuoTier] subscriptions:", subErr.message);
+  // pero queda logueado + en la consola admin (un dúo Pro viéndose free DEBE ser visible).
+  if (subErr) {
+    console.error("[getDuoTier] subscriptions:", subErr.message);
+    await logAppError({ origen: "tier-resolver", mensaje: `subscriptions: ${subErr.message}`, userId: user.id });
+  }
 
   const entitled = !!sub && statusEntitled(sub.status, sub.current_period_end);
   return {

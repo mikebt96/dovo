@@ -6,6 +6,7 @@ type NavKey =
   | "home"
   | "leaderboard"
   | "retos"
+  | "nutricion"
   | "recompensas"
   | "perfil"
   | "ajustes";
@@ -18,6 +19,7 @@ export default async function AppNav({ active }: { active?: NavKey }) {
   const links: { key: NavKey; href: string; label: string }[] = [
     { key: "leaderboard", href: "/leaderboard", label: t("navLeaderboard") },
     { key: "retos", href: "/retos", label: t("navRetos") },
+    { key: "nutricion", href: "/nutricion", label: t("navNutrition") },
     { key: "recompensas", href: "/recompensas", label: t("navRewards") },
     { key: "perfil", href: "/perfil", label: t("navProfile") },
     { key: "ajustes", href: "/ajustes", label: t("navSettings") },
@@ -32,7 +34,8 @@ export default async function AppNav({ active }: { active?: NavKey }) {
         >
           dovo
         </Link>
-        <nav className="flex items-center gap-x-3 sm:gap-x-5 text-[10px] sm:text-[11px] mono uppercase tracking-[0.12em] sm:tracking-[0.18em]">
+        {/* 6 links: en móvil tipografía más compacta + overflow de seguridad (no wrap). */}
+        <nav className="flex items-center gap-x-2 sm:gap-x-5 text-[9px] sm:text-[11px] mono uppercase tracking-[0.1em] sm:tracking-[0.18em] whitespace-nowrap overflow-x-auto [scrollbar-width:none]">
           {links.map((l) => (
             <Link
               key={l.key}

@@ -10,7 +10,10 @@ import ProBadge from "@/app/_components/ProBadge";
 import LanguageToggle from "@/app/_components/LanguageToggle";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import PulseOptOutToggle from "./_components/PulseOptOutToggle";
+import PushSettings from "./_components/PushSettings";
 import SignOutButton from "./_components/SignOutButton";
+import { getNotificationPrefs } from "@/lib/actions/push";
+import { isAdminEmail } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +35,7 @@ export default async function AjustesPage() {
   const optOut = (meRow?.pulse_opt_out as boolean | undefined) ?? false;
   const currentTheme = (await getThemeOverride()) ?? "system";
   const duo = await getDuoTier();
+  const pushPrefs = await getNotificationPrefs();
 
   return (
     <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
@@ -67,6 +71,11 @@ export default async function AjustesPage() {
       </section>
 
       <section className="mb-10">
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("notifications")}</h2>
+        <PushSettings initialPrefs={pushPrefs} />
+      </section>
+
+      <section className="mb-10">
         <h2 className="display text-xl font-bold lowercase mb-5">{t("pulse")}</h2>
         <PulseOptOutToggle initial={optOut} />
       </section>
@@ -98,6 +107,23 @@ export default async function AjustesPage() {
           </Link>
         </nav>
       </section>
+
+      {/* Consola — solo visible para el admin (es-only, superficie interna) */}
+      {isAdminEmail(user.email) && (
+        <section className="mb-10">
+          <Link
+            href="/admin"
+            className="flex items-center gap-3 rounded-xl border border-ink/12 p-4 hover:border-signal transition-colors"
+          >
+            <span className="text-[10px] mono uppercase tracking-[0.18em] opacity-60">
+              ⚙ consola del sistema
+            </span>
+            <span className="ml-auto text-[11px] mono uppercase tracking-[0.14em] text-signal">
+              abrir →
+            </span>
+          </Link>
+        </section>
+      )}
 
       <section className="pt-8 border-t border-ink/15">
         <SignOutButton />

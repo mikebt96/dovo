@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, tierForPriceId } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/service";
+import { logAppError } from "@/lib/observability/log";
 
 // El SDK de Stripe usa crypto de Node → runtime nodejs (no edge).
 export const runtime = "nodejs";
@@ -98,6 +99,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error(`[stripe-webhook] error en ${event.type}:`, err);
+    // A la consola /admin (fire-safe) — Stripe reintentará con el 500.
+    await logAppError({
+      origen: "stripe-webhook",
+      mensaje: `${event.type}: ${err instanceof Error ? err.message : String(err)}`,
+      stack: err instanceof Error ? (err.stack ?? null) : null,
+    });
     return NextResponse.json({ error: "processing failed" }, { status: 500 });
   }
 }

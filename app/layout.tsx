@@ -33,6 +33,11 @@ export default async function RootLayout({
   return (
     <html lang={locale} data-theme={theme ?? undefined}>
       <head>
+        {/* PWA / iOS A2HS (los PNG los genera scripts/gen-icons.mjs antes del deploy) */}
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="dovo" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

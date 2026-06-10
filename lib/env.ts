@@ -24,6 +24,20 @@ const serverEnvSchema = envSchema.extend({
   STRIPE_PRICE_PRO_YEARLY: z.string().optional(),
   STRIPE_PRICE_PREMIUM_MONTHLY: z.string().optional(),
   STRIPE_PRICE_PREMIUM_YEARLY: z.string().optional(),
+  // F5 Nutrición IA · sandbox-first: sin estas vars el plan es sample determinista.
+  // Miguel pega ANTHROPIC_API_KEY + NUTRITION_AI_LIVE=true en Vercel para encender.
+  NUTRITION_AI_LIVE: z.enum(["true", "false"]).optional().default("false"),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  NUTRITION_MODEL: z.string().optional(),
+  // F6 Análisis corporal · misma ANTHROPIC_API_KEY; flag aparte para encender por separado.
+  BODY_SCAN_LIVE: z.enum(["true", "false"]).optional().default("false"),
+  // F8 Push · VAPID self-served (sin cuenta de terceros): genera con scripts/gen-vapid.mjs
+  // y pega las 2 keys en Vercel. Sin keys el envío es no-op y la UI muestra "próximamente".
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_SUBJECT: z.string().optional(),
+  // Consola /admin · emails con acceso, separados por coma (default: Miguel — ver lib/admin.ts).
+  ADMIN_EMAILS: z.string().optional(),
 });
 
 export const publicEnv = envSchema.parse({

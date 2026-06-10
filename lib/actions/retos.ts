@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { RETO_DURACION_DIAS } from "@/lib/scoring/constants";
+import { sendPushToComembers } from "@/lib/push/send";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -78,6 +79,22 @@ export async function crearReto(input: {
     return { ok: false, error: error.message };
   }
   if (!data) return { ok: false, error: "no se pudo crear el reto" };
+
+  // F8 · "los retaron a duelo" — push a los miembros del dúo rival (el actor no es
+  // miembro del rival, así que reciben ambos). Fail-soft: no-op sin VAPID.
+  const { data: miTrato } = await supabase
+    .schema("core")
+    .from("tratos")
+    .select("nombre_grupo")
+    .eq("id", input.miTratoId)
+    .maybeSingle<{ nombre_grupo: string }>();
+  await sendPushToComembers(input.rivalTratoId, user.id, "reto", {
+    title: "dovo · reto",
+    body: `${miTrato?.nombre_grupo ?? "un dúo"} los retó a duelo. ¿Aceptan?`,
+    url: "/retos",
+    tag: "reto-nuevo",
+  });
+
   revalidatePath("/retos");
   return { ok: true, data: { retoId: data.id } };
 }
@@ -106,6 +123,28 @@ export async function responderReto(
     .update(update)
     .eq("id", retoId);
   if (error) return { ok: false, error: error.message };
+
+  // F8 · al ACEPTAR, avisa al dúo retador (trato_a) que el duelo está vivo.
+  if (accion === "aceptar") {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const { data: reto } = await supabase
+      .schema("core")
+      .from("retos")
+      .select("trato_a")
+      .eq("id", retoId)
+      .maybeSingle<{ trato_a: string }>();
+    if (user && reto?.trato_a) {
+      await sendPushToComembers(reto.trato_a, user.id, "reto", {
+        title: "dovo · reto",
+        body: "Aceptaron su reto — el duelo ya corre. A entrenar.",
+        url: "/retos",
+        tag: "reto-aceptado",
+      });
+    }
+  }
+
   revalidatePath("/retos");
   return { ok: true, data: undefined };
 }
