@@ -215,6 +215,17 @@ for (const [uid, titulo] of wish) {
   out.push(`insert into core.wishlist (user_id,titulo) values (${S(uid)},${S(titulo)});`);
 }
 
+// ── F10 · Ataques del duelo activo (Híbridos vs Cinco): historia viva en el feed.
+// Ayer Iván conectó un golpe (−10 al rival) y Cinco intentó devolverla pero Híbridos
+// la bloqueó con escudo. Iván NO ha atacado hoy ⇒ puede lanzar en vivo en el demo.
+out.push("-- ════════ ATAQUES (F10) ════════");
+out.push(`insert into core.ataques (reto_id, de_user, de_trato, para_trato, para_user, tipo, resultado, puntos, congela_hasta, created_at)
+select r.id, ${S(retoMeta.ivan!)}, r.trato_a, r.trato_b, null, 'golpe', 'impacto', 10, null, now() - interval '26 hours'
+from core.retos r where r.trato_a = ${S(retoMeta.hibridos!)} and r.trato_b = ${S(retoMeta.cinco!)} and r.estado = 'activo' limit 1;`);
+out.push(`insert into core.ataques (reto_id, de_user, de_trato, para_trato, para_user, tipo, resultado, puntos, congela_hasta, created_at)
+select r.id, (select user_id from core.trato_miembros where trato_id = r.trato_b limit 1), r.trato_b, r.trato_a, null, 'golpe', 'bloqueado', 0, null, now() - interval '20 hours'
+from core.retos r where r.trato_a = ${S(retoMeta.hibridos!)} and r.trato_b = ${S(retoMeta.cinco!)} and r.estado = 'activo' limit 1;`);
+
 // ── Perfil nutricional demo (Iván) — sin esto, tras cada re-seed /nutricion cae al
 // onboarding en vez del plan con macros (el delete de users cascadea nutrition_profiles).
 // Mismo insert que scripts/seed-demo-nutrition.sql, ahora DENTRO del pipeline de re-seed.

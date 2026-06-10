@@ -495,6 +495,8 @@
     "atkHitFreeze": "frozen! 12h without scoring in this duel",
     "atkBlocked": "blocked! the rivals had a shield — and it's spent",
     "atkFeedTitle": "duel history",
+    "atkFeedEmpty": "no attacks yet — earn your ammo with today's check-in.",
+    "atkNetError": "couldn't confirm the attack — check the history.",
     "atkFeedGolpeHit": "{de} struck {duo} (−10 to the score)",
     "atkFeedFreezeHit": "{de} froze {para} for 12h",
     "atkFeedBlocked": "{duo} blocked {de}'s attack with a shield",

@@ -260,6 +260,13 @@ insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-0000
 insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000016','Reloj con GPS');
 insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000018','Cinturón de fuerza');
 insert into core.wishlist (user_id,titulo) values ('10000000-0000-4000-8000-000000000018','Audífonos para correr');
+-- ════════ ATAQUES (F10) ════════
+insert into core.ataques (reto_id, de_user, de_trato, para_trato, para_user, tipo, resultado, puntos, congela_hasta, created_at)
+select r.id, '10000000-0000-4000-8000-000000000016', r.trato_a, r.trato_b, null, 'golpe', 'impacto', 10, null, now() - interval '26 hours'
+from core.retos r where r.trato_a = '10000000-0000-4000-8000-000000000015' and r.trato_b = '10000000-0000-4000-8000-00000000001a' and r.estado = 'activo' limit 1;
+insert into core.ataques (reto_id, de_user, de_trato, para_trato, para_user, tipo, resultado, puntos, congela_hasta, created_at)
+select r.id, (select user_id from core.trato_miembros where trato_id = r.trato_b limit 1), r.trato_b, r.trato_a, null, 'golpe', 'bloqueado', 0, null, now() - interval '20 hours'
+from core.retos r where r.trato_a = '10000000-0000-4000-8000-000000000015' and r.trato_b = '10000000-0000-4000-8000-00000000001a' and r.estado = 'activo' limit 1;
 -- ════════ NUTRICIÓN (F5) ════════
 insert into core.nutrition_profiles (user_id,restricciones,presupuesto,comidas_por_dia,preferencias) values ('10000000-0000-4000-8000-000000000016','{}'::text[],'medio',4,'me gusta picante; nada de hígado') on conflict (user_id) do nothing;
 -- ════════ EXERCISE LOGS (F9, progresión Iván) ════════

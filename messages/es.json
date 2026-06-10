@@ -495,6 +495,8 @@
     "atkHitFreeze": "¡congelado! 12h sin sumar al marcador del duelo",
     "atkBlocked": "¡bloqueado! el rival tenía escudo — y se consumió",
     "atkFeedTitle": "historial del duelo",
+    "atkFeedEmpty": "aún no hay ataques — gana tu munición con el check-in de hoy.",
+    "atkNetError": "no se pudo confirmar el ataque — revisa el historial.",
     "atkFeedGolpeHit": "{de} golpeó a {duo} (−10 al marcador)",
     "atkFeedFreezeHit": "{de} congeló a {para} por 12h",
     "atkFeedBlocked": "{duo} bloqueó con escudo el ataque de {de}",

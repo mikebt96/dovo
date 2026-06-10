@@ -6,11 +6,13 @@ import type { AtaqueRow, MiembroReto } from "@/lib/actions/ataques";
 // force-dynamic así que el "hace Xh" se calcula fresco en cada request.
 
 function hace(t: (k: string, v: Record<string, number>) => string, iso: string): string {
-  const mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms)) return t("atkAgoM", { n: 1 }); // fecha malformada ⇒ jamás "NaN min"
+  const mins = Math.max(1, Math.floor(ms / 60_000));
   if (mins < 60) return t("atkAgoM", { n: mins });
-  const horas = Math.round(mins / 60);
+  const horas = Math.floor(mins / 60);
   if (horas < 24) return t("atkAgoH", { n: horas });
-  return t("atkAgoD", { n: Math.round(horas / 24) });
+  return t("atkAgoD", { n: Math.max(1, Math.floor(horas / 24)) });
 }
 
 export default async function DuelFeed({
@@ -25,13 +27,27 @@ export default async function DuelFeed({
   congelados: { user_id: string; hasta: string }[];
 }) {
   const t = await getTranslations("retos");
-  if (ataques.length === 0 && congelados.length === 0) return null;
 
   const nombreDe = (userId: string | null): string =>
     (userId && miembros.find((m) => m.user_id === userId)?.nombre) || "?";
 
+  // Empty-state que refuerza el Hook (mejor que el silencio — y evita la columna
+  // lg vacía del review): el feed siempre renderiza algo en un duelo activo.
+  if (ataques.length === 0 && congelados.length === 0) {
+    return (
+      <section className="rounded-2xl border border-dashed border-ink/15 p-5">
+        <h3 className="text-[11px] mono uppercase tracking-[0.22em] opacity-50 mb-2">
+          {t("atkFeedTitle")}
+        </h3>
+        <p className="text-sm opacity-60">{t("atkFeedEmpty")}</p>
+      </section>
+    );
+  }
+
+  const visibles = ataques.slice(0, 12);
+
   return (
-    <section className="rounded-2xl border border-ink/12 p-5">
+    <section className="rounded-2xl border border-ink/12 p-5 lg:max-h-[30rem] lg:overflow-y-auto">
       <h3 className="text-[11px] mono uppercase tracking-[0.22em] opacity-50 mb-4">
         {t("atkFeedTitle")}
       </h3>
@@ -50,7 +66,7 @@ export default async function DuelFeed({
       )}
 
       <ul className="space-y-3">
-        {ataques.map((a, i) => {
+        {visibles.map((a, i) => {
           const de = nombreDe(a.de_user);
           const duoVictima = nombresDuo[a.para_trato] ?? "?";
           const texto =
@@ -79,6 +95,11 @@ export default async function DuelFeed({
           );
         })}
       </ul>
+      {ataques.length > visibles.length && (
+        <p className="text-[10px] mono uppercase tracking-wider opacity-40 mt-3">
+          +{ataques.length - visibles.length}
+        </p>
+      )}
     </section>
   );
 }

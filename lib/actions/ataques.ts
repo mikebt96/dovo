@@ -74,7 +74,10 @@ export async function getDuelContext(
   // Munición: check-in de HOY (CDMX) del usuario en su trato; dúos demo exentos (el RPC
   // lo re-valida server-side — esto es solo para pintar el botón correcto).
   const hoy = HOY_CDMX();
-  const [{ data: miMiembro }, { data: trato }] = await Promise.all([
+  const [
+    { data: miMiembro, error: miErr },
+    { data: trato, error: tratoErr },
+  ] = await Promise.all([
     supabase
       .schema("core")
       .from("trato_miembros")
@@ -89,6 +92,8 @@ export async function getDuelContext(
       .eq("id", miTratoId)
       .maybeSingle<{ is_demo: boolean }>(),
   ]);
+  if (miErr) console.error("[ataques] mi_miembro:", miErr.message);
+  if (tratoErr) console.error("[ataques] trato_demo:", tratoErr.message);
   let municion = !!trato?.is_demo;
   if (!municion && miMiembro) {
     const { data: checkinHoy, error: chkErr } = await supabase
@@ -111,17 +116,24 @@ export async function getDuelContext(
       ) === hoy,
   );
 
+  // Vigentes, deduplicados por usuario (dos freezes solapados ⇒ un chip con el `hasta` mayor).
   const ahora = Date.now();
-  const congelados = feed
-    .filter(
-      (a) =>
-        a.tipo === "congelamiento" &&
-        a.resultado === "impacto" &&
-        a.para_user &&
-        a.congela_hasta &&
-        new Date(a.congela_hasta).getTime() > ahora,
-    )
-    .map((a) => ({ user_id: a.para_user!, hasta: a.congela_hasta! }));
+  const hastaPorUser = new Map<string, string>();
+  for (const a of feed) {
+    if (
+      a.tipo === "congelamiento" &&
+      a.resultado === "impacto" &&
+      a.para_user &&
+      a.congela_hasta &&
+      new Date(a.congela_hasta).getTime() > ahora
+    ) {
+      const previo = hastaPorUser.get(a.para_user);
+      if (!previo || new Date(a.congela_hasta) > new Date(previo)) {
+        hastaPorUser.set(a.para_user, a.congela_hasta);
+      }
+    }
+  }
+  const congelados = [...hastaPorUser].map(([user_id, hasta]) => ({ user_id, hasta }));
 
   return {
     municion,
@@ -154,8 +166,11 @@ export async function lanzarAtaque(input: {
     p_para_user: input.paraUser ?? null,
   });
   if (error) {
-    // Los raise exception del RPC ya vienen en español juguetón — se muestran tal cual.
-    return { ok: false, error: error.message };
+    // P0001 = raise exception del RPC (mensajes en español juguetón) ⇒ tal cual al usuario.
+    // Cualquier otro error (permisos, schema cache, timeout) es técnico: genérico + log.
+    if (error.code === "P0001") return { ok: false, error: error.message };
+    console.error("[ataques] lanzar:", error.code, error.message);
+    return { ok: false, error: "no se pudo lanzar el ataque — intenta de nuevo" };
   }
   const ataque = data as unknown as AtaqueRow;
 

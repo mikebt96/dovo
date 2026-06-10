@@ -43,7 +43,7 @@ export default function RetoNuevoForm({
       <p className="text-xs uppercase tracking-widest opacity-60 mb-3">
         {t("pickRival")}
       </p>
-      <ul className="space-y-2 mb-6">
+      <ul className="space-y-2 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
         {candidatos.map((c) => (
           <li key={c.trato_id}>
             <button

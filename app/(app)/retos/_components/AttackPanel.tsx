@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lanzarAtaque, type AtaqueRow, type AtaqueTipo, type MiembroReto } from "@/lib/actions/ataques";
@@ -26,18 +26,31 @@ export default function AttackPanel({
   const [resultado, setResultado] = useState<AtaqueRow | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // disabled={pending} solo aplica tras re-render: el ref corta el doble-tap en el mismo frame.
+  const inflight = useRef(false);
 
   function lanzar(tipo: AtaqueTipo, paraUser?: string) {
+    if (inflight.current) return;
+    inflight.current = true;
     setErr(null);
     setPicking(false);
     start(async () => {
-      const res = await lanzarAtaque({ retoId, tipo, paraUser });
-      if (!res.ok) {
-        setErr(res.error);
-        return;
+      try {
+        const res = await lanzarAtaque({ retoId, tipo, paraUser });
+        if (!res.ok) {
+          setErr(res.error);
+          return;
+        }
+        setResultado(res.data);
+        router.refresh(); // marcador + feed se actualizan con la nueva matemática
+      } catch {
+        // Rechazo de transporte (red caída, deploy en vuelo): el ataque PUDO haberse
+        // insertado — re-sincroniza en vez de tumbar la vista al error boundary.
+        setErr(t("atkNetError"));
+        router.refresh();
+      } finally {
+        inflight.current = false;
       }
-      setResultado(res.data);
-      router.refresh(); // marcador + feed se actualizan con la nueva matemática
     });
   }
 
@@ -61,8 +74,8 @@ export default function AttackPanel({
       </div>
     ));
 
-  // ── Estados sin munición / ya usado ──
-  if (yaAtacoHoy || (resultado && !err)) {
+  // ── Estados sin munición / ya usado (resultado es terminal aunque haya err posterior) ──
+  if (yaAtacoHoy || resultado) {
     return (
       <div className="space-y-3">
         {banner}

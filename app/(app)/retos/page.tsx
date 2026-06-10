@@ -81,7 +81,12 @@ export default async function RetosPage() {
               [m.trato_b]: m.nombre_b,
             };
             return (
-              <div key={r.id} className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:items-start">
+              <div
+                key={r.id}
+                // Solo los duelos EN CURSO tienen panel/feed; propuestos van a 1 columna
+                // (sin hueco fantasma de 360px en lg — review F10).
+                className={ctx ? "lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:items-start" : ""}
+              >
                 <div className="space-y-4">
                   <div className="anim-fade-up">
                     <DuelScoreboard
