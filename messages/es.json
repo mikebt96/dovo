@@ -240,6 +240,7 @@
     "attributes": "atributos",
     "attributesNote": "cada check-in sube tus atributos y tu nivel. tu clase cambia según en qué destacas.",
     "xpToNext": "faltan {xp} XP para nivel {n}",
+    "yourStreak": "tu racha · {n} sem",
     "physicalData": "datos físicos",
     "weight": "Peso",
     "height": "Altura",
@@ -427,6 +428,7 @@
     "logDetailed": "registrar con métricas",
     "saving": "guardando…",
     "done": "✓ hecho",
+    "boostTag": "+50% boost · solo personaje",
     "metric": {
       "peso_kg": "peso (kg)",
       "reps": "reps",
@@ -481,8 +483,8 @@
     "pending": "esperando respuesta del rival",
     "newTitle": "retar a otro dúo",
     "newSubtitle": "el duelo dura 7 días. gana quien sume más puntos normalizados.",
-    "pickRival": "id del dúo rival",
-    "pickRivalHint": "pídele a tus rivales el id de su dúo (aparece en su tabla).",
+    "pickRival": "elige a tu rival",
+    "pickRivalHint": "todavía no hay otros dúos para retar — cuando haya más dúos en la tabla, aparecen aquí.",
     "submit": "enviar reto",
     "creating": "enviando…",
     "close": "cerrar duelo",
@@ -511,7 +513,10 @@
     "atkFrozenChip": "congelado",
     "atkAgoM": "hace {n} min",
     "atkAgoH": "hace {n} h",
-    "atkAgoD": "hace {n} d"
+    "atkAgoD": "hace {n} d",
+    "atkRecharge": "tu golpe se recarga a medianoche",
+    "atkAmmoSlot": "tienes 1 golpe · expira a medianoche",
+    "losingBy": "vas abajo por {n} — muévete, compa"
   },
   "boosts": {
     "title": "boosts",
@@ -521,7 +526,7 @@
     "energia": "energía",
     "escudo": "escudo",
     "hintEnergia": "+50% en su próximo check-in",
-    "hintEscudo": "protege la racha esta semana",
+    "hintEscudo": "bloquea el próximo ataque rival",
     "sent": "boost enviado ✦",
     "sending": "enviando…",
     "cooldown": "ya diste un boost esta semana",
@@ -719,6 +724,25 @@
     "historyTitle": "historial",
     "disclaimer": "estimación orientativa, no diagnóstico. no es consejo médico ni sustituye a un profesional de la salud.",
     "back": "← perfil"
+  },
+  "levelup": {
+    "eyebrow": "nivel nuevo",
+    "title": "subiste a nivel {n}",
+    "tierEyebrow": "rango nuevo",
+    "tierLine": "{label} sube a {tier}",
+    "xpNext": "faltan {n} xp para el siguiente",
+    "cta": "seguir"
+  },
+  "hud": {
+    "navLabel": "navegación del juego",
+    "hoy": "hoy",
+    "duelo": "duelo",
+    "tabla": "tabla",
+    "premios": "premios",
+    "perfil": "perfil",
+    "ammoOn": "golpe cargado — úsalo en el duelo",
+    "ammoOff": "entrena hoy para cargar tu golpe",
+    "shield": "escudo activo — bloquea el próximo ataque"
   },
   "errors": {
     "notFoundTitle": "esta página no entrena aquí.",

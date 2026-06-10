@@ -1,6 +1,7 @@
 // Helpers de presentación de stats, compartidos por home / perfil / leaderboard.
 // La lógica de tiers/clases/nivel vive en index.ts; esto es solo visual.
 import { STAT_KEYS, type StatKey } from "@/lib/scoring/types";
+import { statDisplay } from "./index";
 
 // Orden canónico de los 6 stats (FUE, RES, FLEX, VEL, EQU, VIT).
 export { STAT_KEYS };
@@ -15,11 +16,14 @@ export const STAT_SHORT: Record<StatKey, string> = {
   vit: "VIT",
 };
 
-// Relleno de barra 0-100% desde un acumulador crudo (escala log, sin cap).
-// Misma escala que usaba home-authed para mantener consistencia visual app-wide.
+// Relleno de barra 0-100% anclado a la escala de tiers (display 0..150,
+// Legend = barra llena). La escala log anterior saturaba al 100% con stats
+// medios — la barra MENTÍA sobre el sistema (un Athlete con barra llena no
+// tiene a dónde crecer). Ahora es consistente con el número display y el tier
+// que se muestran junto a cada barra (directiva del consejo, legibilidad).
 export function barHeight(v: number): number {
-  if (!(v > 0)) return 4;
-  return Math.min(100, Math.round((Math.log10(v + 1) / 2.2) * 100));
+  const d = statDisplay(v);
+  return Math.max(4, Math.min(100, Math.round((d / 150) * 100)));
 }
 
 // Stat dominante (para "top stat" del leaderboard / share card).

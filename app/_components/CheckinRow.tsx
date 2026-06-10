@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { crearCheckin } from "@/lib/actions/checkins";
+import { crearCheckin, type CheckinReward } from "@/lib/actions/checkins";
+import type { StatKey } from "@/lib/scoring/types";
+import { STAT_KEYS } from "@/lib/scoring/types";
+import LevelUpDialog, { type LevelUpData } from "./LevelUpDialog";
 
 type Props = {
   miembroId: string;
@@ -15,6 +18,30 @@ type Props = {
 
 const HOY = () => new Date().toISOString().slice(0, 10);
 
+// Mapa estático por StatKey (Tailwind no puede purgar clases dinámicas — patrón
+// BAR_CLASS de StatBar). Dot del color del stat + tinte de fondo; el texto va en
+// ink (AA sobre papel claro — regla 22: los colores de stat no son texto plano).
+const STAT_LABEL: Record<StatKey, string> = {
+  fue: "FUE",
+  res: "RES",
+  flex: "FLE",
+  vel: "VEL",
+  equ: "EQU",
+  vit: "VIT",
+};
+const STAT_VAR: Record<StatKey, string> = {
+  fue: "var(--stat-fue)",
+  res: "var(--stat-res)",
+  flex: "var(--stat-flex)",
+  vel: "var(--stat-vel)",
+  equ: "var(--stat-equ)",
+  vit: "var(--stat-vit)",
+};
+
+// El tap más importante de la app (directiva del consejo §4.1): hit-stop de 90ms
+// tras el res.ok y DESPUÉS todo el feedback junto — el recibo de esfuerzo:
+// +N pts flotando, chips de delta por stat, etiqueta de boost, háptica. Si hubo
+// level-up o tier-up, escala a la ceremonia L (LevelUpDialog) — no apila efectos.
 export default function CheckinRow({
   miembroId,
   actividadId,
@@ -27,9 +54,11 @@ export default function CheckinRow({
   const [open, setOpen] = useState(false);
   const [vals, setVals] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
-  const [puntosGanados, setPuntosGanados] = useState<number | null>(null);
+  const [reward, setReward] = useState<CheckinReward | null>(null);
+  const [ceremony, setCeremony] = useState<LevelUpData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   function log(metricas: Record<string, number>, duracionMin: number) {
     setError(null);
@@ -45,10 +74,34 @@ export default function CheckinRow({
         setError(res.error);
         return;
       }
-      setDone(true);
-      setPuntosGanados(res.data?.puntos ?? null);
-      setOpen(false);
-      router.refresh(); // refresca stats + racha del home
+      const r = res.data;
+      // ── HIT-STOP 90ms (firma física de dovo §3): la UI se congela tras la
+      // respuesta y suelta TODO el feedback junto. Es la diferencia entre
+      // "toast de guardado" y golpe que se siente en la mano. ──
+      timers.current.push(
+        setTimeout(() => {
+          setDone(true);
+          setReward(r);
+          setOpen(false);
+          navigator.vibrate?.(12);
+          // level-up / tier-up escalan a ceremonia L, encadenada tras el recibo
+          if (r.nivelDespues > r.nivelAntes || r.tierUps.length > 0) {
+            timers.current.push(
+              setTimeout(() => {
+                setCeremony({
+                  nivel:
+                    r.nivelDespues > r.nivelAntes
+                      ? { antes: r.nivelAntes, despues: r.nivelDespues }
+                      : null,
+                  tierUps: r.tierUps,
+                  xpParaSiguiente: r.xpParaSiguiente,
+                });
+              }, 700),
+            );
+          }
+          router.refresh(); // stats + racha + barras (StatBarLive anima old→new)
+        }, 90),
+      );
     });
   }
 
@@ -62,21 +115,31 @@ export default function CheckinRow({
     log(metricas, dur);
   }
 
+  const deltasVisibles = reward
+    ? STAT_KEYS.filter((k) => (reward.deltas[k] ?? 0) >= 0.5)
+    : [];
+
   return (
-    <div className={`relative border rounded-lg p-4 ${done ? "border-signal/40 anim-pop" : "border-ink/15"}`}>
-      {/* Game-feel (F12): los puntos ganados se CELEBRAN — flotan y se van. */}
-      {puntosGanados !== null && puntosGanados > 0 && (
+    <div
+      className={`relative border rounded-xl p-4 ${done ? "border-signal/40 anim-pop" : "border-ink/15"}`}
+    >
+      {/* el recibo de esfuerzo: los puntos flotan, escalados por magnitud (Balatro) */}
+      {reward && reward.puntos > 0 && (
         <span
           aria-hidden
-          className="anim-float-away absolute -top-2 right-6 display font-extrabold text-signal text-lg"
-          style={{ textShadow: "0 0 18px rgba(109,74,255,0.45)" }}
+          className="anim-float-away absolute -top-3 right-6 display font-extrabold text-signal text-2xl tabular-nums"
+          style={{
+            fontSize: `${Math.min(1.6, 1.1 + reward.puntos / 2000)}rem`,
+            textShadow: "0 0 22px color-mix(in srgb, var(--c-signal) 50%, transparent)",
+          }}
         >
-          +{puntosGanados} pts
+          +{reward.puntos} pts
         </span>
       )}
-      <div className="flex items-center justify-between">
+
+      <div className="flex items-center justify-between gap-3">
         <span className="display font-medium lowercase">{nombre}</span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -88,16 +151,49 @@ export default function CheckinRow({
             type="button"
             onClick={quickLog}
             disabled={pending || done}
-            className={`anim-press px-4 py-2 rounded-full text-sm lowercase disabled:opacity-100 transition-colors ${
-              done
-                ? "bg-signal text-white"
-                : "bg-ink text-papel hover:bg-signal hover:text-white disabled:opacity-50"
-            }`}
+            className="btn-game px-5 py-2.5 rounded-[14px] text-sm lowercase text-white display font-semibold disabled:opacity-100"
           >
-            {done ? `✓ ${t("done")}` : pending ? t("saving") : t("quickLog")}
+            {done ? t("done") : pending ? t("saving") : t("quickLog")}
           </button>
         </div>
       </div>
+
+      {/* chips de delta: qué compró tu sudor, stat por stat, en cascada 60ms */}
+      {deltasVisibles.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {deltasVisibles.map((k, i) => (
+            <span
+              key={k}
+              className="chip-delta inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] tabular-nums"
+              style={
+                {
+                  background: `color-mix(in srgb, ${STAT_VAR[k]} 14%, transparent)`,
+                  "--anim-delay": `${i * 60}ms`,
+                } as React.CSSProperties
+              }
+            >
+              <span
+                aria-hidden
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: STAT_VAR[k] }}
+              />
+              +{Math.round(reward!.deltas[k])} {STAT_LABEL[k]}
+            </span>
+          ))}
+          {reward?.boostAplicado && (
+            <span className="chip-delta inline-flex items-center rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep"
+              style={
+                {
+                  background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)",
+                  "--anim-delay": `${deltasVisibles.length * 60}ms`,
+                } as React.CSSProperties
+              }
+            >
+              {t("boostTag")}
+            </span>
+          )}
+        </div>
+      )}
 
       {open && (
         <div className="mt-4 space-y-3 border-t border-ink/10 pt-4">
@@ -127,7 +223,11 @@ export default function CheckinRow({
           </button>
         </div>
       )}
-      {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+      {error && <p className="text-sm text-rival-deep mt-2">{error}</p>}
+
+      {ceremony && (
+        <LevelUpDialog data={ceremony} onClose={() => setCeremony(null)} />
+      )}
     </div>
   );
 }

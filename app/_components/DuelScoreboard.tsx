@@ -36,6 +36,12 @@ function useCountUp(target: number, ms = 800): number {
   return v;
 }
 
+// Marcador v2 (directiva §4.7): dos lados, dos temperaturas — tú en violeta (la
+// casa), el rival en --mode-rival (rojo dedicado; mata el bug del magenta FLE).
+// El "vs" al 30% muere: lo reemplaza el diferencial vivo en chip diagonal
+// (nada rival está a 90° — signature move §6.5). Barra de ventaja central de
+// dos scaleX enfrentados. Vas perdiendo = tu lado desatura + copy sin
+// eufemismos. Derrota jamás se burla (§8.7).
 export default function DuelScoreboard({
   m,
   miTratoId,
@@ -57,6 +63,14 @@ export default function DuelScoreboard({
 
   const miCount = useCountUp(miPuntos);
   const rivalCount = useCountUp(rivalPuntos);
+  const diff = miPuntos - rivalPuntos;
+  const diffCount = useCountUp(Math.abs(diff));
+
+  const total = miPuntos + rivalPuntos;
+  const share = total > 0 ? miPuntos / total : 0.5;
+  // margen ≥10% del total ⇒ estado "vas perdiendo/ganando" declarado
+  const losing = total > 0 && diff < 0 && Math.abs(diff) >= total * 0.1;
+  const winning = total > 0 && diff > 0 && Math.abs(diff) >= total * 0.1;
 
   const finMs = new Date(m.periodo_fin + "T00:00:00Z").getTime();
   const dias = Math.max(0, Math.ceil((finMs - Date.now()) / 86_400_000));
@@ -72,10 +86,10 @@ export default function DuelScoreboard({
 
   return (
     <div
-      className="rounded-[20px] p-6 text-white"
+      className="card-game p-6 text-white"
       style={{
-        background:
-          "radial-gradient(120% 120% at 50% 0%, #16132a 0%, #0b0a14 70%, #07060d 100%)",
+        // nada rival está a 90°: el corte diagonal ES el conflicto (§6.5)
+        clipPath: "polygon(0 0, 100% 2%, 99.2% 100%, 0.8% 97.5%)",
       }}
     >
       <div className="flex items-center justify-between text-[11px] mono uppercase tracking-widest text-white/50">
@@ -94,42 +108,102 @@ export default function DuelScoreboard({
       </div>
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 mt-6">
-        <div className="text-left">
+        <div
+          className="text-left"
+          style={losing ? { filter: "grayscale(0.5)" } : undefined}
+        >
           <div className="text-[11px] mono uppercase tracking-wider text-signal mb-1">
             {t("you")}
           </div>
           <div className="display font-semibold lowercase truncate">{miNombre}</div>
           <div
             className="display font-extrabold tabular-nums text-4xl mt-2"
-            style={{ textShadow: "0 0 24px rgba(109,74,255,0.5)" }}
+            style={{
+              textShadow: `0 0 24px color-mix(in srgb, var(--c-signal) ${winning ? 60 : 45}%, transparent)`,
+            }}
           >
             {miCount}
           </div>
         </div>
 
-        <div className="display font-extrabold text-white/30 text-lg">
-          {t("vs")}
+        {/* diferencial vivo en chip diagonal — reemplaza el "vs" muerto */}
+        <div
+          className="display font-extrabold tabular-nums text-base px-2.5 py-1 rounded-[10px]"
+          style={{
+            transform: "rotate(-8deg)",
+            background:
+              diff > 0
+                ? "color-mix(in srgb, var(--c-signal) 28%, transparent)"
+                : diff < 0
+                  ? "color-mix(in srgb, var(--mode-rival) 28%, transparent)"
+                  : "rgba(255,255,255,0.12)",
+            color:
+              diff > 0
+                ? "var(--c-signal)"
+                : diff < 0
+                  ? "var(--mode-rival)"
+                  : "rgba(255,255,255,0.6)",
+          }}
+        >
+          {diff === 0 ? t("vs") : `${diff > 0 ? "+" : "−"}${diffCount}`}
         </div>
 
         <div className="text-right">
-          <div className="text-[11px] mono uppercase tracking-wider text-stat-flex mb-1">
+          <div
+            className="text-[11px] mono uppercase tracking-wider mb-1"
+            style={{ color: "var(--mode-rival)" }}
+          >
             {t("rival")}
           </div>
           <div className="display font-semibold lowercase truncate">
             {rivalNombre}
           </div>
-          <div className="display font-extrabold tabular-nums text-4xl mt-2 text-white/90">
+          <div
+            className="display font-extrabold tabular-nums text-4xl mt-2"
+            style={{
+              textShadow:
+                "0 0 24px color-mix(in srgb, var(--mode-rival) 45%, transparent)",
+            }}
+          >
             {rivalCount}
           </div>
         </div>
       </div>
+
+      {/* barra de ventaja: dos scaleX enfrentados desde el centro (§4.7) */}
+      <div className="relative h-2 mt-5 rounded-full overflow-hidden bg-white/[0.08]">
+        <div
+          className="absolute inset-y-0 left-0 w-1/2"
+          style={{
+            background: "var(--c-signal)",
+            transform: `scaleX(${share * 2})`,
+            transformOrigin: "left",
+            transition: "transform 700ms var(--ease-snap)",
+          }}
+        />
+        <div
+          className="absolute inset-y-0 right-0 w-1/2"
+          style={{
+            background: "var(--mode-rival)",
+            transform: `scaleX(${(1 - share) * 2})`,
+            transformOrigin: "right",
+            transition: "transform 700ms var(--ease-snap)",
+          }}
+        />
+      </div>
+
+      {losing && (
+        <p className="mt-3 text-[11px] mono uppercase tracking-[0.16em] text-white/65">
+          {t("losingBy", { n: Math.abs(diff) })}
+        </p>
+      )}
 
       {canRespond && m.estado === "propuesto" && (
         <div className="flex gap-2 mt-6">
           <button
             disabled={pending}
             onClick={() => act(() => responderReto(m.reto_id, "aceptar"))}
-            className="flex-1 rounded-full bg-signal text-white py-2.5 display font-semibold lowercase disabled:opacity-50"
+            className="btn-game flex-1 text-white py-2.5 display font-semibold lowercase disabled:opacity-50"
           >
             {t("accept")}
           </button>

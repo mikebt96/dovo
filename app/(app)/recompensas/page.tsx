@@ -48,15 +48,8 @@ export default async function RecompensasPage() {
       <AppNav active="recompensas" />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
-      {/* Racha del dúo — gatillo emocional, panel oscuro premium (DESIGN.md §6) */}
-      <section
-        className="relative overflow-hidden rounded-3xl p-7 sm:p-9 text-white mb-10"
-        style={{
-          background:
-            "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
-          boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
-        }}
-      >
+      {/* Racha del dúo — gatillo emocional. Racha SIEMPRE en ámbar (léxico §2). */}
+      <section className="card-game relative overflow-hidden p-7 sm:p-9 text-white mb-10">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
@@ -68,7 +61,12 @@ export default async function RecompensasPage() {
         <div className="relative flex items-end gap-4">
           <div
             className="display font-extrabold leading-[0.8] text-6xl sm:text-7xl tabular-nums"
-            style={{ textShadow: "0 0 44px rgba(109,74,255,0.45)" }}
+            style={{
+              // panel SIEMPRE oscuro → ámbar brillante fijo (el token reactivo
+              // daría #8f5a00 sobre negro en tema claro — ilegible)
+              color: "#ffb454",
+              textShadow: "0 0 44px color-mix(in srgb, #ffb454 45%, transparent)",
+            }}
           >
             {data.racha}
           </div>

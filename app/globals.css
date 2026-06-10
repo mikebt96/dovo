@@ -11,6 +11,18 @@
   --font-body: "Geist", system-ui, sans-serif;
   --font-mark: "Syne", system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  /* ── Mesa Nocturna · superficie de juego (directiva del consejo 2026-06-10 §2).
+     El chrome permanece editorial; el color/movimiento se concentra en lo que
+     está en juego. El violeta es "la casa": identidad, nav, XP — no recursos. ── */
+  --radius-game: 20px; /* cards de juego */
+  --radius-chip: 10px; /* chips de recurso/estado */
+  --shadow-game: 0 24px 60px -28px rgba(109, 74, 255, 0.55);
+
+  /* ── Motion tokens (contrato §3) ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* la house curve, formalizada */
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1); /* barras, reveals */
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1); /* overshoot ~10%: SOLO transform */
 }
 
 /* Map the legacy semantic tokens to theme-reactive CSS vars. `inline` keeps
@@ -34,6 +46,19 @@
   --color-stat-vel: var(--stat-vel);
   --color-stat-equ: var(--stat-equ);
   --color-stat-vit: var(--stat-vit);
+  /* ── Modos emocionales (Mesa Nocturna §2): el chrome JAMÁS los usa. Las
+     variantes -deep son para TEXTO sobre papel claro (AA ≥4.5:1); las brillantes
+     para gráficos, glows y superficies oscuras. ── */
+  --color-coop: var(--mode-coop);
+  --color-coop-deep: var(--mode-coop-deep);
+  --color-rival: var(--mode-rival);
+  --color-rival-deep: var(--mode-rival-deep);
+  --color-gold: var(--mode-gold);
+  --color-racha: var(--mode-racha);
+  /* ── Léxico de recursos: 1 recurso = 1 color + 1 icono + 1 lugar, SIEMPRE ── */
+  --color-ammo: var(--stat-vit); /* lima · munición (= check-in de hoy) */
+  --color-shield: var(--mode-coop); /* escudo (regalo del pacto) */
+  --color-freeze: var(--stat-vel); /* cyan · congelamiento */
 }
 
 /* ---- Ultraviolet · light (default) ---- */
@@ -52,6 +77,13 @@
   --stat-vel: #3ac4d6; /* Velocidad — cyan */
   --stat-equ: #3ac49a; /* Equilibrio — teal */
   --stat-vit: #aef03c; /* Vitalidad — acid lime */
+  /* Modos emocionales (Mesa Nocturna). -deep = texto AA sobre papel claro. */
+  --mode-coop: #3ac49a; /* pacto: boost, escudo, quest coop (= stat-equ) */
+  --mode-coop-deep: #177a5c;
+  --mode-rival: #ff3d5e; /* duelo, ataque, deuda — gráficos y panel oscuro */
+  --mode-rival-deep: #c2103a;
+  --mode-gold: #f0c75a; /* ceremonia: level-up, milestone (solo sobre oscuro) */
+  --mode-racha: #8f5a00; /* racha del trato — ámbar AA sobre claro */
   color-scheme: light;
 }
 
@@ -71,6 +103,12 @@
     --stat-vel: #54d2e2;
     --stat-equ: #52d2ac;
     --stat-vit: #c2f24f;
+    --mode-coop: #4adfb2;
+    --mode-coop-deep: #4adfb2;
+    --mode-rival: #ff5c77;
+    --mode-rival-deep: #ff8094;
+    --mode-gold: #f0c75a;
+    --mode-racha: #ffb454;
     color-scheme: dark;
   }
 }
@@ -90,6 +128,12 @@
   --stat-vel: #54d2e2;
   --stat-equ: #52d2ac;
   --stat-vit: #c2f24f;
+  --mode-coop: #4adfb2;
+  --mode-coop-deep: #4adfb2;
+  --mode-rival: #ff5c77;
+  --mode-rival-deep: #ff8094;
+  --mode-gold: #f0c75a;
+  --mode-racha: #ffb454;
   color-scheme: dark;
 }
 
@@ -156,8 +200,73 @@ body {
   opacity: 0.3;
 }
 
-/* ── F10 · Animaciones globales (editorial, sutiles). Todas se apagan con
-   prefers-reduced-motion — la app funciona idéntica sin movimiento. ── */
+/* ════════════════════════════════════════════════════════════════════
+   Mesa Nocturna · utilities de juego (directiva del consejo §2)
+   ════════════════════════════════════════════════════════════════════ */
+
+/* La superficie de juego canónica — reemplaza las copias inline del panel
+   oscuro (CharacterCard, DuelScoreboard, héroe de home, recompensas...).
+   ÚNICA excepción: opengraph-image.tsx (el renderer OG exige inline). */
+@utility card-game {
+  background: radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%);
+  box-shadow: var(--shadow-game);
+  border-radius: var(--radius-game);
+}
+
+/* La física de Brawl Stars sin su paleta: hundimiento real al press (80ms),
+   rebote con overshoot al soltar (250ms). SOLO acciones de juego: quickLog,
+   golpe/congelar, aceptar reto, dar boost, reclamar recompensa.
+   Excepción de reduced-motion: el hundimiento es feedback de INPUT, se queda. */
+@utility btn-game {
+  background: var(--btn-color, var(--c-signal));
+  border-radius: 14px;
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--btn-color, var(--c-signal)), black 35%);
+  transition: translate 250ms var(--ease-back), box-shadow 250ms var(--ease-back);
+  &:active {
+    translate: 0 4px;
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--btn-color, var(--c-signal)), black 35%);
+    transition: translate 80ms ease-out, box-shadow 80ms ease-out;
+  }
+}
+
+/* Cinta de peligro a 45°: deuda y superficies de ataque. Nada rival está a 90°. */
+@utility tape-rival {
+  background-image: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--mode-rival) 18%, transparent) 0 8px,
+    transparent 8px 16px
+  );
+}
+
+/* ── Ceremonias L · <dialog> takeover (anatomía §3: anticipación → hit-stop →
+   clímax → settle; ≤2.5s, skippable a un tap). El top layer queda libre de
+   Grain gratis. Safari <17.5 ignora @starting-style → aparece sin animación
+   de entrada con el dato y el CTA intactos (fallback funcional aceptado). ── */
+dialog.dlg-game {
+  margin: auto;
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: min(92vw, 26rem);
+  width: 100%;
+}
+dialog.dlg-game::backdrop {
+  background: rgba(7, 6, 13, 0.85);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Contrato de motion (directiva §3) — Juice budget S/M/L
+   · S  <400ms, inline, 0 partículas (check-in, log, chips de delta)
+   · M  600–1200ms, dentro del card, ≤20 partículas DOM (tier-up, golpe)
+   · L  1.5–2.5s, takeover <dialog>, confetti ≤80, máx 1 por visita
+        (level-up, W/L de duelo, milestone de racha, Veredicto)
+   · Hit-stop 90ms: todo impacto congela la UI tras el res.ok y suelta el
+     feedback junto (float + flash + buzz). La firma física de dovo.
+   · Overshoot SOLO en transform · barras nuevas con scaleX, nunca width ·
+     shake SOLO impactos recibidos · exits 20% más rápidos · máx 1 animación
+     perpetua por viewport · derrota = desaturación, jamás burla.
+   · reduced-motion: estado final estático con el feedback INFORMATIVO intacto.
+   ════════════════════════════════════════════════════════════════════ */
 @keyframes anim-fade-up {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -203,6 +312,51 @@ body {
 @keyframes anim-bar-w { from { width: 0%; } }
 @keyframes anim-bar-h { from { height: 0%; } }
 
+/* ── Mesa Nocturna · keyframes de juego (directiva §3-§4) ── */
+/* Clímax de ceremonia: el número nuevo entra scale(3)→1 con overshoot. */
+@keyframes anim-slam {
+  0% { opacity: 0; transform: scale(3); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+/* Partícula DOM (level-up): vuela del centro hacia --dx/--dy y muere. */
+@keyframes anim-particle {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, -40px)) scale(0.4); }
+}
+/* Flash de tier-up: anillo del color del stat que respira una vez (capa M). */
+@keyframes anim-tier-flash {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--flash-color, var(--c-signal)) 0%, transparent); }
+  35% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--flash-color, var(--c-signal)) 40%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--flash-color, var(--c-signal)) 0%, transparent); }
+}
+/* Tensión del revelado (§4.6 — la slot machine ética): wobble 350ms ×2 = 700ms. */
+@keyframes anim-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1.2deg); }
+  75% { transform: rotate(1.2deg); }
+}
+
+/* Barra de dos capas (provisional damage §4.2): el fill salta con spring; la
+   ghost drena 400ms después. scaleX (compositor), nunca width. Las clases base
+   viven FUERA del media query: en reduced-motion el transform aplica sin
+   transición (salto al valor final = feedback informativo intacto). */
+.bar-fill {
+  transform-origin: left;
+}
+.bar-ghost {
+  transform-origin: left;
+}
+/* Chips de delta (+12 FUE): visibles SIEMPRE (feedback informativo); el pop y
+   el stagger solo con motion. CheckinRow los retira por timeout. */
+.chip-delta {
+  opacity: 1;
+}
+/* Partículas: decorativas puras — sin motion no existen (patrón float-away). */
+.anim-particle {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .anim-fade-up {
     opacity: 0;
@@ -236,4 +390,34 @@ body {
   .anim-stagger > *:nth-child(7) { animation-delay: 270ms; }
   .anim-stagger > *:nth-child(8) { animation-delay: 315ms; }
   .anim-stagger > *:nth-child(n + 9) { animation-delay: 360ms; }
+
+  /* ── Mesa Nocturna · solo con motion ── */
+  .anim-wobble { animation: anim-wobble 350ms ease-in-out 2; }
+  .anim-slam { animation: anim-slam 500ms var(--ease-back) both; }
+  .anim-particle { animation: anim-particle 800ms var(--ease-out) forwards; }
+  .anim-tier-flash { animation: anim-tier-flash 600ms ease-out; }
+  .chip-delta {
+    opacity: 0;
+    animation: anim-pop 0.4s var(--ease-out) forwards;
+    animation-delay: var(--anim-delay, 0ms);
+  }
+  .bar-fill { transition: transform 450ms var(--ease-back); }
+  .bar-ghost { transition: transform 800ms linear 400ms; }
+
+  /* Entrada de ceremonia L: backdrop sube + dialog escala desde 0.85.
+     transition-behavior allow-discrete para display/overlay (top layer). */
+  dialog.dlg-game[open] {
+    transition:
+      opacity 350ms var(--ease-out),
+      scale 350ms var(--ease-out),
+      display 350ms allow-discrete,
+      overlay 350ms allow-discrete;
+  }
+  @starting-style {
+    dialog.dlg-game[open] { opacity: 0; scale: 0.85; }
+  }
+  dialog.dlg-game[open]::backdrop { transition: background-color 350ms ease-out; }
+  @starting-style {
+    dialog.dlg-game[open]::backdrop { background: rgba(7, 6, 13, 0); }
+  }
 }

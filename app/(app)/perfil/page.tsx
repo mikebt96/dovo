@@ -83,24 +83,17 @@ export default async function PerfilPage() {
 
       <div className="lg:grid lg:grid-cols-[1.1fr_1fr] lg:gap-10 lg:items-start">
       <section className="mb-10 anim-fade-up">
+        {/* La barra de XP vive DENTRO de la carta (StatBarLive de dos capas) —
+            un solo componente para home y perfil (directiva §5). */}
         <CharacterCard
           nivel={sheet.nivel}
           className={sheet.className}
           prestige={character.prestige}
           stats={character}
           tiers={sheet.tiers}
+          progresoNivel={sheet.progresoNivel}
+          xpParaSiguiente={sheet.xpParaSiguiente}
         />
-        <div className="mt-4">
-          <p className="text-[10px] mono uppercase tracking-widest opacity-50 mb-1">
-            {t("xpToNext", { xp: sheet.xpParaSiguiente, n: sheet.nivel + 1 })}
-          </p>
-          <div className="h-1 bg-papel-dark rounded-full overflow-hidden">
-            <div
-              className="h-full bg-signal anim-bar-w"
-              style={{ width: `${Math.round(sheet.progresoNivel * 100)}%` }}
-            />
-          </div>
-        </div>
         <p className="text-xs opacity-50 mt-6">{t("attributesNote")}</p>
       </section>
 

@@ -240,6 +240,7 @@
     "attributes": "attributes",
     "attributesNote": "every check-in raises your attributes and your level. your class shifts with what you excel at.",
     "xpToNext": "{xp} XP to level {n}",
+    "yourStreak": "your streak · {n} wk",
     "physicalData": "physical data",
     "weight": "Weight",
     "height": "Height",
@@ -427,6 +428,7 @@
     "logDetailed": "log with metrics",
     "saving": "saving…",
     "done": "✓ done",
+    "boostTag": "+50% boost · character only",
     "metric": {
       "peso_kg": "weight (kg)",
       "reps": "reps",
@@ -481,8 +483,8 @@
     "pending": "waiting for the rival",
     "newTitle": "challenge another duo",
     "newSubtitle": "the duel runs 7 days. most normalized points wins.",
-    "pickRival": "rival duo id",
-    "pickRivalHint": "ask your rivals for their duo id (shown on their board).",
+    "pickRival": "pick your rival",
+    "pickRivalHint": "no other duos to challenge yet — once more duos join the board, they show up here.",
     "submit": "send challenge",
     "creating": "sending…",
     "close": "close duel",
@@ -511,7 +513,10 @@
     "atkFrozenChip": "frozen",
     "atkAgoM": "{n} min ago",
     "atkAgoH": "{n} h ago",
-    "atkAgoD": "{n} d ago"
+    "atkAgoD": "{n} d ago",
+    "atkRecharge": "your strike recharges at midnight",
+    "atkAmmoSlot": "1 strike loaded · expires at midnight",
+    "losingBy": "down by {n} — move it"
   },
   "boosts": {
     "title": "boosts",
@@ -521,7 +526,7 @@
     "energia": "energy",
     "escudo": "shield",
     "hintEnergia": "+50% on their next check-in",
-    "hintEscudo": "protects the streak this week",
+    "hintEscudo": "blocks the next rival attack",
     "sent": "boost sent ✦",
     "sending": "sending…",
     "cooldown": "you already gave a boost this week",
@@ -719,6 +724,25 @@
     "historyTitle": "history",
     "disclaimer": "orientative estimate, not a diagnosis. not medical advice and no substitute for a health professional.",
     "back": "← profile"
+  },
+  "levelup": {
+    "eyebrow": "level up",
+    "title": "you hit level {n}",
+    "tierEyebrow": "new rank",
+    "tierLine": "{label} is now {tier}",
+    "xpNext": "{n} xp to next level",
+    "cta": "keep going"
+  },
+  "hud": {
+    "navLabel": "game navigation",
+    "hoy": "today",
+    "duelo": "duel",
+    "tabla": "board",
+    "premios": "rewards",
+    "perfil": "profile",
+    "ammoOn": "strike loaded — use it in the duel",
+    "ammoOff": "train today to load your strike",
+    "shield": "shield up — blocks the next attack"
   },
   "errors": {
     "notFoundTitle": "this page doesn't train here.",

@@ -4,6 +4,16 @@
 **Status:** v1 working spec · 2026-05-19
 **Reference prototypes:** `~/dovo/prototypes/solar.html` (chosen direction — light, Ultraviolet) · `~/dovo/prototypes/logo.html` (logo lab — metaball drops)
 
+> ⚠️ **ADDENDUM GOBERNANTE (2026-06-10): "Mesa Nocturna".** El consejo de
+> videojuegos tomó las riendas del diseño de la APP por mandato del founder.
+> Donde este documento diga "editorial, sutil" para superficies de juego, manda
+> [`2026-06-10-game-design-directive.md`](./2026-06-10-game-design-directive.md)
+> (tokens de modos emocionales, contrato de motion S/M/L, hit-stop, HUD,
+> ceremonias). El chrome (nav superior, forms, landing) sigue siendo editorial —
+> esa separación ES la jerarquía. Veredictos completos del consejo en
+> `2026-06-10-game-council-verdicts.md` + auditoría en
+> `2026-06-10-game-council-audit.md`.
+
 ---
 
 ## 0. Theme Strategy (read first — it governs everything)

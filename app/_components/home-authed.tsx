@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import AppNav from "./AppNav";
 import Grain from "./Grain";
+import BottomHUDServer from "./BottomHUDServer";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
 import CharacterCard from "./CharacterCard";
@@ -183,12 +184,7 @@ export default async function HomeAuthed() {
         <section className="mb-8 anim-fade-up">
           <Link
             href="/entrenamiento"
-            className="anim-lift group block relative overflow-hidden rounded-3xl p-7 sm:p-8 text-white"
-            style={{
-              background:
-                "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
-              boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
-            }}
+            className="card-game anim-lift group block relative overflow-hidden p-7 sm:p-8 text-white"
           >
             <div
               aria-hidden
@@ -241,7 +237,8 @@ export default async function HomeAuthed() {
         </section>
       )}
 
-      {/* Character card — el ancla de la app (DESIGN.md §6) */}
+      {/* Character card — el ancla de la app (DESIGN.md §6). Con la barra de XP
+          de dos capas EN LA HOME (directiva §4.2): cada check-in se ve comprar. */}
       <section className="mb-8">
         <CharacterCard
           nivel={sheet.nivel}
@@ -250,6 +247,8 @@ export default async function HomeAuthed() {
           prestige={character.prestige}
           stats={character}
           tiers={sheet.tiers}
+          progresoNivel={sheet.progresoNivel}
+          xpParaSiguiente={sheet.xpParaSiguiente}
         />
       </section>
 
@@ -285,6 +284,20 @@ export default async function HomeAuthed() {
               );
             })}
           </div>
+        )}
+        {/* nutrición ya no es tab (HUD de 5 — directiva §4.4): vive en el lobby */}
+        {miembroId && (
+          <Link
+            href="/nutricion"
+            className="mt-3 flex items-center justify-between rounded-xl border border-ink/10 p-3.5 hover:border-signal transition-colors"
+          >
+            <span className="display lowercase font-medium text-sm">
+              {t("navNutrition")}
+            </span>
+            <span className="mono text-[10px] uppercase tracking-[0.14em] opacity-50">
+              →
+            </span>
+          </Link>
         )}
       </section>
 
@@ -347,6 +360,7 @@ export default async function HomeAuthed() {
           </div>
         </Link>
       )}
+      <BottomHUDServer />
       <Grain />
     </main>
   );

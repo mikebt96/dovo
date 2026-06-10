@@ -96,7 +96,14 @@ export default async function RetosPage() {
                     />
                   </div>
                   {ctx && (
-                    <div className="rounded-2xl border border-ink/12 p-5">
+                    <div
+                      className="rounded-2xl border border-rival/25 p-5 overflow-hidden"
+                      style={{
+                        clipPath: "polygon(0 1%, 100% 0, 100% 99%, 0.6% 100%)",
+                      }}
+                    >
+                      {/* cinta de peligro: superficie de ataque (§6.5) */}
+                      <div aria-hidden className="tape-rival -mx-5 -mt-5 mb-4 h-2" />
                       <h3 className="text-[11px] mono uppercase tracking-[0.22em] opacity-50 mb-3">
                         {t("atkTitle")}
                       </h3>
