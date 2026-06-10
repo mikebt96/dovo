@@ -23,6 +23,9 @@ function isPublic(pathname: string) {
     // El service worker DEBE ser público: el browser lo registra sin sesión y un
     // redirect a /sign-in rompe el registro del push (F8).
     || pathname === "/sw.js"
+    // SEO: crawlers no tienen sesión.
+    || pathname === "/robots.txt"
+    || pathname === "/sitemap.xml"
   );
 }
 
