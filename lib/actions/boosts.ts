@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { BOOST_GATING_RACHAS } from "@/lib/scoring/constants";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -16,8 +15,9 @@ export type BoostActivo = {
   fecha_expira: string;
 };
 
-// Regala un boost a tu partner (intra-dúo, SIEMPRE positivo). Gating: racha del dúo ≥ 2.
-// Cooldown: 1 boost por emisor por dúo cada 7 días.
+// Regala un boost a tu partner (intra-dúo, SIEMPRE positivo). Gating (racha ≥ 2),
+// cooldown (1 por emisor por dúo cada 7 días) e insert viven en core.dar_boost
+// (SECURITY DEFINER, 20260610050000): los clientes no tienen INSERT sobre core.boosts.
 export async function darBoost(input: {
   paraUserId: string;
   tratoId: string;
@@ -32,47 +32,18 @@ export async function darBoost(input: {
     return { ok: false, error: "el boost es para tu dúo, no para ti" };
   }
 
-  // Gating: el dúo debe tener racha ≥ BOOST_GATING_RACHAS.
-  const { data: streak } = await supabase
-    .schema("core")
-    .from("trato_streak")
-    .select("current_streak_weeks")
-    .eq("trato_id", input.tratoId)
-    .maybeSingle<{ current_streak_weeks: number }>();
-  if ((streak?.current_streak_weeks ?? 0) < BOOST_GATING_RACHAS) {
-    return {
-      ok: false,
-      error: `desbloquea boosts con una racha de ${BOOST_GATING_RACHAS} semanas`,
-    };
-  }
-
-  // Cooldown: ¿este emisor ya regaló un boost en este dúo en los últimos 7 días?
-  const haceUnaSemana = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const { data: reciente } = await supabase
-    .schema("core")
-    .from("boosts")
-    .select("id")
-    .eq("de_user", user.id)
-    .eq("trato_id", input.tratoId)
-    .gt("fecha_otorgado", haceUnaSemana)
-    .limit(1)
-    .maybeSingle<{ id: string }>();
-  if (reciente) {
-    return { ok: false, error: "ya regalaste un boost esta semana" };
-  }
-
-  // energía: vence en 24h (próximo check-in). escudo: protege la semana (~7d).
-  const horas = input.tipo === "energia" ? 24 : 24 * 7;
-  const expira = new Date(Date.now() + horas * 3_600_000).toISOString();
-
-  const { error } = await supabase.schema("core").from("boosts").insert({
-    de_user: user.id,
-    para_user: input.paraUserId,
-    trato_id: input.tratoId,
-    tipo: input.tipo,
-    fecha_expira: expira,
+  const { error } = await supabase.schema("core").rpc("dar_boost", {
+    p_para_user: input.paraUserId,
+    p_trato_id: input.tratoId,
+    p_tipo: input.tipo,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    // P0001 = raise exception del RPC (mensajes en español) ⇒ tal cual al usuario.
+    // Cualquier otro error (permisos, schema cache, timeout) es técnico: genérico + log.
+    if (error.code === "P0001") return { ok: false, error: error.message };
+    console.error("[boosts] dar:", error.code, error.message);
+    return { ok: false, error: "no se pudo regalar el boost — intenta de nuevo" };
+  }
 
   revalidatePath("/");
   revalidatePath(`/grupo/${input.tratoId}`);

@@ -20,6 +20,6 @@ export const CAP_CHECKINS_ACTIVIDAD_DIA = 3; // por actividad/día — enforced 
 
 // ── Boosts intra-dúo + retos dúo-vs-dúo (Fase C). ──
 export const BOOST_FACTOR = 1.5; // boost "energía": +50% al siguiente check-in del receptor
-export const BOOST_GATING_RACHAS = 2; // racha de dúo mínima para desbloquear regalar boosts
+export const BOOST_GATING_RACHAS = 2; // racha de dúo mínima para regalar boosts — enforced en dar_boost (DB); aquí solo UI
 export const RETO_DURACION_DIAS = 7; // duelo de 1 ciclo de compliance
 export const RETO_ACEPTAR_HORAS = 48; // ventana para aceptar antes de expirar
