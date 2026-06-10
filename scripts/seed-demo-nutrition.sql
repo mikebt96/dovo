@@ -1,3 +1,4 @@
+-- NOTA: el seed de F9 (progresión de rutina de Iván) vive en scripts/seed-demo-workout.sql.
 -- Seed F5 para el demo de inversionistas: perfil nutricional de Iván (demo+ivan@dovofit.com).
 -- Con esto, al entrar a /nutricion el plan base se autogenera (sample determinista) sin
 -- pasar por el onboarding. Idempotente. Aplicar vía MCP execute_sql.

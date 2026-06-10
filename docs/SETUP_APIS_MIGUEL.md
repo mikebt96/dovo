@@ -126,6 +126,17 @@ cacheada** (1 llamada por usuario por semana como máximo, vía botón) — cont
 > /mes/usuario) **sin tocar código** — solo esa env var. El plan base (sin IA) cuesta $0.
 > La misma `ANTHROPIC_API_KEY` servirá para F6 (análisis corporal con Vision) — una sola key.
 
+### 8b. Claude API — rutina IA (F9) · misma key que §8
+
+`/grupo/[id]/rutina` evolucionó a **prescripción real de ejercicios** (qué hacer cada día
+según tu meta) + **logging serie×reps×peso** con sugerencia de progresión. El plan base es
+**gratis y determinista**; "personalizar con IA" (equipo, lesiones, preferencias) es **Pro**.
+Usa la **misma `ANTHROPIC_API_KEY`** de §8; enciende con:
+```
+WORKOUT_AI_LIVE=true
+```
+(El logging y el plan base funcionan sin key — $0.)
+
 ### 9. Push notifications (F8) · VAPID self-served — NO necesitas cuenta de terceros
 
 La infra ya está en vivo: service worker, suscripción por device, preferencias por usuario
