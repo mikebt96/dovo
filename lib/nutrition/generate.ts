@@ -55,9 +55,14 @@ const PLAN_SCHEMA = {
             items: {
               type: "object",
               additionalProperties: false,
-              required: ["tipo", "nombre", "descripcion", "kcal", "prot", "carb", "grasa"],
+              required: ["tipo", "nombre", "descripcion", "kcal", "prot", "carb", "grasa", "preparacion"],
               properties: {
                 tipo: { type: "string", enum: ["desayuno", "comida", "cena", "snack"] },
+                preparacion: {
+                  type: "array",
+                  description: "cómo cocinarlo: 2 a 4 pasos cortos, imperativos, cocina casera MX",
+                  items: { type: "string" },
+                },
                 nombre: { type: "string" },
                 descripcion: { type: "string" },
                 kcal: { type: "integer" },

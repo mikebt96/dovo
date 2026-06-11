@@ -21,10 +21,20 @@ export type AppError = {
 export type ScanFinding = { check: string; status: "ok" | "warn" | "critical"; detail: string };
 export type ScanResult = { ok: boolean; findings: ScanFinding[]; scanned_at: string };
 
+export type CronHealth = {
+  jobname: string;
+  schedule: string;
+  active: boolean;
+  last_status: string | null; // succeeded | failed | null (aún no corre)
+  last_start: string | null;
+  last_msg: string | null;
+};
+
 export type AdminData = {
   flags: Array<{ name: string; on: boolean }>;
   counts: Array<{ name: string; value: number }>;
   errors: AppError[];
+  crons: CronHealth[];
   dbOk: boolean;
 };
 
@@ -96,6 +106,16 @@ export async function getAdminData(): Promise<AdminData | null> {
     console.error("[admin] app_errors:", errErr.message);
   }
 
+  // Salud de los crons (Veredicto, cierre de duelos): un job caído en silencio
+  // vuelve escenografía toda la UI que depende de él.
+  const { data: cronRows, error: cronErr } = await svc
+    .schema("core")
+    .rpc("cron_health");
+  if (cronErr) {
+    dbOk = false;
+    console.error("[admin] cron_health:", cronErr.message);
+  }
+
   return {
     flags,
     counts: [
@@ -106,6 +126,7 @@ export async function getAdminData(): Promise<AdminData | null> {
       { name: "body scans", value: scans },
     ],
     errors: (errRows ?? []) as AppError[],
+    crons: (cronRows ?? []) as CronHealth[],
     dbOk,
   };
 }

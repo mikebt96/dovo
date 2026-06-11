@@ -10,6 +10,7 @@ import type {
   TipoComida,
 } from "./types";
 import { macrosObjetivo } from "./macros";
+import { RECETAS } from "./recetas";
 
 // PLAN BASE determinista (fail-soft de F5): plantillas hechas a mano con platillos
 // mexicanos reales y macros plausibles — NUNCA lorem, NUNCA 500. Tres plantillas por
@@ -180,7 +181,17 @@ function pick(pool: Plato[], i: number, offset = 0): Plato {
 }
 
 function conTipo(p: Plato, tipo: TipoComida): Comida {
-  return { tipo, nombre: p.nombre, descripcion: p.descripcion, kcal: p.kcal, prot: p.prot, carb: p.carb, grasa: p.grasa };
+  return {
+    tipo,
+    nombre: p.nombre,
+    descripcion: p.descripcion,
+    kcal: p.kcal,
+    prot: p.prot,
+    carb: p.carb,
+    grasa: p.grasa,
+    // cómo cocinarlo (recetario por nombre exacto del platillo)
+    preparacion: RECETAS[p.nombre],
+  };
 }
 
 // ── v2 · pool efectivo por tipo: restricciones (veg) + VETOS fuera +

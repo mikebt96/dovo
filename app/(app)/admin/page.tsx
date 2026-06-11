@@ -67,6 +67,50 @@ export default async function AdminPage() {
         </div>
       </section>
 
+      {/* Crons: el Veredicto y el cierre de duelos NO pueden caerse en silencio */}
+      <section className="mb-10">
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-4">
+          crons · veredicto y duelos
+        </h2>
+        <div className="grid gap-2">
+          {data.crons.length === 0 && (
+            <p className="text-sm opacity-50">sin jobs programados — eso ES un problema.</p>
+          )}
+          {data.crons.map((c) => {
+            const estado =
+              c.last_status === "succeeded"
+                ? "ok"
+                : c.last_status === "failed"
+                  ? "falló"
+                  : "sin correr aún";
+            const dot =
+              c.last_status === "succeeded"
+                ? "bg-stat-vit"
+                : c.last_status === "failed"
+                  ? "bg-red-500"
+                  : "bg-ink/20";
+            return (
+              <div
+                key={c.jobname}
+                className="flex flex-wrap items-center gap-3 rounded-xl border border-ink/10 px-4 py-3"
+              >
+                <span className={`h-2 w-2 rounded-full ${dot}`} />
+                <span className="text-sm font-medium">{c.jobname}</span>
+                <span className="text-[10px] mono opacity-50">{c.schedule} UTC</span>
+                <span className="ml-auto text-[10px] mono uppercase tracking-widest opacity-60">
+                  {estado}
+                  {c.last_start &&
+                    ` · ${new Date(c.last_start).toLocaleString("es-MX", { timeZone: "America/Mexico_City", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`}
+                </span>
+                {c.last_status === "failed" && c.last_msg && (
+                  <p className="w-full text-xs text-red-600/80 mono">{c.last_msg}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Flags sandbox-first */}
       <section className="mb-10">
         <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-4">

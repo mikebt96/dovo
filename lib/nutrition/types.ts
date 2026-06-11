@@ -11,6 +11,9 @@ export type Comida = {
   prot: number; // g
   carb: number; // g
   grasa: number; // g
+  // v2: cómo cocinarlo, en pasos cortos (recetario sample / IA con key).
+  // Opcional: los planes guardados antes de v2 no lo traen.
+  preparacion?: string[];
 };
 
 export type DiaPlan = {
