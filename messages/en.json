@@ -217,6 +217,7 @@
     "level": "level {n} · {clase}",
     "streak": "streak {n} wk",
     "todayTitle": "today",
+    "todayRoutineLink": "today's routine →",
     "todayNoGroup": "join a group to start logging your activity.",
     "buildRoutine": "build your routine →",
     "groupsTitle": "your groups",

@@ -39,6 +39,10 @@ type Props = {
   nombre: string;
   metricasRequeridas: string[]; // ej ['peso_kg','reps','sets'] | ['tiempo_min','intensidad']
   duracionDefault: number; // de la rutina
+  // El expander de métricas crudas solo tiene sentido junto a la sesión (rutina).
+  // En la home es ruido: "¿peso/reps/sets de GYM?" no significa nada — el
+  // registro real por ejercicio vive en /entrenamiento (feedback de Miguel).
+  conMetricas?: boolean;
 };
 
 // Fecha de HOY en CDMX — NO toISOString (UTC): después de las 18:00 CDMX el
@@ -78,6 +82,7 @@ export default function CheckinRow({
   nombre,
   metricasRequeridas,
   duracionDefault,
+  conMetricas = false,
 }: Props) {
   const t = useTranslations("checkin");
   const router = useRouter();
@@ -187,13 +192,15 @@ export default function CheckinRow({
       <div className="flex items-center justify-between gap-3">
         <span className="display font-medium lowercase">{nombre}</span>
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
-          >
-            {t("details")}
-          </button>
+          {conMetricas && (
+            <button
+              type="button"
+              onClick={() => setOpen((o) => !o)}
+              className="text-xs uppercase tracking-widest opacity-60 hover:opacity-100"
+            >
+              {t("details")}
+            </button>
+          )}
           <button
             type="button"
             onClick={quickLog}

@@ -270,12 +270,15 @@ export default async function RutinaPage({
                       <p className="text-[10px] mono uppercase tracking-[0.18em] opacity-60 mb-3">
                         {t("checkinHoyTitle")}
                       </p>
+                      {/* aquí SÍ con métricas: junto a la sesión tienen sentido
+                          (tiempo/intensidad de lo que acabas de hacer) */}
                       <CheckinRow
                         miembroId={miembro.id}
                         actividadId={actividadHoy.id}
                         nombre={actividadHoy.nombre}
                         metricasRequeridas={actividadHoy.metricas_requeridas}
                         duracionDefault={duracionHoy}
+                        conMetricas
                       />
                     </div>
                   )}

@@ -35,6 +35,24 @@ abajo se construye con su lenguaje: Mesa Nocturna, ceremonias, recibo, voz MX.
     apps nativas del roadmap. NO prometerlo en UI antes de eso (regla 16 del
     consejo: cero promesas sin mecánica).
 
+### Preparación y recuperación (feedback de Miguel paseando por la app)
+
+- **Antes de entrenar, preguntar cómo llegas**: "¿alguna molestia o lesión hoy?"
+  (selector de zona: rodilla, hombro, espalda baja...). Si hay molestia:
+  - v1 determinista: los ejercicios del plan que cargan esa zona se marcan con
+    "cuídate hoy" (el catálogo F9 ya tiene grupo muscular) + recomendación de
+    sustitución suave; la molestia se registra (historial para el coach IA).
+  - fase IA: el plan del día se REGENERA evitando la zona (mismo contrato,
+    gated por WORKOUT_AI_LIVE).
+- **Recomendaciones de recuperación** como parte del juego (capa S, jamás
+  sermón): hidratación, sueño, meditación — y SIEMPRE con alternativa para
+  quien no le gusta (respiración 4-7-8, caminata de 10 min, estiramiento).
+  Rotación determinista por día/perfil; personalización = IA después.
+- **Métricas crudas fuera de la home**: hecho en F16 — "¿peso/reps/sets de
+  GYM?" no significa nada a nivel actividad; el registro real por ejercicio
+  vive en la rutina (exercise_logs + progresión). La home es arcade de un tap
+  y te lleva a tu rutina del día.
+
 ## Nutrición v2
 
 ### Wizard (primera vez — lo que preguntaría un nutriólogo del deporte)

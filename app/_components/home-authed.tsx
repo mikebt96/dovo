@@ -264,11 +264,23 @@ export default async function HomeAuthed() {
       </section>
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
-      {/* Hoy: actividades de la rutina default, registrables con un tap */}
+      {/* Hoy: un tap por actividad (arcade) — la rutina REAL del día con sus
+          ejercicios vive en /entrenamiento; la home solo te lleva (feedback
+          de Miguel: nada de pedir métricas de un ejercicio que no conoce). */}
       <section className="mb-8 lg:mb-0">
-        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-3">
-          {t("todayTitle")}
-        </h2>
+        <div className="flex items-baseline justify-between gap-3 mb-3">
+          <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50">
+            {t("todayTitle")}
+          </h2>
+          {planContent && (
+            <Link
+              href="/entrenamiento"
+              className="text-[11px] mono uppercase tracking-[0.14em] text-signal-deep hover:text-signal transition-colors"
+            >
+              {t("todayRoutineLink")}
+            </Link>
+          )}
+        </div>
         {!miembroId ? (
           <p className="text-sm opacity-50">{t("todayNoGroup")}</p>
         ) : rutinaItems.length === 0 ? (

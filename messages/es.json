@@ -217,6 +217,7 @@
     "level": "nivel {n} · {clase}",
     "streak": "racha {n} sem",
     "todayTitle": "hoy",
+    "todayRoutineLink": "tu rutina de hoy →",
     "todayNoGroup": "únete a un grupo para empezar a registrar tu actividad.",
     "buildRoutine": "arma tu rutina →",
     "groupsTitle": "tus grupos",
