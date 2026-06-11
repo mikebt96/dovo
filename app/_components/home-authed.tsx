@@ -5,6 +5,7 @@ import AppNav from "./AppNav";
 import Grain from "./Grain";
 import BottomHUDServer from "./BottomHUDServer";
 import TratoHUD from "./TratoHUD";
+import MisionesHoy from "./MisionesHoy";
 import VeredictoDialog from "./VeredictoDialog";
 import { getVeredictoPendiente } from "@/lib/actions/trato";
 import CheckinRow from "./CheckinRow";
@@ -189,64 +190,24 @@ export default async function HomeAuthed() {
       {/* El estado del trato abre el lobby (directiva §4.5): SIEMPRE son dos. */}
       {primerGrupoId && <TratoHUD tratoId={primerGrupoId} />}
 
-      {/* F11 · Héroe del día: la acción antes que las stats. Panel oscuro premium
-          (mismo lenguaje que DuelScoreboard/macros) con la sesión prescrita de hoy. */}
-      {planContent && (
-        <section className="mb-8 anim-fade-up">
-          <Link
-            href="/entrenamiento"
-            className="card-game anim-lift group block relative overflow-hidden p-7 sm:p-8 text-white"
-          >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
-              style={{ background: "radial-gradient(circle, rgba(109,74,255,0.5), transparent 70%)" }}
-            />
-            <p className="relative text-[11px] mono uppercase tracking-[0.22em] text-signal mb-3">
-              {sesionHoy ? t("heroEyebrow") : t("heroRest")}
-            </p>
-            {sesionHoy ? (
-              <>
-                <h2 className="relative display font-extrabold lowercase leading-none text-3xl sm:text-4xl">
-                  {sesionHoy.actividad_slug} · {sesionHoy.titulo}
-                </h2>
-                <ul className="relative mt-5 space-y-1.5">
-                  {sesionHoy.bloques.slice(0, 4).map((b) => (
-                    <li key={b.exercise_slug} className="flex items-baseline gap-3 text-sm">
-                      <span className="text-white/85">{b.nombre}</span>
-                      <span className="mono tabular-nums text-[11px] text-white/45">
-                        {b.series}×{b.reps}
-                      </span>
-                    </li>
-                  ))}
-                  {sesionHoy.bloques.length > 4 && (
-                    <li className="text-[11px] mono text-white/35">
-                      +{sesionHoy.bloques.length - 4}
-                    </li>
-                  )}
-                </ul>
-              </>
-            ) : (
-              <>
-                <h2 className="relative display font-extrabold lowercase leading-none text-3xl sm:text-4xl">
-                  {t("heroRestBody")}
-                </h2>
-                {proxima && (
-                  <p className="relative mt-4 text-sm text-white/60">
-                    {t("heroNext", {
-                      dia: tDias(DAY_KEY[proxima.dia] ?? proxima.dia),
-                      titulo: proxima.titulo,
-                    })}
-                  </p>
-                )}
-              </>
-            )}
-            <span className="relative mt-6 inline-flex items-center text-[12px] mono uppercase tracking-[0.16em] text-signal group-hover:translate-x-1 transition-transform">
-              {sesionHoy ? t("heroCta") : t("heroVerSemana")}
-            </span>
-          </Link>
-        </section>
-      )}
+      {/* Las MISIONES DE HOY mandan en el lobby (mandato de Miguel): dieta y
+          ejercicio como las dos misiones diarias — el detalle de la sesión
+          (bloques, pesos, progresión) vive en /entrenamiento. */}
+      <MisionesHoy
+        sesionHoy={
+          sesionHoy
+            ? { actividad_slug: sesionHoy.actividad_slug, titulo: sesionHoy.titulo }
+            : null
+        }
+        proximaTitulo={
+          !sesionHoy && proxima
+            ? t("heroNext", {
+                dia: tDias(DAY_KEY[proxima.dia] ?? proxima.dia),
+                titulo: proxima.titulo,
+              })
+            : null
+        }
+      />
 
       {/* Character card — el ancla de la app (DESIGN.md §6). Con la barra de XP
           de dos capas EN LA HOME (directiva §4.2): cada check-in se ve comprar. */}
@@ -264,23 +225,12 @@ export default async function HomeAuthed() {
       </section>
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
-      {/* Hoy: un tap por actividad (arcade) — la rutina REAL del día con sus
-          ejercicios vive en /entrenamiento; la home solo te lleva (feedback
-          de Miguel: nada de pedir métricas de un ejercicio que no conoce). */}
+      {/* Registro rápido: un tap por actividad (arcade). Secundario a las
+          misiones — la rutina real con ejercicios vive en /entrenamiento. */}
       <section className="mb-8 lg:mb-0">
-        <div className="flex items-baseline justify-between gap-3 mb-3">
-          <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50">
-            {t("todayTitle")}
-          </h2>
-          {planContent && (
-            <Link
-              href="/entrenamiento"
-              className="text-[11px] mono uppercase tracking-[0.14em] text-signal-deep hover:text-signal transition-colors"
-            >
-              {t("todayRoutineLink")}
-            </Link>
-          )}
-        </div>
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-3">
+          {t("quickLogTitle")}
+        </h2>
         {!miembroId ? (
           <p className="text-sm opacity-50">{t("todayNoGroup")}</p>
         ) : rutinaItems.length === 0 ? (

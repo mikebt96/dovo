@@ -91,7 +91,8 @@ export async function getNutritionData(): Promise<NutritionData> {
     .from("food_logs")
     .select("id, tipo, descripcion")
     .eq("user_id", user.id)
-    .eq("fecha", new Date().toISOString().slice(0, 10))
+    // CDMX, no UTC: tras las 18:00 los logs caían en "mañana" (lección F9/F15)
+    .eq("fecha", new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(new Date()))
     .order("created_at", { ascending: true });
   if (logsErr) console.error("[nutrition] food_logs:", logsErr.message);
 
