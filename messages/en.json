@@ -429,6 +429,10 @@
     "saving": "saving…",
     "done": "✓ done",
     "boostTag": "+50% boost · character only",
+    "selloChip": "place seal",
+    "anchorCta": "anchor this place",
+    "anchoring": "anchoring…",
+    "anchored": "anchored — your next check-in seals",
     "metric": {
       "peso_kg": "weight (kg)",
       "reps": "reps",
@@ -748,7 +752,8 @@
     "judgedIn": "the deal gets judged in {t}",
     "judgedSoon": "the deal gets judged within the hour",
     "riskCopy": "the deal's streak is at risk — there's still time",
-    "brokenCopy": "streak at zero · best run: {n} wk"
+    "brokenCopy": "streak at zero · best run: {n} wk",
+    "selloTitle": "place-sealed — trained where they said"
   },
   "veredicto": {
     "eyebrow": "sunday verdict",

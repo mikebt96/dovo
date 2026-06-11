@@ -429,6 +429,10 @@
     "saving": "guardando…",
     "done": "✓ hecho",
     "boostTag": "+50% boost · solo personaje",
+    "selloChip": "sello del lugar",
+    "anchorCta": "anclar este lugar",
+    "anchoring": "anclando…",
+    "anchored": "anclado — tu próximo check-in sella",
     "metric": {
       "peso_kg": "peso (kg)",
       "reps": "reps",
@@ -748,7 +752,8 @@
     "judgedIn": "el trato se juzga en {t}",
     "judgedSoon": "el trato se juzga esta hora",
     "riskCopy": "la racha del trato está en riesgo — aún están a tiempo",
-    "brokenCopy": "racha en cero · su mejor marca: {n} sem"
+    "brokenCopy": "racha en cero · su mejor marca: {n} sem",
+    "selloTitle": "con sello del lugar — entrenó donde dijo"
   },
   "veredicto": {
     "eyebrow": "veredicto del domingo",

@@ -4,9 +4,34 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { crearCheckin, type CheckinReward } from "@/lib/actions/checkins";
+import { anclarLugar } from "@/lib/actions/lugares";
 import type { StatKey } from "@/lib/scoring/types";
 import { STAT_KEYS } from "@/lib/scoring/types";
+import GameIcon from "./GameIcon";
 import LevelUpDialog, { type LevelUpData } from "./LevelUpDialog";
+
+type Coords = { lat: number; lng: number; acc?: number };
+
+// El candado del lugar: UNA muestra en el momento del tap (gesto de usuario ⇒
+// prompt de permiso natural). Cualquier fallo (negado, timeout, sin GPS) ⇒
+// undefined y el check-in procede SIN sello — jamás bloquea ni castiga.
+function getCoords(timeoutMs = 2500): Promise<Coords | undefined> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !("geolocation" in navigator)) {
+      return resolve(undefined);
+    }
+    navigator.geolocation.getCurrentPosition(
+      (p) =>
+        resolve({
+          lat: p.coords.latitude,
+          lng: p.coords.longitude,
+          acc: p.coords.accuracy,
+        }),
+      () => resolve(undefined),
+      { timeout: timeoutMs, maximumAge: 120_000, enableHighAccuracy: false },
+    );
+  });
+}
 
 type Props = {
   miembroId: string;
@@ -16,7 +41,12 @@ type Props = {
   duracionDefault: number; // de la rutina
 };
 
-const HOY = () => new Date().toISOString().slice(0, 10);
+// Fecha de HOY en CDMX — NO toISOString (UTC): después de las 18:00 CDMX el
+// check-in caía en "mañana" (misma lección que F9 para el plan; en-CA = ISO).
+const HOY = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(
+    new Date(),
+  );
 
 // Mapa estático por StatKey (Tailwind no puede purgar clases dinámicas — patrón
 // BAR_CLASS de StatBar). Dot del color del stat + tinte de fondo; el texto va en
@@ -57,18 +87,24 @@ export default function CheckinRow({
   const [reward, setReward] = useState<CheckinReward | null>(null);
   const [ceremony, setCeremony] = useState<LevelUpData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [anclado, setAnclado] = useState<"idle" | "saving" | "done">("idle");
   const [pending, start] = useTransition();
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const lastCoords = useRef<Coords | undefined>(undefined);
 
   function log(metricas: Record<string, number>, duracionMin: number) {
     setError(null);
     start(async () => {
+      // la muestra del candado se toma en el tap; el fallo no estorba
+      const coords = await getCoords();
+      lastCoords.current = coords;
       const res = await crearCheckin({
         miembroId,
         actividadId,
         fecha: HOY(),
         metricas,
         duracionMin,
+        coords,
       });
       if (!res.ok) {
         setError(res.error);
@@ -107,6 +143,17 @@ export default function CheckinRow({
 
   function quickLog() {
     log({}, duracionDefault); // smart default: solo duración de la rutina
+  }
+  // ancla EXPLÍCITA: el jugador decide que ESTE lugar es su gym (privacidad:
+  // la app jamás guarda ubicación que el usuario no pidió anclar)
+  function anclar() {
+    const c = lastCoords.current;
+    if (!c) return;
+    setAnclado("saving");
+    start(async () => {
+      const r = await anclarLugar({ actividadId, lat: c.lat, lng: c.lng });
+      setAnclado(r.ok ? "done" : "idle");
+    });
   }
   function detailedLog() {
     const metricas: Record<string, number> = {};
@@ -190,6 +237,46 @@ export default function CheckinRow({
               }
             >
               {t("boostTag")}
+            </span>
+          )}
+          {/* el candado del lugar: sello ganado, o la invitación a anclar */}
+          {reward?.sello && (
+            <span
+              className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep"
+              style={
+                {
+                  background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)",
+                  "--anim-delay": `${(deltasVisibles.length + 1) * 60}ms`,
+                } as React.CSSProperties
+              }
+            >
+              <GameIcon name="pin" size={11} filled />
+              {t("selloChip")}
+            </span>
+          )}
+          {reward?.puedeAnclar && lastCoords.current && anclado !== "done" && (
+            <button
+              type="button"
+              disabled={anclado === "saving"}
+              onClick={anclar}
+              className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-signal-deep border border-signal/40 hover:border-signal transition-colors disabled:opacity-50"
+              style={{ "--anim-delay": `${(deltasVisibles.length + 1) * 60}ms` } as React.CSSProperties}
+            >
+              <GameIcon name="pin" size={11} />
+              {anclado === "saving" ? t("anchoring") : t("anchorCta")}
+            </button>
+          )}
+          {anclado === "done" && (
+            <span
+              className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep"
+              style={
+                {
+                  background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)",
+                } as React.CSSProperties
+              }
+            >
+              <GameIcon name="pin" size={11} filled />
+              {t("anchored")}
             </span>
           )}
         </div>

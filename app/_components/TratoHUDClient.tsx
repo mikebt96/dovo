@@ -11,6 +11,7 @@ type Miembro = {
   freq: number;
   semana: number;
   hoy: boolean;
+  hoySellado: boolean; // candado del lugar: el sello que el compa ve
   esYo: boolean;
 };
 
@@ -162,10 +163,11 @@ export default function TratoHUDClient({
 
       {/* fila 2: DuoPulse — el mark que vive (§6.2) */}
       <div className="mt-3 flex items-center gap-3">
-        <div className="flex items-center gap-1.5" aria-hidden>
+        <div className="flex items-center gap-1.5">
           {miembros.map((m, i) => (
             <span
               key={m.userId}
+              title={m.hoySellado ? t("selloTitle") : undefined}
               className={m.hoy ? "anim-breathe inline-block" : "inline-block"}
               style={{ "--anim-delay": `${i * 1800}ms` } as React.CSSProperties}
             >
@@ -173,7 +175,16 @@ export default function TratoHUDClient({
                 className="block w-6 h-6 rounded-full"
                 style={
                   m.hoy
-                    ? { background: "var(--c-signal)" }
+                    ? {
+                        background: "var(--c-signal)",
+                        // sello del lugar: anillo coop — prueba, no decoración
+                        ...(m.hoySellado
+                          ? {
+                              boxShadow:
+                                "0 0 0 2px color-mix(in srgb, var(--mode-coop) 70%, transparent)",
+                            }
+                          : null),
+                      }
                     : {
                         border: "1.5px solid color-mix(in srgb, var(--c-ink) 25%, transparent)",
                         filter: "grayscale(0.8)",

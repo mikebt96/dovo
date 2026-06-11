@@ -324,6 +324,13 @@ dialog.dlg-game::backdrop {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
   100% { opacity: 0; transform: translate(var(--dx, 0px), var(--dy, -40px)) scale(0.4); }
 }
+/* Chips del recibo: pop que TERMINA visible (anim-pop sin opacity en el 100%
+   + forwards + base opacity:0 los desvanecía — bug cazado en verificación). */
+@keyframes anim-chip-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
 /* Flash de tier-up: anillo del color del stat que respira una vez (capa M). */
 @keyframes anim-tier-flash {
   0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--flash-color, var(--c-signal)) 0%, transparent); }
@@ -415,7 +422,7 @@ dialog.dlg-game::backdrop {
   .anim-tier-flash { animation: anim-tier-flash 600ms ease-out; }
   .chip-delta {
     opacity: 0;
-    animation: anim-pop 0.4s var(--ease-out) forwards;
+    animation: anim-chip-in 0.4s var(--ease-out) forwards;
     animation-delay: var(--anim-delay, 0ms);
   }
   .bar-fill { transition: transform 450ms var(--ease-back); }

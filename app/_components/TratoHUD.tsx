@@ -25,6 +25,7 @@ export default async function TratoHUD({ tratoId }: { tratoId: string }) {
       freq: m.freq_objetivo,
       semana: m.checkins_semana,
       hoy: m.checkin_hoy,
+      hoySellado: m.checkin_hoy_sellado,
       esYo: m.user_id === user.id,
     }));
 

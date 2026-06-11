@@ -14,6 +14,7 @@ export type EstadoMiembro = {
   freq_objetivo: number;
   checkins_semana: number;
   checkin_hoy: boolean;
+  checkin_hoy_sellado: boolean; // candado del lugar: el compa VE el sello
 };
 
 export type RachaTrato = {

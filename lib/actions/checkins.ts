@@ -28,7 +28,25 @@ export type CheckinReward = {
   tierUps: TierUp[];
   rachaPersonal: number; // user_streak (la PERSONAL, no la del trato)
   municionLista: boolean; // este check-in ES la munición de hoy (regla getDuelContext)
+  sello: boolean; // candado del lugar: la muestra cayó dentro del ancla
+  puedeAnclar: boolean; // hubo coords pero no hay ancla → ofrecer anclar
 };
+
+// Haversine en metros — el candado compara UNA muestra contra el ancla.
+function distanciaM(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): number {
+  const R = 6371000;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.lat * Math.PI) / 180) *
+      Math.cos((b.lat * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
 
 const ZERO_STATS: Stats = { fue: 0, res: 0, flex: 0, vel: 0, equ: 0, vit: 0 };
 
@@ -40,6 +58,9 @@ export async function crearCheckin(input: {
   fecha: string; // YYYY-MM-DD
   metricas: Metricas;
   duracionMin: number;
+  // candado del lugar: UNA muestra tomada en el tap (no se persiste — solo el
+  // veredicto). Ausente = GPS negado/no disponible ⇒ check-in válido sin sello.
+  coords?: { lat: number; lng: number; acc?: number };
 }): Promise<Result<CheckinReward>> {
   const supabase = await createClient();
   const {
@@ -134,6 +155,34 @@ export async function crearCheckin(input: {
   // es el primero de hoy, este check-in ES el que carga el golpe.
   const municionLista = input.fecha === hoyCDMX() && (previos ?? []).length === 0;
 
+  // ── El candado del lugar: la muestra del tap vs el ancla del jugador ──
+  // Sin sello NO se castiga (GPS falla, hay actividades sin lugar fijo): el
+  // sello es prueba positiva para el compa, no un gate. La tolerancia absorbe
+  // la imprecisión del GPS reportada por el device (cap 75 m — honesta).
+  let verificado = false;
+  let verifDist: number | null = null;
+  let puedeAnclar = false;
+  if (
+    input.coords &&
+    Number.isFinite(input.coords.lat) &&
+    Number.isFinite(input.coords.lng)
+  ) {
+    const { data: lugar } = await supabase
+      .schema("core")
+      .from("lugares")
+      .select("lat, lng, radio_m")
+      .eq("user_id", user.id)
+      .eq("actividad_id", input.actividadId)
+      .maybeSingle<{ lat: number; lng: number; radio_m: number }>();
+    if (lugar) {
+      verifDist = Math.round(distanciaM(input.coords, lugar));
+      const tolerancia = Math.min(Math.max(input.coords.acc ?? 0, 0), 75);
+      verificado = verifDist <= lugar.radio_m + tolerancia;
+    } else {
+      puedeAnclar = true; // hay señal pero no ancla: ofrecer anclar este lugar
+    }
+  }
+
   // El RPC devuelve core.user_character AFTER (con deltas boosteados aplicados).
   const { data: afterData, error } = await supabase.schema("core").rpc("apply_checkin", {
     p_miembro_id: input.miembroId,
@@ -143,6 +192,8 @@ export async function crearCheckin(input: {
     p_kcal: score.kcal,
     p_puntos: puntos,
     p_deltas: deltas,
+    p_verificado: verificado,
+    p_verif_dist_m: verifDist,
   });
   if (error) return { ok: false, error: error.message };
 
@@ -216,6 +267,8 @@ export async function crearCheckin(input: {
       tierUps,
       rachaPersonal: streakRow?.current_streak_weeks ?? 0,
       municionLista,
+      sello: verificado,
+      puedeAnclar,
     },
   };
 }

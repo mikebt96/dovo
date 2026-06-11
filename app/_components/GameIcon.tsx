@@ -17,7 +17,8 @@ export type GameIconName =
   | "candado"
   | "corona"
   | "tabla"
-  | "perfil";
+  | "perfil"
+  | "pin";
 
 const PATHS: Record<GameIconName, (filled: boolean) => React.ReactNode> = {
   // impacto: rombo central + ticks radiales a 90°
@@ -103,6 +104,16 @@ const PATHS: Record<GameIconName, (filled: boolean) => React.ReactNode> = {
     <>
       <circle cx="12" cy="8" r="4" fill={f ? "currentColor" : "none"} />
       <path d="M4.5 20.5c.8-3.7 3.9-5.5 7.5-5.5s6.7 1.8 7.5 5.5" />
+    </>
+  ),
+  // sello del lugar: pin geométrico
+  pin: (f) => (
+    <>
+      <path
+        d="M12 21.5S5.5 15.8 5.5 10.5a6.5 6.5 0 1113 0C18.5 15.8 12 21.5 12 21.5z"
+        fill={f ? "currentColor" : "none"}
+      />
+      <circle cx="12" cy="10.5" r="2.2" fill={f ? "var(--c-paper, #fff)" : "none"} />
     </>
   ),
 };
