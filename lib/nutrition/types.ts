@@ -29,6 +29,9 @@ export type MealPlanContent = {
   dias: DiaPlan[]; // 7, lunes→domingo
   lista_super: PasilloSuper[];
   nota?: string;
+  // v2 · plan de dúo: mismos platillos, dosis de cada quien
+  factor_porcion?: number; // escala de porciones vs la plantilla base (1 = tal cual)
+  duo?: boolean; // generado con los insumos compartidos del trato
 };
 
 export type MealPlanRow = {
@@ -60,7 +63,20 @@ export type NutritionProfile = {
   presupuesto: "bajo" | "medio" | "alto";
   comidas_por_dia: number;
   preferencias: string | null;
+  // v2 (spec del founder): lo que preguntaría un nutriólogo + memoria de gustos
+  menus_distintos: number; // 3 | 5 | 7 — menús distintos que rotan en la semana
+  vetos: string[]; // "no me gustó" — no vuelve a aparecer jamás
+  favoritos: string[]; // "me gustó" — el motor los prefiere
 };
+
+// Insumos compartidos del dúo (core.duo_nutricion): con esto AMBOS generan los
+// MISMOS platillos — el determinismo sincroniza sin coordinación.
+export type DuoNutricion = {
+  objetivos: PerfilFisico["objetivo"][];
+  restricciones: Restriccion[];
+  vetos: string[];
+  menusDistintos: number;
+} | null;
 
 export type PerfilFisico = {
   peso_kg: number;

@@ -1,10 +1,12 @@
 import type {
   Comida,
   DiaPlan,
+  DuoNutricion,
   MealPlanContent,
   NutritionProfile,
   PasilloSuper,
   PerfilFisico,
+  Restriccion,
   TipoComida,
 } from "./types";
 import { macrosObjetivo } from "./macros";
@@ -181,29 +183,108 @@ function conTipo(p: Plato, tipo: TipoComida): Comida {
   return { tipo, nombre: p.nombre, descripcion: p.descripcion, kcal: p.kcal, prot: p.prot, carb: p.carb, grasa: p.grasa };
 }
 
+// ── v2 · pool efectivo por tipo: restricciones (veg) + VETOS fuera +
+//    favoritos primero. En modo dúo los favoritos NO reordenan (la sincronía
+//    de platillos entre los dos vale más que la preferencia individual). ──
+function poolEfectivo(
+  t: Plantilla,
+  tipo: TipoComida,
+  veg: boolean,
+  vetos: string[],
+  favoritos: string[],
+): Plato[] {
+  let pool: Plato[];
+  if (tipo === "desayuno") pool = veg ? t.desayunos.filter((d) => !d.carne) : t.desayunos;
+  else if (tipo === "comida") pool = veg ? t.swapVeg.comidas : t.comidas;
+  else if (tipo === "cena")
+    pool = veg ? [...t.cenas.filter((c) => !c.carne), ...t.swapVeg.cenas] : t.cenas;
+  else pool = t.snacks;
+
+  const sinVetos = pool.filter((p) => !vetos.includes(p.nombre));
+  const base = sinVetos.length ? sinVetos : pool; // jamás un pool vacío
+  if (!favoritos.length) return base;
+  return [
+    ...base.filter((p) => favoritos.includes(p.nombre)),
+    ...base.filter((p) => !favoritos.includes(p.nombre)),
+  ];
+}
+
+// Escala la dosis (plan de dúo: mismos platillos, kcal de cada quien). La
+// descripción declara la porción — el sample no inventa gramajes nuevos.
+export function escalaComida(c: Comida, factor: number): Comida {
+  if (Math.abs(factor - 1) <= 0.07) return c;
+  return {
+    ...c,
+    kcal: Math.round(c.kcal * factor),
+    prot: Math.round(c.prot * factor),
+    carb: Math.round(c.carb * factor),
+    grasa: Math.round(c.grasa * factor),
+    descripcion: `${c.descripcion} · porción ×${factor.toFixed(2)}`,
+  };
+}
+
+// Candidatos de reemplazo para la palomita de "no me gustó" (swap automático):
+// mismo tipo, mismas restricciones, sin vetos ni los platillos ya en el día.
+export function candidatosSwap(
+  objetivo: PerfilFisico["objetivo"],
+  tipo: TipoComida,
+  restricciones: Restriccion[],
+  vetos: string[],
+  excluir: string[],
+): Comida[] {
+  const t = plantillaPara(objetivo);
+  const veg = restricciones.includes("vegetariano") || restricciones.includes("vegano");
+  return poolEfectivo(t, tipo, veg, vetos, [])
+    .filter((p) => !excluir.includes(p.nombre))
+    .map((p) => conTipo(p, tipo));
+}
+
 export function buildSamplePlan(
   fisico: PerfilFisico,
   nutricion: NutritionProfile,
+  duo: DuoNutricion = null,
 ): MealPlanContent {
-  const t = plantillaPara(fisico.objetivo);
-  const m = macrosObjetivo(fisico);
-  const veg = nutricion.restricciones.includes("vegetariano") || nutricion.restricciones.includes("vegano");
+  // Dúo con objetivos distintos ⇒ plantilla compromiso (mantenimiento): mismos
+  // platillos para los dos; el rumbo calórico de cada quien vive en su dosis.
+  const objetivosDistintos = duo && new Set(duo.objetivos).size > 1;
+  const t = plantillaPara(objetivosDistintos ? "mantener" : fisico.objetivo);
+  const m = macrosObjetivo(fisico); // SIEMPRE personal — la dosis es tuya
 
-  const comidasPool = veg ? t.swapVeg.comidas : t.comidas;
-  const cenasPool = veg
-    ? [...t.cenas.filter((c) => !c.carne), ...t.swapVeg.cenas]
-    : t.cenas;
-  const desayunosPool = veg ? t.desayunos.filter((d) => !d.carne) : t.desayunos;
+  const restricciones = duo ? duo.restricciones : nutricion.restricciones;
+  const veg = restricciones.includes("vegetariano") || restricciones.includes("vegano");
+  const vetos = duo
+    ? Array.from(new Set([...duo.vetos, ...nutricion.vetos]))
+    : nutricion.vetos;
+  const favoritos = duo ? [] : nutricion.favoritos;
+  const menus = Math.max(1, Math.min(duo ? duo.menusDistintos : nutricion.menus_distintos, 7));
 
-  const dias: DiaPlan[] = DIAS.map((dia, i) => {
+  const desayunosPool = poolEfectivo(t, "desayuno", veg, vetos, favoritos);
+  const comidasPool = poolEfectivo(t, "comida", veg, vetos, favoritos);
+  const cenasPool = poolEfectivo(t, "cena", veg, vetos, favoritos);
+  const snacksPool = poolEfectivo(t, "snack", veg, vetos, favoritos);
+
+  // N menús distintos que ROTAN sobre la semana (pregunta del wizard)
+  const diasBase: DiaPlan[] = DIAS.map((dia, i) => {
+    const slot = i % menus;
     const comidas: Comida[] = [
-      conTipo(pick(desayunosPool, i), "desayuno"),
-      conTipo(pick(comidasPool, i), "comida"),
-      conTipo(pick(cenasPool, i, 1), "cena"),
+      conTipo(pick(desayunosPool, slot), "desayuno"),
+      conTipo(pick(comidasPool, slot), "comida"),
+      conTipo(pick(cenasPool, slot, 1), "cena"),
     ];
-    if (nutricion.comidas_por_dia >= 4) comidas.push(conTipo(pick(t.snacks, i), "snack"));
+    if (nutricion.comidas_por_dia >= 4) comidas.push(conTipo(pick(snacksPool, slot), "snack"));
     return { dia, comidas };
   });
+
+  // Dosis: factor de porción personal contra el día promedio de la plantilla.
+  const kcalDiaProm =
+    diasBase.reduce((s, d) => s + d.comidas.reduce((x, c) => x + c.kcal, 0), 0) /
+    diasBase.length;
+  const factor =
+    Math.round(Math.min(1.35, Math.max(0.75, m.kcal / Math.max(1, kcalDiaProm))) * 100) / 100;
+  const dias = diasBase.map((d) => ({
+    dia: d.dia,
+    comidas: d.comidas.map((c) => escalaComida(c, factor)),
+  }));
 
   return {
     kcal_objetivo: m.kcal,
@@ -211,5 +292,7 @@ export function buildSamplePlan(
     dias,
     lista_super: t.listaSuper,
     nota: t.nota,
+    factor_porcion: factor,
+    duo: !!duo,
   };
 }

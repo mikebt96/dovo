@@ -15,12 +15,14 @@ export default function NutritionProfileForm({
     presupuesto: string;
     comidas_por_dia: number;
     preferencias: string | null;
+    menus_distintos?: number;
   };
 }) {
   const t = useTranslations("nutricion");
   const [restricciones, setRestricciones] = useState<string[]>(initial?.restricciones ?? []);
   const [presupuesto, setPresupuesto] = useState(initial?.presupuesto ?? "medio");
   const [comidas, setComidas] = useState(initial?.comidas_por_dia ?? 4);
+  const [menus, setMenus] = useState(initial?.menus_distintos ?? 5);
   const [preferencias, setPreferencias] = useState(initial?.preferencias ?? "");
   const [err, setErr] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -40,6 +42,7 @@ export default function NutritionProfileForm({
         presupuesto,
         comidas_por_dia: comidas,
         preferencias: preferencias || undefined,
+        menus_distintos: menus,
       });
       if (!res.ok) setErr(res.error);
     });
@@ -110,6 +113,26 @@ export default function NutritionProfileForm({
             </button>
           ))}
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-3">
+          {t("formMenus")}
+        </legend>
+        <div className="flex gap-2">
+          {[3, 5, 7].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setMenus(n)}
+              aria-pressed={menus === n}
+              className={chip(menus === n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs opacity-50 mt-2">{t("formMenusHint")}</p>
       </fieldset>
 
       <fieldset>

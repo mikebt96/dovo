@@ -7,6 +7,8 @@ import { generateSample, generateWithAi } from "@/lib/nutrition/generate";
 import { weekStartISO } from "@/lib/nutrition/macros";
 import { getEntitlement } from "@/lib/billing/tier";
 import type {
+  Comida,
+  DuoNutricion,
   MealPlanContent,
   MealPlanRow,
   NutritionProfile,
@@ -14,6 +16,7 @@ import type {
   Restriccion,
 } from "@/lib/nutrition/types";
 import { RESTRICCIONES } from "@/lib/nutrition/types";
+import { candidatosSwap, escalaComida } from "@/lib/nutrition/sample-plans";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -38,6 +41,50 @@ async function getFisico(userId: string): Promise<PerfilFisico | null> {
   return data ?? null;
 }
 
+// ── Plan de dúo (regla de oro): UN plan, dosis de cada quien. Los insumos del
+// compa son ilegibles por RLS — la RPC definer duo_nutricion los expone gated.
+// Si AMBOS están configurados, el motor genera con la UNIÓN (mismos platillos
+// para los dos; cada quien genera el suyo con kcal personales — el determinismo
+// sincroniza sin coordinación). Si no, plan individual.
+async function getDuoNutricion(userId: string): Promise<DuoNutricion> {
+  const supabase = await createClient();
+  const { data: miembro } = await supabase
+    .schema("core")
+    .from("trato_miembros")
+    .select("trato_id")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle<{ trato_id: string }>();
+  if (!miembro) return null;
+
+  const { data: filas, error } = await supabase
+    .schema("core")
+    .rpc("duo_nutricion", { p_trato_id: miembro.trato_id });
+  if (error) {
+    console.error("[nutrition] duo_nutricion:", error.message);
+    return null;
+  }
+  const rows = (filas ?? []) as Array<{
+    user_id: string;
+    objetivo: string | null;
+    restricciones: string[];
+    vetos: string[];
+    menus_distintos: number;
+    listo: boolean;
+  }>;
+  // dúo real: 2+ miembros y TODOS con perfil físico + nutricional
+  if (rows.length < 2 || rows.some((r) => !r.listo)) return null;
+
+  return {
+    objetivos: rows.map((r) => r.objetivo as PerfilFisico["objetivo"]),
+    restricciones: Array.from(
+      new Set(rows.flatMap((r) => r.restricciones)),
+    ) as Restriccion[],
+    vetos: Array.from(new Set(rows.flatMap((r) => r.vetos))),
+    menusDistintos: Math.min(...rows.map((r) => r.menus_distintos)),
+  };
+}
+
 export async function getNutritionData(): Promise<NutritionData> {
   const empty: NutritionData = { fisico: null, nutricion: null, plan: null, logsHoy: [], aiLive: isNutritionAiLive() };
   const supabase = await createClient();
@@ -51,7 +98,7 @@ export async function getNutritionData(): Promise<NutritionData> {
   const { data: nutriRow, error: nutriErr } = await supabase
     .schema("core")
     .from("nutrition_profiles")
-    .select("restricciones, presupuesto, comidas_por_dia, preferencias")
+    .select("restricciones, presupuesto, comidas_por_dia, preferencias, menus_distintos, vetos, favoritos")
     .eq("user_id", user.id)
     .maybeSingle<NutritionProfile>();
   if (nutriErr) console.error("[nutrition] nutrition_profiles:", nutriErr.message);
@@ -72,7 +119,8 @@ export async function getNutritionData(): Promise<NutritionData> {
   // Sin plan esta semana pero con ambos perfiles ⇒ genera el SAMPLE al instante (idempotente
   // por unique(user_id, week_start)). El page load nunca llama a Claude — la IA es botón.
   if (!plan && fisico && nutricion) {
-    const generated = generateSample(fisico, nutricion);
+    const duo = await getDuoNutricion(user.id);
+    const generated = generateSample(fisico, nutricion, duo);
     const { data: inserted, error: insErr } = await supabase
       .schema("core")
       .from("meal_plans")
@@ -110,6 +158,7 @@ export async function saveNutritionProfile(input: {
   presupuesto: string;
   comidas_por_dia: number;
   preferencias?: string;
+  menus_distintos?: number;
 }): Promise<Result> {
   const restricciones = input.restricciones.filter((r): r is Restriccion =>
     (RESTRICCIONES as string[]).includes(r),
@@ -119,6 +168,9 @@ export async function saveNutritionProfile(input: {
     : "medio";
   const comidas = Math.min(5, Math.max(3, Math.round(input.comidas_por_dia)));
   const preferencias = input.preferencias?.trim().slice(0, 300) || null;
+  const menus = [3, 5, 7].includes(input.menus_distintos ?? 5)
+    ? (input.menus_distintos ?? 5)
+    : 5;
 
   const supabase = await createClient();
   const {
@@ -126,24 +178,48 @@ export async function saveNutritionProfile(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sin sesión" };
 
+  // vetos/favoritos NO se tocan aquí (los administra la palomita) — el upsert
+  // de PostgREST solo SETea las columnas presentes en el payload.
   const { error: upErr } = await supabase
     .schema("core")
     .from("nutrition_profiles")
     .upsert(
-      { user_id: user.id, restricciones, presupuesto, comidas_por_dia: comidas, preferencias },
+      {
+        user_id: user.id,
+        restricciones,
+        presupuesto,
+        comidas_por_dia: comidas,
+        preferencias,
+        menus_distintos: menus,
+      },
       { onConflict: "user_id" },
     );
   if (upErr) return { ok: false, error: upErr.message };
 
-  // El perfil cambió ⇒ el plan de la semana ya no aplica: regenera el sample con el perfil nuevo.
+  // El perfil cambió ⇒ el plan de la semana ya no aplica: regenera el sample
+  // con el perfil COMPLETO (incl. vetos/favoritos vivos) y el contexto de dúo.
   const fisico = await getFisico(user.id);
   if (fisico) {
-    const generated = generateSample(fisico, {
-      restricciones,
-      presupuesto: presupuesto as NutritionProfile["presupuesto"],
-      comidas_por_dia: comidas,
-      preferencias,
-    });
+    const { data: full } = await supabase
+      .schema("core")
+      .from("nutrition_profiles")
+      .select("restricciones, presupuesto, comidas_por_dia, preferencias, menus_distintos, vetos, favoritos")
+      .eq("user_id", user.id)
+      .maybeSingle<NutritionProfile>();
+    const duo = await getDuoNutricion(user.id);
+    const generated = generateSample(
+      fisico,
+      full ?? {
+        restricciones,
+        presupuesto: presupuesto as NutritionProfile["presupuesto"],
+        comidas_por_dia: comidas,
+        preferencias,
+        menus_distintos: menus,
+        vetos: [],
+        favoritos: [],
+      },
+      duo,
+    );
     const { error: planErr } = await supabase
       .schema("core")
       .from("meal_plans")
@@ -155,7 +231,125 @@ export async function saveNutritionProfile(input: {
   }
 
   revalidatePath("/nutricion");
+  revalidatePath("/");
   return { ok: true, data: undefined };
+}
+
+// ── La palomita de "no me gustó" (spec del founder): el alimento se CAMBIA en
+// automático por un equivalente (mismo tipo, mismas restricciones, sin vetos)
+// y el veto se recuerda para siempre — no vuelve a aparecer en ningún menú. ──
+export async function vetarComida(input: {
+  diaIdx: number;
+  comidaIdx: number;
+}): Promise<Result<{ nueva: Comida | null }>> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sin sesión" };
+
+  const fisico = await getFisico(user.id);
+  const { data: perfil } = await supabase
+    .schema("core")
+    .from("nutrition_profiles")
+    .select("restricciones, presupuesto, comidas_por_dia, preferencias, menus_distintos, vetos, favoritos")
+    .eq("user_id", user.id)
+    .maybeSingle<NutritionProfile>();
+  if (!fisico || !perfil) return { ok: false, error: "completa tu perfil primero" };
+
+  const week = weekStartISO();
+  const { data: planRow, error: planErr } = await supabase
+    .schema("core")
+    .from("meal_plans")
+    .select("id, week_start, source, plan")
+    .eq("user_id", user.id)
+    .eq("week_start", week)
+    .maybeSingle<MealPlanRow>();
+  if (planErr) return { ok: false, error: planErr.message };
+  if (!planRow) return { ok: false, error: "aún no hay plan esta semana" };
+
+  const dia = planRow.plan.dias[input.diaIdx];
+  const comida = dia?.comidas[input.comidaIdx];
+  if (!comida) return { ok: false, error: "comida no encontrada" };
+
+  // el veto se recuerda SIEMPRE (aunque no haya reemplazo disponible)
+  const vetos = Array.from(new Set([...perfil.vetos, comida.nombre]));
+
+  const duo = await getDuoNutricion(user.id);
+  const objetivosDistintos = duo && new Set(duo.objetivos).size > 1;
+  const objetivo = objetivosDistintos ? "mantener" : fisico.objetivo;
+  const restricciones = duo ? duo.restricciones : perfil.restricciones;
+  const vetosEfectivos = duo ? Array.from(new Set([...duo.vetos, ...vetos])) : vetos;
+
+  // candidato: mismo tipo, sin vetos, sin repetir lo que ya hay en el día
+  const enElDia = dia.comidas.map((c) => c.nombre);
+  let candidatos = candidatosSwap(objetivo, comida.tipo, restricciones, vetosEfectivos, enElDia);
+  if (!candidatos.length) {
+    candidatos = candidatosSwap(objetivo, comida.tipo, restricciones, vetosEfectivos, []);
+  }
+  const cruda = candidatos[(input.diaIdx + input.comidaIdx) % Math.max(1, candidatos.length)] ?? null;
+  const nueva = cruda ? escalaComida(cruda, planRow.plan.factor_porcion ?? 1) : null;
+
+  if (nueva) {
+    const plan: MealPlanContent = {
+      ...planRow.plan,
+      dias: planRow.plan.dias.map((d, di) =>
+        di !== input.diaIdx
+          ? d
+          : { ...d, comidas: d.comidas.map((c, ci) => (ci === input.comidaIdx ? nueva : c)) },
+      ),
+    };
+    const { error: upPlanErr } = await supabase
+      .schema("core")
+      .from("meal_plans")
+      .update({ plan })
+      .eq("id", planRow.id);
+    if (upPlanErr) return { ok: false, error: upPlanErr.message };
+  }
+
+  const { error: upVetoErr } = await supabase
+    .schema("core")
+    .from("nutrition_profiles")
+    .update({ vetos })
+    .eq("user_id", user.id);
+  if (upVetoErr) return { ok: false, error: upVetoErr.message };
+
+  revalidatePath("/nutricion");
+  return { ok: true, data: { nueva } };
+}
+
+// "Me gustó": el motor lo prefiere en planes futuros (toggle).
+export async function marcarFavorito(nombre: string): Promise<Result<{ favorito: boolean }>> {
+  const limpio = nombre.trim().slice(0, 120);
+  if (!limpio) return { ok: false, error: "alimento inválido" };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sin sesión" };
+
+  const { data: perfil } = await supabase
+    .schema("core")
+    .from("nutrition_profiles")
+    .select("favoritos")
+    .eq("user_id", user.id)
+    .maybeSingle<{ favoritos: string[] }>();
+  if (!perfil) return { ok: false, error: "completa tu perfil primero" };
+
+  const ya = perfil.favoritos.includes(limpio);
+  const favoritos = ya
+    ? perfil.favoritos.filter((f) => f !== limpio)
+    : [...perfil.favoritos, limpio];
+
+  const { error } = await supabase
+    .schema("core")
+    .from("nutrition_profiles")
+    .update({ favoritos })
+    .eq("user_id", user.id);
+  if (error) return { ok: false, error: error.message };
+
+  return { ok: true, data: { favorito: !ya } };
 }
 
 /**

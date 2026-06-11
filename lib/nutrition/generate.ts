@@ -1,7 +1,7 @@
 import "server-only";
 import { getAnthropic, isNutritionAiLive, NUTRITION_MODEL } from "@/lib/anthropic";
 import { logAppError } from "@/lib/observability/log";
-import type { MealPlanContent, NutritionProfile, PerfilFisico } from "./types";
+import type { DuoNutricion, MealPlanContent, NutritionProfile, PerfilFisico } from "./types";
 import { macrosObjetivo } from "./macros";
 import { buildSamplePlan } from "./sample-plans";
 
@@ -16,8 +16,9 @@ export type GeneratedPlan = { source: "sample" | "ai"; plan: MealPlanContent };
 export function generateSample(
   fisico: PerfilFisico,
   nutricion: NutritionProfile,
+  duo: DuoNutricion = null,
 ): GeneratedPlan {
-  return { source: "sample", plan: buildSamplePlan(fisico, nutricion) };
+  return { source: "sample", plan: buildSamplePlan(fisico, nutricion, duo) };
 }
 
 // JSON Schema del plan — misma forma que MealPlanContent (lib/nutrition/types.ts).

@@ -8,11 +8,13 @@ import Paywall from "@/app/_components/Paywall";
 import ProBadge from "@/app/_components/ProBadge";
 import { getEntitlement } from "@/lib/billing/tier";
 import { getNutritionData } from "@/lib/actions/nutrition";
-import type { Comida, DiaPlan } from "@/lib/nutrition/types";
+import type { DiaPlan } from "@/lib/nutrition/types";
+import { diaSemanaCDMX } from "@/lib/workout/fecha";
 import NutritionProfileForm from "./_components/NutritionProfileForm";
 import FoodLogQuickAdd from "./_components/FoodLogQuickAdd";
 import FoodFab from "./_components/FoodFab";
 import AiRegenButton from "./_components/AiRegenButton";
+import ComidaInteractiva from "./_components/ComidaInteractiva";
 
 export const dynamic = "force-dynamic";
 // La action de IA (regenerateWithAi) puede tardar: extiende el límite de la ruta.
@@ -85,7 +87,9 @@ export default async function NutricionPage() {
   }
 
   const plan = data.plan;
-  const hoyIdx = (new Date().getDay() + 6) % 7; // lunes=0
+  // CDMX, no el reloj del server (Vercel = UTC ⇒ "hoy" se volvía mañana a las 18:00)
+  const hoyNombre = diaSemanaCDMX();
+  const favoritos = data.nutricion.favoritos ?? [];
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-6xl mx-auto">
@@ -94,15 +98,8 @@ export default async function NutricionPage() {
 
       {plan && (
         <>
-          {/* Header de macros — panel oscuro premium (DESIGN.md §6) */}
-          <section
-            className="relative overflow-hidden rounded-3xl p-7 sm:p-9 text-white mb-8"
-            style={{
-              background:
-                "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
-              boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
-            }}
-          >
+          {/* Header de macros — superficie de juego (Mesa Nocturna) */}
+          <section className="card-game relative overflow-hidden p-7 sm:p-9 text-white mb-8">
             <div
               aria-hidden
               className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
@@ -127,27 +124,50 @@ export default async function NutricionPage() {
               </div>
             </div>
             <div className="relative mt-6 flex flex-wrap items-center justify-between gap-3">
-              <span
-                className={`text-[10px] mono uppercase tracking-[0.18em] rounded-full px-3 py-1.5 ${
-                  plan.source === "ai"
-                    ? "bg-signal/30 text-white"
-                    : "bg-white/10 text-white/70"
-                }`}
-              >
-                {plan.source === "ai" ? `✦ ${t("badgeAi")}` : t("badgeSample")}
+              <span className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`text-[10px] mono uppercase tracking-[0.18em] rounded-full px-3 py-1.5 ${
+                    plan.source === "ai"
+                      ? "bg-signal/30 text-white"
+                      : "bg-white/10 text-white/70"
+                  }`}
+                >
+                  {plan.source === "ai" ? `✦ ${t("badgeAi")}` : t("badgeSample")}
+                </span>
+                {/* plan de dúo: mismos platillos, tu dosis (regla de oro) */}
+                {plan.plan.duo && (
+                  <span
+                    className="text-[10px] mono uppercase tracking-[0.18em] rounded-full px-3 py-1.5"
+                    style={{
+                      color: "#4adfb2",
+                      background: "color-mix(in srgb, #4adfb2 14%, transparent)",
+                    }}
+                  >
+                    {t("badgeDuo")}
+                  </span>
+                )}
               </span>
               <AiRegenButton aiLive={data.aiLive} />
             </div>
           </section>
 
-          {/* Plan semanal: carrusel snap en móvil, grid 7-col en desktop */}
+          {/* Plan semanal: L-D en menús DESPLEGABLES (spec del founder) — hoy
+              abierto, cada alimento con su palomita (gustó / no gustó → swap). */}
           <section className="mb-10">
             <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-4">
               {t("semanaTitle")}
             </h2>
-            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-3 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-7 lg:overflow-visible">
+            <div className="space-y-2 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0 lg:items-start">
               {plan.plan.dias.map((d, i) => (
-                <DiaCard key={d.dia} dia={d} esHoy={i === hoyIdx} dayLabel={t(`dias.${DAY_KEY[d.dia] ?? "lunes"}`)} />
+                <DiaAccordion
+                  key={d.dia}
+                  dia={d}
+                  diaIdx={i}
+                  esHoy={d.dia === hoyNombre}
+                  dayLabel={t(`dias.${DAY_KEY[d.dia] ?? "lunes"}`)}
+                  hoyLabel={t("hoyChip")}
+                  favoritos={favoritos}
+                />
               ))}
             </div>
             {plan.plan.nota && (
@@ -210,39 +230,68 @@ function Macro({ label, value, color }: { label: string; value: number; color: s
   );
 }
 
-function DiaCard({ dia, esHoy, dayLabel }: { dia: DiaPlan; esHoy: boolean; dayLabel: string }) {
+// Día desplegable: <details> nativo (cero JS para abrir/cerrar), hoy abierto.
+// El summary es la carta del día: nombre + kcal totales + chip HOY.
+function DiaAccordion({
+  dia,
+  diaIdx,
+  esHoy,
+  dayLabel,
+  hoyLabel,
+  favoritos,
+}: {
+  dia: DiaPlan;
+  diaIdx: number;
+  esHoy: boolean;
+  dayLabel: string;
+  hoyLabel: string;
+  favoritos: string[];
+}) {
+  const kcalDia = dia.comidas.reduce((s, c) => s + c.kcal, 0);
   return (
-    <div
-      className={`snap-start shrink-0 w-64 lg:w-auto rounded-2xl border p-4 ${
+    <details
+      open={esHoy}
+      className={`group rounded-2xl border ${
         esHoy ? "border-signal bg-signal/[0.04]" : "border-ink/10"
       }`}
     >
-      <div
-        className={`text-[10px] mono uppercase tracking-[0.18em] mb-3 ${
-          esHoy ? "text-signal" : "opacity-50"
-        }`}
-      >
-        {dayLabel}
-        {esHoy && " ·"}
-      </div>
-      <div className="space-y-3">
-        {dia.comidas.map((c) => (
-          <ComidaRow key={`${c.tipo}-${c.nombre}`} comida={c} />
+      <summary className="flex items-center justify-between gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+        <span className="flex items-center gap-2">
+          <span
+            className={`display font-bold lowercase ${esHoy ? "text-signal" : ""}`}
+          >
+            {dayLabel}
+          </span>
+          {esHoy && (
+            <span className="text-[9px] mono uppercase tracking-[0.18em] rounded-full px-2 py-0.5 bg-signal text-white">
+              {hoyLabel}
+            </span>
+          )}
+        </span>
+        <span className="flex items-center gap-3 shrink-0">
+          <span className="text-[10px] mono opacity-50 tabular-nums">
+            {kcalDia} kcal
+          </span>
+          <span
+            aria-hidden
+            className="text-[10px] mono opacity-40 transition-transform group-open:rotate-180"
+          >
+            ▾
+          </span>
+        </span>
+      </summary>
+      <div className="px-4 pb-4 pt-1 space-y-3 border-t border-ink/8">
+        {dia.comidas.map((c, ci) => (
+          <ComidaInteractiva
+            key={`${c.tipo}-${c.nombre}`}
+            diaIdx={diaIdx}
+            comidaIdx={ci}
+            comida={c}
+            esFavorito={favoritos.includes(c.nombre)}
+          />
         ))}
       </div>
-    </div>
-  );
-}
-
-function ComidaRow({ comida }: { comida: Comida }) {
-  return (
-    <div>
-      <div className="text-[9px] mono uppercase tracking-widest text-signal/80">{comida.tipo}</div>
-      <div className="text-sm font-medium leading-snug">{comida.nombre}</div>
-      <div className="text-[10px] mono opacity-45 mt-0.5">
-        {comida.kcal} kcal · {comida.prot}p
-      </div>
-    </div>
+    </details>
   );
 }
 
