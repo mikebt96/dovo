@@ -172,6 +172,33 @@ export async function cerrarRetoAction(retoId: string): Promise<Result> {
   return { ok: true, data: undefined };
 }
 
+export type HeadToHead = { yo: number; rival: number; empates: number };
+
+// Historial W-L del par (directiva §4.7/§4.8): todos los retos cerrados entre
+// ambos dúos, en los dos órdenes. La RLS de party lo permite y los índices
+// retos_trato_a/b_idx ya existen.
+export async function getHeadToHead(
+  miTratoId: string,
+  rivalTratoId: string,
+): Promise<HeadToHead> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .schema("core")
+    .from("retos")
+    .select("ganador_trato_id")
+    .eq("estado", "cerrado")
+    .or(
+      `and(trato_a.eq.${miTratoId},trato_b.eq.${rivalTratoId}),and(trato_a.eq.${rivalTratoId},trato_b.eq.${miTratoId})`,
+    );
+  if (error) console.error("[retos] head-to-head:", error.message);
+  const rows = (data ?? []) as { ganador_trato_id: string | null }[];
+  return {
+    yo: rows.filter((r) => r.ganador_trato_id === miTratoId).length,
+    rival: rows.filter((r) => r.ganador_trato_id === rivalTratoId).length,
+    empates: rows.filter((r) => r.ganador_trato_id === null).length,
+  };
+}
+
 // Retos del dúo (RLS: el usuario es party). Filas crudas; la UI pide marcador por reto.
 export async function getRetosDeTrato(tratoId: string): Promise<RetoRow[]> {
   const supabase = await createClient();

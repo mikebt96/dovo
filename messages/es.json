@@ -516,7 +516,15 @@
     "atkAgoD": "hace {n} d",
     "atkRecharge": "tu golpe se recarga a medianoche",
     "atkAmmoSlot": "tienes 1 golpe · expira a medianoche",
-    "losingBy": "vas abajo por {n} — muévete, compa"
+    "losingBy": "vas abajo por {n} — muévete, compa",
+    "duelEyebrow": "veredicto del duelo",
+    "duelWon": "ganaron",
+    "duelLost": "perdieron",
+    "duelTied": "empate",
+    "h2h": "historial: van {yo}–{rival}",
+    "rematch": "revancha",
+    "rematchSent": "reto de revancha enviado — esperando al rival",
+    "duelClose": "cerrar"
   },
   "boosts": {
     "title": "boosts",
@@ -724,6 +732,33 @@
     "historyTitle": "historial",
     "disclaimer": "estimación orientativa, no diagnóstico. no es consejo médico ni sustituye a un profesional de la salud.",
     "back": "← perfil"
+  },
+  "trato": {
+    "eyebrow": "el trato",
+    "tu": "tú",
+    "statusBoth": "los dos cumplieron hoy",
+    "statusYouDone": "tú ✓ · {nombre} aún no",
+    "statusYouPending": "{nombre} ✓ · te toca a ti",
+    "statusNone": "hoy nadie ha entrenado — el trato espera",
+    "nudge": "empujón",
+    "nudgeConfirm": "¿se lo mandas?",
+    "nudgeSent": "empujón enviado",
+    "noRoutine": "sin rutina aún",
+    "rachaChip": "{n} sem",
+    "judgedIn": "el trato se juzga en {t}",
+    "judgedSoon": "el trato se juzga esta hora",
+    "riskCopy": "la racha del trato está en riesgo — aún están a tiempo",
+    "brokenCopy": "racha en cero · su mejor marca: {n} sem"
+  },
+  "veredicto": {
+    "eyebrow": "veredicto del domingo",
+    "sealedTitle": "el trato se selló",
+    "sealedSub": "van {n} semanas seguidas",
+    "newRecord": "récord nuevo del dúo",
+    "brokenTitle": "la racha se rompió",
+    "brokenSub": "su mejor marca sigue ahí — la revancha empieza hoy",
+    "brokenCta": "empezar la revancha",
+    "cta": "seguir"
   },
   "levelup": {
     "eyebrow": "nivel nuevo",

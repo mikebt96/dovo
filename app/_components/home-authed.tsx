@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import AppNav from "./AppNav";
 import Grain from "./Grain";
 import BottomHUDServer from "./BottomHUDServer";
+import TratoHUD from "./TratoHUD";
+import VeredictoDialog from "./VeredictoDialog";
+import { getVeredictoPendiente } from "@/lib/actions/trato";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
 import CharacterCard from "./CharacterCard";
@@ -97,6 +100,11 @@ export default async function HomeAuthed() {
   const miembroId = miembrosList[0]?.id;
   const primerGrupoId = grupos[0]?.id;
 
+  // Veredicto del Domingo pendiente de ceremonia (una vez por usuario·semana)
+  const veredicto = primerGrupoId
+    ? await getVeredictoPendiente(primerGrupoId)
+    : null;
+
   type RutinaItem = { actividad_id: string; duracion_min: number };
   let rutinaItems: RutinaItem[] = [];
   const actividadMap = new Map<
@@ -177,6 +185,9 @@ export default async function HomeAuthed() {
           )}
         </div>
       )}
+
+      {/* El estado del trato abre el lobby (directiva §4.5): SIEMPRE son dos. */}
+      {primerGrupoId && <TratoHUD tratoId={primerGrupoId} />}
 
       {/* F11 · Héroe del día: la acción antes que las stats. Panel oscuro premium
           (mismo lenguaje que DuelScoreboard/macros) con la sesión prescrita de hoy. */}
@@ -359,6 +370,10 @@ export default async function HomeAuthed() {
             </span>
           </div>
         </Link>
+      )}
+      {/* Ceremonia L del Veredicto — máx una por visita (las L jamás se apilan) */}
+      {veredicto && primerGrupoId && (
+        <VeredictoDialog tratoId={primerGrupoId} veredicto={veredicto} />
       )}
       <BottomHUDServer />
       <Grain />

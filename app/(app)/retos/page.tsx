@@ -8,12 +8,14 @@ import DuelScoreboard from "@/app/_components/DuelScoreboard";
 import {
   getRetosDeTrato,
   getMarcador,
+  getHeadToHead,
   type Marcador,
   type RetoRow,
 } from "@/lib/actions/retos";
 import { getDuelContext } from "@/lib/actions/ataques";
 import AttackPanel from "./_components/AttackPanel";
 import DuelFeed from "./_components/DuelFeed";
+import DuelResultDialog from "./_components/DuelResultDialog";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +68,18 @@ export default async function RetosPage() {
     enCurso.map((p) => getDuelContext(p.r.id, miTratoId)),
   );
   const ctxDe = new Map(enCurso.map((p, i) => [p.r.id, contextos[i]]));
+
+  // Ceremonia W/L del duelo más reciente (directiva §4.8) — el dialog decide en
+  // cliente si ya se ceremonió (localStorage por reto_id).
+  const ultimoCerrado = historial[0] ?? null;
+  const h2hUltimo = ultimoCerrado
+    ? await getHeadToHead(
+        miTratoId,
+        ultimoCerrado.m.trato_a === miTratoId
+          ? ultimoCerrado.m.trato_b
+          : ultimoCerrado.m.trato_a,
+      )
+    : null;
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
@@ -194,6 +208,15 @@ export default async function RetosPage() {
             })}
           </ul>
         </section>
+      )}
+
+      {ultimoCerrado && h2hUltimo && (
+        <DuelResultDialog
+          m={ultimoCerrado.m}
+          miTratoId={miTratoId}
+          h2h={h2hUltimo}
+          ganadorTratoId={ultimoCerrado.r.ganador_trato_id}
+        />
       )}
     </main>
   );

@@ -336,6 +336,18 @@ dialog.dlg-game::backdrop {
   25% { transform: rotate(-1.2deg); }
   75% { transform: rotate(1.2deg); }
 }
+/* El mark que vive (§6.2): los discos respiran desfasados cuando el dúo cumple.
+   Portado de landing.css (transform-only, compositor). LA animación perpetua
+   permitida del lobby (regla: máx 1 por viewport). */
+@keyframes dv-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-0.04em) scale(1.05); }
+}
+/* Racha en riesgo: pulso de opacidad acotado (nunca rompe AA — patrón frost). */
+@keyframes anim-risk-pulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
 
 /* Barra de dos capas (provisional damage §4.2): el fill salta con spring; la
    ghost drena 400ms después. scaleX (compositor), nunca width. Las clases base
@@ -394,6 +406,11 @@ dialog.dlg-game::backdrop {
   /* ── Mesa Nocturna · solo con motion ── */
   .anim-wobble { animation: anim-wobble 350ms ease-in-out 2; }
   .anim-slam { animation: anim-slam 500ms var(--ease-back) both; }
+  .anim-breathe {
+    animation: dv-breathe 3.6s ease-in-out infinite;
+    animation-delay: var(--anim-delay, 0ms);
+  }
+  .anim-risk { animation: anim-risk-pulse 2.4s ease-in-out infinite; }
   .anim-particle { animation: anim-particle 800ms var(--ease-out) forwards; }
   .anim-tier-flash { animation: anim-tier-flash 600ms ease-out; }
   .chip-delta {

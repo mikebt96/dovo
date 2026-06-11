@@ -516,7 +516,15 @@
     "atkAgoD": "{n} d ago",
     "atkRecharge": "your strike recharges at midnight",
     "atkAmmoSlot": "1 strike loaded · expires at midnight",
-    "losingBy": "down by {n} — move it"
+    "losingBy": "down by {n} — move it",
+    "duelEyebrow": "duel verdict",
+    "duelWon": "you won",
+    "duelLost": "you lost",
+    "duelTied": "tie",
+    "h2h": "all-time: {yo}–{rival}",
+    "rematch": "rematch",
+    "rematchSent": "rematch sent — waiting on the rival",
+    "duelClose": "close"
   },
   "boosts": {
     "title": "boosts",
@@ -724,6 +732,33 @@
     "historyTitle": "history",
     "disclaimer": "orientative estimate, not a diagnosis. not medical advice and no substitute for a health professional.",
     "back": "← profile"
+  },
+  "trato": {
+    "eyebrow": "the deal",
+    "tu": "you",
+    "statusBoth": "both showed up today",
+    "statusYouDone": "you ✓ · {nombre} not yet",
+    "statusYouPending": "{nombre} ✓ · your turn",
+    "statusNone": "nobody trained today — the deal is waiting",
+    "nudge": "nudge",
+    "nudgeConfirm": "send it?",
+    "nudgeSent": "nudge sent",
+    "noRoutine": "no routine yet",
+    "rachaChip": "{n} wk",
+    "judgedIn": "the deal gets judged in {t}",
+    "judgedSoon": "the deal gets judged within the hour",
+    "riskCopy": "the deal's streak is at risk — there's still time",
+    "brokenCopy": "streak at zero · best run: {n} wk"
+  },
+  "veredicto": {
+    "eyebrow": "sunday verdict",
+    "sealedTitle": "the deal was sealed",
+    "sealedSub": "{n} weeks straight",
+    "newRecord": "new duo record",
+    "brokenTitle": "the streak broke",
+    "brokenSub": "your best run is still there — the comeback starts today",
+    "brokenCta": "start the comeback",
+    "cta": "keep going"
   },
   "levelup": {
     "eyebrow": "level up",

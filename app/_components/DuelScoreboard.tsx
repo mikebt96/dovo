@@ -1,40 +1,13 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import {
   responderReto,
   cerrarRetoAction,
   type Marcador,
 } from "@/lib/actions/retos";
-
-function prefersReduced(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
-
-function useCountUp(target: number, ms = 800): number {
-  const [v, setV] = useState(0);
-  useEffect(() => {
-    if (prefersReduced()) {
-      setV(target);
-      return;
-    }
-    let raf = 0;
-    let start = 0;
-    const tick = (now: number) => {
-      if (!start) start = now;
-      const p = Math.min(1, (now - start) / ms);
-      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, ms]);
-  return v;
-}
+import { useCountUp } from "@/lib/hooks/useCountUp";
 
 // Marcador v2 (directiva §4.7): dos lados, dos temperaturas — tú en violeta (la
 // casa), el rival en --mode-rival (rojo dedicado; mata el bug del magenta FLE).
