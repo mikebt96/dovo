@@ -11,8 +11,10 @@ import LanguageToggle from "@/app/_components/LanguageToggle";
 import ThemeToggle from "@/app/_components/ThemeToggle";
 import PulseOptOutToggle from "./_components/PulseOptOutToggle";
 import PushSettings from "./_components/PushSettings";
+import SaludPermisos from "./_components/SaludPermisos";
 import SignOutButton from "./_components/SignOutButton";
 import { getNotificationPrefs } from "@/lib/actions/push";
+import { getEstadoSalud } from "@/lib/actions/salud";
 import { isAdminEmail } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +38,7 @@ export default async function AjustesPage() {
   const currentTheme = (await getThemeOverride()) ?? "system";
   const duo = await getDuoTier();
   const pushPrefs = await getNotificationPrefs();
+  const estadoSalud = (await getEstadoSalud()) ?? { salud: false, ubicacion: false, fuentes: {} };
 
   return (
     <main className="min-h-svh max-w-2xl lg:max-w-4xl mx-auto px-6 py-10 bg-papel text-ink">
@@ -74,6 +77,11 @@ export default async function AjustesPage() {
       <section className="mb-10">
         <h2 className="display text-xl font-bold lowercase mb-5">{t("notifications")}</h2>
         <PushSettings initialPrefs={pushPrefs} />
+      </section>
+
+      <section className="mb-10">
+        <h2 className="display text-xl font-bold lowercase mb-5">{t("saludPermisos")}</h2>
+        <SaludPermisos initial={estadoSalud} />
       </section>
 
       <section className="mb-10">

@@ -204,40 +204,21 @@ export async function getInteligenciaPremios(): Promise<InteligenciaPremios | nu
   const svc = createServiceClient();
 
   // Regla conservadora: si CUALQUIER miembro del dúo se salió de pulse, el
-  // dúo ENTERO queda fuera del agregado — la apuesta es un dato de los dos.
-  // Los dos gates van fail-closed: truncado silencioso = abortar, jamás
-  // dejar entrar a un dúo con opt-out.
-  // Limitación conocida (para la limpieza): la exclusión usa la membresía
-  // ACTUAL — si el miembro opted-out deja el dúo, su histórico reingresa.
-  // El fix real es un flag pegajoso a nivel trato (SQL, post-Veredicto).
-  const optOuts = await paginar<{ id: string }>("opt-outs", 50_000, "fallar", (d, h) =>
+  // dúo ENTERO queda fuera del agregado — y el flag es PEGAJOSO a nivel
+  // trato (tratos.pulse_excluido, triggers en F24): aunque el miembro se
+  // vaya o borre su cuenta, el histórico del trato no reingresa jamás.
+  // Gate fail-closed: truncado silencioso = abortar.
+  const excluidos = await paginar<{ id: string }>("tratos excluidos", 50_000, "fallar", (d, h) =>
     svc
       .schema("core")
-      .from("users")
+      .from("tratos")
       .select("id")
-      .eq("pulse_opt_out", true)
+      .eq("pulse_excluido", true)
       .order("id")
       .range(d, h),
   );
-  if (!optOuts) return null;
-
-  let tratosExcluidos = new Set<string>();
-  if (optOuts.length > 0) {
-    const tm = await paginar<{ trato_id: string }>("miembros opt-out", 50_000, "fallar", (d, h) =>
-      svc
-        .schema("core")
-        .from("trato_miembros")
-        .select("trato_id")
-        .in(
-          "user_id",
-          optOuts.map((o) => o.id),
-        )
-        .order("id")
-        .range(d, h),
-    );
-    if (!tm) return null;
-    tratosExcluidos = new Set(tm.map((r) => r.trato_id));
-  }
+  if (!excluidos) return null;
+  const tratosExcluidos = new Set(excluidos.map((r) => r.id));
 
   // Apuestas más recientes primero; si algún día rebasan el tope, el agregado
   // es parcial CON aviso (jamás silencioso).

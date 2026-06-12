@@ -69,6 +69,18 @@ export async function crearGrupo(
   };
 }
 
+// Mensajes de los códigos del RPC unirse_con_token (F24). El RPC es la ÚNICA
+// puerta de entrada: valida token + cupo por tipo (pareja=2, pequeño=6) en
+// SECURITY DEFINER — cierra el hoyo RLS del insert directo y el bug del
+// lookup por token (un extraño no puede LEER tratos bajo RLS).
+const ERRORES_UNIRSE: Record<string, string> = {
+  GRUPO_NO_EXISTE: "grupo no existe",
+  GRUPO_INACTIVO: "este grupo ya no está activo",
+  YA_MIEMBRO: "ya eres miembro de este grupo",
+  GRUPO_LLENO: "este grupo ya está completo",
+  AUTH_REQUERIDA: "sin sesión",
+};
+
 export async function unirseAGrupo(
   input: UnirseGrupoInput,
 ): Promise<Result<{ trato_id: string }>> {
@@ -81,36 +93,14 @@ export async function unirseAGrupo(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sin sesión" };
 
-  // Lookup del grupo por token
-  const { data: grupo, error: lookupErr } = await supabase
+  const { data: tratoId, error: joinErr } = await supabase
     .schema("core")
-    .from("tratos")
-    .select("id, estado")
-    .eq("invite_token", parsed.data.token)
-    .maybeSingle();
-
-  if (lookupErr || !grupo) return { ok: false, error: "grupo no existe" };
-  if (grupo.estado !== "activo") {
-    return { ok: false, error: "este grupo ya no está activo" };
-  }
-
-  // Insertarse como miembro (RLS permite solo auth.uid() = user_id;
-  // unique constraint previene doble-join)
-  const { error: joinErr } = await supabase
-    .schema("core")
-    .from("trato_miembros")
-    .insert({
-      trato_id: grupo.id as string,
-      user_id: user.id,
-      role: "member",
-    });
+    .rpc("unirse_con_token", { p_token: parsed.data.token });
 
   if (joinErr) {
-    if (joinErr.code === "23505") {
-      return { ok: false, error: "ya eres miembro de este grupo" };
-    }
-    return { ok: false, error: joinErr.message };
+    return { ok: false, error: ERRORES_UNIRSE[joinErr.message] ?? joinErr.message };
   }
+  const grupo = { id: tratoId as string };
 
   // El creador DEBE enterarse (§4.15): el push complementa al email de
   // aceptación que ya existe. Fail-soft: sin VAPID es no-op.
