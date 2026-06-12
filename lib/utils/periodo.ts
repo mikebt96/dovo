@@ -1,34 +1,19 @@
 // Ventanas de tiempo para el leaderboard / retos. Half-open [start, end).
-// Semana = lunes ISO (igual que date_trunc('week') en Postgres). Mes = primer día.
+// ANCLADAS A CDMX (F23·G17): la versión UTC marcaba "semana nueva" desde las
+// 18:00 del domingo CDMX — el leaderboard y el plan apuntaban a semanas
+// distintas según la hora. Semana = lunes CDMX (igual que los crons).
+import { hoyCDMX, lunesSemanaCDMX } from "@/lib/workout/fecha";
 
 export type Periodo = "semana" | "mes";
 
-function iso(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-// Lunes de la semana ISO que contiene `ref` (UTC).
-export function isoWeekStart(ref: Date = new Date()): Date {
-  const d = new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), ref.getUTCDate()));
-  const dow = d.getUTCDay(); // 0=domingo..6=sábado
-  const back = dow === 0 ? -6 : 1 - dow; // retrocede al lunes
-  d.setUTCDate(d.getUTCDate() + back);
-  return d;
-}
-
-export function monthStart(ref: Date = new Date()): Date {
-  return new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), 1));
-}
-
-// Rango {start, end} en 'YYYY-MM-DD' para el periodo dado.
-export function periodoRange(periodo: Periodo, ref: Date = new Date()): { start: string; end: string } {
+// Rango {start, end} en 'YYYY-MM-DD' para el periodo dado (CDMX).
+export function periodoRange(periodo: Periodo): { start: string; end: string } {
   if (periodo === "mes") {
-    const start = monthStart(ref);
-    const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
-    return { start: iso(start), end: iso(end) };
+    const ym = hoyCDMX().slice(0, 7); // YYYY-MM en CDMX
+    const start = `${ym}-01`;
+    const d = new Date(start + "T00:00:00Z");
+    d.setUTCMonth(d.getUTCMonth() + 1);
+    return { start, end: d.toISOString().slice(0, 10) };
   }
-  const start = isoWeekStart(ref);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 7);
-  return { start: iso(start), end: iso(end) };
+  return { start: lunesSemanaCDMX(0), end: lunesSemanaCDMX(1) };
 }

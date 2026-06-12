@@ -1,5 +1,7 @@
 "use server";
 
+import { hoyCDMX } from "@/lib/workout/fecha";
+
 import type { Result } from "@/lib/actions/result";
 
 import { revalidatePath } from "next/cache";
@@ -84,7 +86,9 @@ export async function getAdminData(): Promise<AdminData | null> {
     count("body_scans"),
   ]);
 
-  const hace7d = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+  const base = new Date(hoyCDMX() + "T00:00:00Z");
+  base.setUTCDate(base.getUTCDate() - 7);
+  const hace7d = base.toISOString().slice(0, 10);
   const { count: checkins7d, error: chkErr } = await svc
     .schema("core")
     .from("checkins")

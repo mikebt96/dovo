@@ -67,7 +67,9 @@ export default function LevelUpDialog({
       aria-label={
         isLevelUp ? t("title", { n: data.nivel!.despues }) : t("tierEyebrow")
       }
-      onClick={() => ref.current?.close()}
+      onClick={(e) => {
+        if (e.target === ref.current) ref.current?.close();
+      }}
     >
       <div className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center">
         {/* halo de ceremonia */}

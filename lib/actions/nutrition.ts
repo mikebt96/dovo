@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isNutritionAiLive } from "@/lib/anthropic";
 import { generateSample, generateWithAi } from "@/lib/nutrition/generate";
-import { macrosObjetivo, weekStartISO } from "@/lib/nutrition/macros";
+import { macrosObjetivo } from "@/lib/nutrition/macros";
+import { hoyCDMX, lunesSemanaCDMX } from "@/lib/workout/fecha";
 import { getEntitlement } from "@/lib/billing/tier";
 import type {
   Comida,
@@ -139,7 +140,7 @@ export async function getNutritionData(): Promise<NutritionData> {
   if (nutriErr) console.error("[nutrition] nutrition_profiles:", nutriErr.message);
   const nutricion = nutriRow ?? null;
 
-  const week = weekStartISO();
+  const week = lunesSemanaCDMX();
   let plan: MealPlanRow | null = null;
   const { data: planRow, error: planErr } = await supabase
     .schema("core")
@@ -175,7 +176,7 @@ export async function getNutritionData(): Promise<NutritionData> {
     .select("id, tipo, descripcion")
     .eq("user_id", user.id)
     // CDMX, no UTC: tras las 18:00 los logs caían en "mañana" (lección F9/F15)
-    .eq("fecha", new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(new Date()))
+    .eq("fecha", hoyCDMX())
     .order("created_at", { ascending: true });
   if (logsErr) console.error("[nutrition] food_logs:", logsErr.message);
 
@@ -260,7 +261,7 @@ export async function saveNutritionProfile(input: {
       .schema("core")
       .from("meal_plans")
       .upsert(
-        { user_id: user.id, week_start: weekStartISO(), source: generated.source, plan: generated.plan },
+        { user_id: user.id, week_start: lunesSemanaCDMX(), source: generated.source, plan: generated.plan },
         { onConflict: "user_id,week_start" },
       );
     if (planErr) return { ok: false, error: planErr.message };
@@ -293,7 +294,7 @@ export async function vetarComida(input: {
     .maybeSingle<NutritionProfile>();
   if (!fisico || !perfil) return { ok: false, error: "completa tu perfil primero" };
 
-  const week = weekStartISO();
+  const week = lunesSemanaCDMX();
   const { data: planRow, error: planErr } = await supabase
     .schema("core")
     .from("meal_plans")
@@ -319,10 +320,9 @@ export async function vetarComida(input: {
 
   // candidato: mismo tipo, sin vetos, sin repetir lo que ya hay en el día
   const enElDia = dia.comidas.map((c) => c.nombre);
-  let candidatos = candidatosSwap(objetivo, comida.tipo, restricciones, vetosEfectivos, enElDia);
-  if (!candidatos.length) {
-    candidatos = candidatosSwap(objetivo, comida.tipo, restricciones, vetosEfectivos, []);
-  }
+  // sin reintento que repita lo que ya hay en el día: si no hay candidato,
+  // nueva=null y el veto queda registrado igual (contrato documentado) — F23·G18
+  const candidatos = candidatosSwap(objetivo, comida.tipo, restricciones, vetosEfectivos, enElDia);
   const cruda = candidatos[(input.diaIdx + input.comidaIdx) % Math.max(1, candidatos.length)] ?? null;
   const nueva = cruda ? escalaComida(cruda, planRow.plan.factor_porcion ?? 1) : null;
 
@@ -420,7 +420,7 @@ export async function regenerateWithAi(): Promise<Result<{ source: "sample" | "a
   // Control de costo (contrato del setup doc y de la migración F5): la regeneración con
   // Claude es SEMANAL — si el plan de esta semana ya es source='ai', no se vuelve a llamar.
   // Editar el perfil regenera el sample (source='sample'), lo que rehabilita 1 pasada de IA.
-  const week = weekStartISO();
+  const week = lunesSemanaCDMX();
   const { data: existing, error: exErr } = await supabase
     .schema("core")
     .from("meal_plans")
@@ -442,7 +442,7 @@ export async function regenerateWithAi(): Promise<Result<{ source: "sample" | "a
     .schema("core")
     .from("meal_plans")
     .upsert(
-      { user_id: user.id, week_start: weekStartISO(), source: generated.source, plan: generated.plan as MealPlanContent },
+      { user_id: user.id, week_start: lunesSemanaCDMX(), source: generated.source, plan: generated.plan as MealPlanContent },
       { onConflict: "user_id,week_start" },
     );
   if (upErr) return { ok: false, error: upErr.message };
@@ -471,7 +471,7 @@ export async function logFood(input: {
   const { data, error } = await supabase
     .schema("core")
     .from("food_logs")
-    .insert({ user_id: user.id, tipo, descripcion })
+    .insert({ user_id: user.id, tipo, descripcion, fecha: hoyCDMX() })
     .select("id")
     .maybeSingle<{ id: string }>();
   if (error) return { ok: false, error: error.message };

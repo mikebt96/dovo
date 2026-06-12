@@ -192,6 +192,7 @@ export default async function HomeAuthed() {
       {/* te metieron un golpe — la home lo dice y te manda a cobrártela */}
       {ataque && (
         <BannerAtaque
+          key={ataque.id}
           ataqueId={ataque.id}
           tipo={ataque.tipo === "golpe" ? "golpe" : "congelamiento"}
         />

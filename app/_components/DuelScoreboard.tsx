@@ -45,7 +45,8 @@ export default function DuelScoreboard({
   const losing = total > 0 && diff < 0 && Math.abs(diff) >= total * 0.1;
   const winning = total > 0 && diff > 0 && Math.abs(diff) >= total * 0.1;
 
-  const finMs = new Date(m.periodo_fin + "T00:00:00Z").getTime();
+  // fin del duelo a medianoche CDMX (UTC-6 fijo, convención del repo)
+  const finMs = new Date(m.periodo_fin + "T00:00:00-06:00").getTime();
   const dias = Math.max(0, Math.ceil((finMs - Date.now()) / 86_400_000));
   const vencido = finMs <= Date.now();
 

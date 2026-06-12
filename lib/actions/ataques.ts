@@ -1,5 +1,7 @@
 "use server";
 
+import { fechaCDMX, hoyCDMX } from "@/lib/workout/fecha";
+
 import type { Result } from "@/lib/actions/result";
 
 import { revalidatePath } from "next/cache";
@@ -33,9 +35,6 @@ export type DuelContext = {
   ataques: AtaqueRow[]; // historial del duelo, más reciente primero
   congelados: { user_id: string; hasta: string }[]; // congelamientos vigentes
 };
-
-const HOY_CDMX = () =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(new Date());
 
 export async function getDuelContext(
   retoId: string,
@@ -73,7 +72,7 @@ export async function getDuelContext(
 
   // Munición: check-in de HOY (CDMX) del usuario en su trato; dúos demo exentos (el RPC
   // lo re-valida server-side — esto es solo para pintar el botón correcto).
-  const hoy = HOY_CDMX();
+  const hoy = hoyCDMX();
   const [
     { data: miMiembro, error: miErr },
     { data: trato, error: tratoErr },
@@ -111,9 +110,7 @@ export async function getDuelContext(
   const yaAtacoHoy = feed.some(
     (a) =>
       a.de_user === user.id &&
-      new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(
-        new Date(a.created_at),
-      ) === hoy,
+      fechaCDMX(new Date(a.created_at)) === hoy,
   );
 
   // Vigentes, deduplicados por usuario (dos freezes solapados ⇒ un chip con el `hasta` mayor).

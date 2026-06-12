@@ -2,7 +2,7 @@
 
 import { vibrateTap } from "@/lib/juice";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { marcarFavorito, vetarComida } from "@/lib/actions/nutrition";
@@ -33,6 +33,14 @@ export default function ComidaInteractiva({
   const [fav, setFav] = useState(esFavorito);
   const [estado, setEstado] = useState<"idle" | "swapping" | "swapped">("idle");
   const [pending, start] = useTransition();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   function like() {
     setFav((f) => !f); // optimista — la action confirma
@@ -54,7 +62,7 @@ export default function ComidaInteractiva({
       vibrateTap();
       setEstado("swapped");
       router.refresh(); // el platillo nuevo llega del server (jamás inventado)
-      setTimeout(() => setEstado("idle"), 1600);
+      timer.current = setTimeout(() => setEstado("idle"), 1600);
     });
   }
 

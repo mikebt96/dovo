@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
-import { hoyCDMX, diaSemanaCDMX } from "@/lib/workout/fecha";
+import { hoyCDMX, diaSemanaCDMX, lunesSemanaCDMX } from "@/lib/workout/fecha";
 import type { MealPlanRow } from "@/lib/nutrition/types";
 import GameIcon from "./GameIcon";
 
@@ -54,8 +54,7 @@ export default async function MisionesHoy({
     .from("meal_plans")
     .select("id, week_start, source, plan")
     .eq("user_id", user.id)
-    .order("week_start", { ascending: false })
-    .limit(1)
+    .eq("week_start", lunesSemanaCDMX())
     .maybeSingle<MealPlanRow>();
   const diaHoy =
     planRow?.plan?.dias?.find((d) => d.dia === diaSemanaCDMX()) ?? null;

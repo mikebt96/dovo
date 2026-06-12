@@ -283,7 +283,7 @@ function DiaAccordion({
       <div className="px-4 pb-4 pt-1 space-y-3 border-t border-ink/8">
         {dia.comidas.map((c, ci) => (
           <ComidaInteractiva
-            key={`${c.tipo}-${c.nombre}`}
+            key={`${ci}-${c.tipo}-${c.nombre}`}
             diaIdx={diaIdx}
             comidaIdx={ci}
             comida={c}

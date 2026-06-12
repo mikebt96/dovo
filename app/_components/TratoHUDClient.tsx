@@ -6,6 +6,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { nudgeCompa } from "@/lib/actions/trato";
 import GameIcon from "./GameIcon";
+import { dowCDMX, hoyCDMX } from "@/lib/workout/fecha";
 
 type Miembro = {
   userId: string;
@@ -16,18 +17,6 @@ type Miembro = {
   hoySellado: boolean; // candado del lugar: el sello que el compa ve
   esYo: boolean;
 };
-
-const TZ = "America/Mexico_City";
-
-function hoyCDMXClient(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
-}
-
-// 0 = lunes … 6 = domingo, en CDMX
-function dowCDMX(): number {
-  const d = new Date(hoyCDMXClient() + "T00:00:00Z");
-  return (d.getUTCDay() + 6) % 7;
-}
 
 // Próximo Veredicto: domingo 23:59 CDMX = lunes 05:59 UTC (CDMX es UTC-6 fijo).
 function msAlVeredicto(): number {
@@ -69,11 +58,13 @@ export default function TratoHUDClient({
   }, []);
 
   // rate-limit del empujón: 1/día (v1 localStorage — el tag del push colapsa repetidos)
-  const nudgeKey = `dovo_nudge_${tratoId}_${hoyCDMXClient()}`;
+  const nudgeKey = `dovo_nudge_${tratoId}_${hoyCDMX()}`;
   useEffect(() => {
-    if (localStorage.getItem(nudgeKey)) setNudgeState("sent");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // re-sincroniza si cambia el día (la key) sin pisar una confirmación abierta
+    setNudgeState((prev) =>
+      prev === "confirm" ? prev : localStorage.getItem(nudgeKey) ? "sent" : "idle",
+    );
+  }, [nudgeKey]);
 
   const yo = miembros.find((m) => m.esYo);
   const otros = miembros.filter((m) => !m.esYo);

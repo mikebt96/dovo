@@ -104,7 +104,10 @@ export default async function ApuestaSemanal({ tratoId }: { tratoId: string }) {
           )}
 
           <div className="mt-4">
+            {/* key: si el compa re-sella, el sheet re-monta con el texto nuevo
+                (useState(inicial) solo siembra en mount) — F23·G18 */}
             <ApuestaSheet
+              key={`${data.actual.id}|${data.actual.premio_text}|${data.actual.apuesta_text}`}
               tratoId={tratoId}
               tierNombre={tier.nombre}
               racha={data.rachaTrato}

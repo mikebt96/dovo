@@ -1,5 +1,7 @@
 "use server";
 
+import { hoyCDMX } from "@/lib/workout/fecha";
+
 import type { Result } from "@/lib/actions/result";
 
 import { revalidatePath } from "next/cache";
@@ -35,8 +37,13 @@ export type Marcador = {
   lider_trato_id: string | null;
 };
 
-function hoyISO(): string {
-  return new Date().toISOString().slice(0, 10);
+// Ventana del duelo anclada a CDMX (F23·G17): la versión UTC arrancaba el
+// duelo "mañana" si lo creabas después de las 18:00.
+function ventanaReto(): { inicio: string; fin: string } {
+  const inicio = hoyCDMX();
+  const d = new Date(inicio + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + RETO_DURACION_DIAS);
+  return { inicio, fin: d.toISOString().slice(0, 10) };
 }
 
 // Reta a otro dúo: crea un duelo de RETO_DURACION_DIAS días por puntos normalizados.
@@ -53,10 +60,7 @@ export async function crearReto(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sin sesión" };
 
-  const inicio = hoyISO();
-  const fin = new Date(Date.now() + RETO_DURACION_DIAS * 86_400_000)
-    .toISOString()
-    .slice(0, 10);
+  const { inicio, fin } = ventanaReto();
 
   const { data, error } = await supabase
     .schema("core")
@@ -109,13 +113,14 @@ export async function responderReto(
   // ambos dúos compitan la ventana completa.
   const update =
     accion === "aceptar"
-      ? {
-          estado: "activo" as const,
-          periodo_inicio: hoyISO(),
-          periodo_fin: new Date(Date.now() + RETO_DURACION_DIAS * 86_400_000)
-            .toISOString()
-            .slice(0, 10),
-        }
+      ? (() => {
+          const v = ventanaReto();
+          return {
+            estado: "activo" as const,
+            periodo_inicio: v.inicio,
+            periodo_fin: v.fin,
+          };
+        })()
       : { estado: "rechazado" as const };
   const { error } = await supabase
     .schema("core")

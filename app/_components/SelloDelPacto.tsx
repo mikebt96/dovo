@@ -38,7 +38,9 @@ export default function SelloDelPacto() {
       ref={ref}
       className="dlg-game"
       aria-label={t("title")}
-      onClick={() => ref.current?.close()}
+      onClick={(e) => {
+        if (e.target === ref.current) ref.current?.close();
+      }}
     >
       <div className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center">
         <div

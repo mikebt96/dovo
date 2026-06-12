@@ -41,7 +41,9 @@ export default function VeredictoDialog({
       ref={ref}
       className="dlg-game"
       aria-label={t("eyebrow")}
-      onClick={() => ref.current?.close()}
+      onClick={(e) => {
+        if (e.target === ref.current) ref.current?.close();
+      }}
     >
       <div className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center">
         {/* halo de ceremonia — dorado si selló, apagado si se rompió */}

@@ -2,8 +2,9 @@
 
 import { vibrateTap } from "@/lib/juice";
 import { STAT_SHORT, STAT_VAR } from "@/lib/leveling/display";
+import { hoyCDMX } from "@/lib/workout/fecha";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { crearCheckin, type CheckinReward } from "@/lib/actions/checkins";
@@ -51,12 +52,6 @@ type Props = {
   boostHref?: string;
 };
 
-// Fecha de HOY en CDMX — NO toISOString (UTC): después de las 18:00 CDMX el
-// check-in caía en "mañana" (misma lección que F9 para el plan; en-CA = ISO).
-const HOY = () =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(
-    new Date(),
-  );
 
 // Mapa estático por StatKey (Tailwind no puede purgar clases dinámicas — mismo patrón
 // estático que DuoChampion). Dot del color del stat + tinte de fondo; el texto va en
@@ -88,6 +83,16 @@ export default function CheckinRow({
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const lastCoords = useRef<Coords | undefined>(undefined);
 
+  // timers fuera al desmontar (F23·G18): un refresh a mitad del hit-stop no
+  // dispara setState sobre un componente muerto
+  useEffect(
+    () => () => {
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+    },
+    [],
+  );
+
   function log(metricas: Record<string, number>, duracionMin: number) {
     setError(null);
     start(async () => {
@@ -97,7 +102,7 @@ export default function CheckinRow({
       const res = await crearCheckin({
         miembroId,
         actividadId,
-        fecha: HOY(),
+        fecha: hoyCDMX(),
         metricas,
         duracionMin,
         coords,

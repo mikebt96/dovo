@@ -2,7 +2,7 @@
 
 import { prefersReducedMotion, vibrateHit } from "@/lib/juice";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lanzarAtaque, type AtaqueRow, type AtaqueTipo, type MiembroReto } from "@/lib/actions/ataques";
@@ -36,6 +36,14 @@ export default function AttackPanel({
   // disabled={pending} solo aplica tras re-render: el ref corta el doble-tap en el mismo frame.
   const inflight = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(
+    () => () => {
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+    },
+    [],
+  );
 
   function lanzar(tipo: AtaqueTipo, paraUser?: string) {
     if (inflight.current) return;

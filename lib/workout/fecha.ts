@@ -3,9 +3,20 @@
 
 const TZ = "America/Mexico_City";
 
-/** YYYY-MM-DD de hoy en CDMX (en-CA formatea exactamente ISO). */
+/** YYYY-MM-DD de una fecha en CDMX (en-CA formatea exactamente ISO). */
+export function fechaCDMX(d: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
+}
+
+/** YYYY-MM-DD de hoy en CDMX. */
 export function hoyCDMX(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
+  return fechaCDMX();
+}
+
+/** Día de la semana de hoy en CDMX: 0 = lunes … 6 = domingo. */
+export function dowCDMX(): number {
+  const d = new Date(hoyCDMX() + "T00:00:00Z");
+  return (d.getUTCDay() + 6) % 7;
 }
 
 /** Nombre del día de hoy en CDMX, en minúsculas y con acentos ("miércoles"). */

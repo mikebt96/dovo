@@ -47,12 +47,3 @@ export function macrosObjetivo(p: PerfilFisico): MacrosObjetivo {
 
   return { kcal, prot, carb, grasa };
 }
-
-/** Lunes (UTC) de la semana de una fecha — clave de cache de meal_plans. */
-export function weekStartISO(d = new Date()): string {
-  const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-  const dow = date.getUTCDay(); // 0=domingo
-  const diff = dow === 0 ? -6 : 1 - dow;
-  date.setUTCDate(date.getUTCDate() + diff);
-  return date.toISOString().slice(0, 10);
-}
