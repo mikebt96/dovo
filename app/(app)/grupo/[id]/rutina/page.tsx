@@ -6,12 +6,15 @@ import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import { getWorkoutData } from "@/lib/actions/workout";
 import { POR_SLUG } from "@/lib/workout/catalog";
-import { diaSemanaCDMX } from "@/lib/workout/fecha";
+import { diaSemanaCDMX, hoyCDMX } from "@/lib/workout/fecha";
 import { topeReps } from "@/lib/workout/progresion";
+import { tipDelDia, zonaAfectaGrupo } from "@/lib/workout/recuperacion";
+import { getMolestiasHoy } from "@/lib/actions/molestias";
 import type { SerieLog } from "@/lib/workout/types";
 import RutinaForm from "./RutinaForm";
 import LogExerciseButton from "./LogExerciseButton";
 import AiWorkoutButton from "./AiWorkoutButton";
+import PreEntreno from "./PreEntreno";
 import CheckinRow from "@/app/_components/CheckinRow";
 
 export const dynamic = "force-dynamic";
@@ -142,6 +145,9 @@ export default async function RutinaPage({
     ? (rutinaItemsRaw.find((i) => i.actividad_id === actividadHoy.id)?.duracion_min ?? 45)
     : 45;
 
+  // Pre-entreno: molestias de HOY → "cuídate hoy" en los ejercicios de la zona
+  const zonasHoy = await getMolestiasHoy();
+
   return (
     <main className="min-h-svh max-w-2xl lg:max-w-5xl mx-auto px-6 py-10 bg-papel text-ink">
       <AppNav active="entrenar" />
@@ -149,6 +155,9 @@ export default async function RutinaPage({
 
       {plan && (
         <>
+          {/* Pre-entreno (spec del founder): cómo llegas hoy + recuperación */}
+          <PreEntreno zonasIniciales={zonasHoy} tip={tipDelDia(hoyCDMX())} />
+
           {/* Header del plan: badge de fuente + botón IA */}
           <div className="flex flex-wrap items-center gap-3 mb-6">
             <span
@@ -216,6 +225,18 @@ export default async function RutinaPage({
                         <li key={`${b.exercise_slug}-${i}`} className="border-t border-ink/8 pt-3 first:border-t-0 first:pt-0">
                           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                             <span className="font-medium">{b.nombre}</span>
+                            {/* pre-entreno: este ejercicio carga una zona con molestia */}
+                            {esHoy && zonaAfectaGrupo(zonasHoy, ej?.grupo) && (
+                              <span
+                                className="text-[9px] mono uppercase tracking-[0.14em] rounded-full px-2 py-0.5"
+                                style={{
+                                  color: "var(--mode-rival-deep)",
+                                  background: "color-mix(in srgb, var(--mode-rival) 10%, transparent)",
+                                }}
+                              >
+                                {t("cuidate")}
+                              </span>
+                            )}
                             <span className="text-sm tabular-nums opacity-70">
                               {b.series}×{b.reps}
                             </span>

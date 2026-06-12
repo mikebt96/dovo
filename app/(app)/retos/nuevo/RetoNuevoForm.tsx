@@ -3,9 +3,29 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { crearReto } from "@/lib/actions/retos";
+import { crearReto, type HeadToHead } from "@/lib/actions/retos";
+import GameIcon from "@/app/_components/GameIcon";
 
-type Candidato = { trato_id: string; nombre: string };
+// Scouting de rivales (directiva §5 retos): cada candidato es una mini-carta —
+// clase dominante, top stat en su color, racha del dúo en ámbar y el historial
+// contra ti. Eliges a quién retar VIENDO contra quién te metes.
+type Candidato = {
+  trato_id: string;
+  nombre: string;
+  racha: number;
+  clase: string | null;
+  topStat: string | null;
+  h2h: HeadToHead;
+};
+
+const STAT_VAR: Record<string, string> = {
+  fue: "var(--stat-fue)",
+  res: "var(--stat-res)",
+  flex: "var(--stat-flex)",
+  vel: "var(--stat-vel)",
+  equ: "var(--stat-equ)",
+  vit: "var(--stat-vit)",
+};
 
 export default function RetoNuevoForm({
   miTratoId,
@@ -44,30 +64,72 @@ export default function RetoNuevoForm({
         {t("pickRival")}
       </p>
       <ul className="space-y-2 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
-        {candidatos.map((c) => (
-          <li key={c.trato_id}>
-            <button
-              type="button"
-              onClick={() => setSel(c.trato_id)}
-              className={`w-full text-left border rounded-lg p-4 transition-colors ${
-                sel === c.trato_id
-                  ? "border-signal bg-papel-dark/40"
-                  : "border-ink/12 hover:border-ink/30"
-              }`}
-            >
-              <span className="display font-medium lowercase">{c.nombre}</span>
-            </button>
-          </li>
-        ))}
+        {candidatos.map((c) => {
+          const activo = sel === c.trato_id;
+          const statColor = c.topStat ? STAT_VAR[c.topStat] : null;
+          const conHistoria = c.h2h.yo + c.h2h.rival + c.h2h.empates > 0;
+          return (
+            <li key={c.trato_id}>
+              <button
+                type="button"
+                onClick={() => setSel(c.trato_id)}
+                aria-pressed={activo}
+                className={`w-full text-left border rounded-xl p-4 transition-all ${
+                  activo
+                    ? "border-signal bg-signal/[0.05] shadow-[0_8px_30px_-14px_rgba(109,74,255,0.45)]"
+                    : "border-ink/12 hover:border-ink/30"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="display font-bold lowercase truncate">
+                    {c.nombre}
+                  </span>
+                  {/* racha del dúo rival — SIEMPRE en ámbar (léxico §2) */}
+                  {c.racha > 0 && (
+                    <span
+                      className="shrink-0 inline-flex items-center gap-1 text-[10px] mono uppercase tracking-[0.12em] tabular-nums"
+                      style={{ color: "var(--mode-racha)" }}
+                    >
+                      <GameIcon name="eslabones" size={11} />
+                      {t("scoutRacha", { n: c.racha })}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  {c.clase && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] mono lowercase opacity-75">
+                      {statColor && (
+                        <span
+                          aria-hidden
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: statColor }}
+                        />
+                      )}
+                      {c.clase}
+                    </span>
+                  )}
+                  {conHistoria && (
+                    <span
+                      className="text-[10px] mono uppercase tracking-[0.12em] tabular-nums"
+                      style={{ color: "var(--mode-rival-deep)" }}
+                    >
+                      {t("h2h", { yo: c.h2h.yo, rival: c.h2h.rival })}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </li>
+          );
+        })}
       </ul>
 
-      {err && <p className="text-sm text-red-600 mb-3">{err}</p>}
+      {err && <p className="text-sm text-rival-deep mb-3">{err}</p>}
 
       <button
         type="button"
         disabled={!sel || pending}
         onClick={enviar}
-        className="inline-block bg-ink text-papel px-6 py-3 rounded-full display font-semibold lowercase hover:bg-signal hover:text-white transition-colors disabled:opacity-40"
+        className="btn-game inline-block text-white px-6 py-3 display font-semibold lowercase disabled:opacity-40"
       >
         {pending ? t("creating") : t("submit")}
       </button>

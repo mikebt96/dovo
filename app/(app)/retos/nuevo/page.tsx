@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { getLeaderboard } from "@/lib/actions/leaderboard";
+import { getHeadToHead } from "@/lib/actions/retos";
 import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import RetoNuevoForm from "./RetoNuevoForm";
@@ -27,9 +28,18 @@ export default async function NuevoRetoPage() {
 
   const miTratoId = miembro.trato_id;
   const res = await getLeaderboard("semana", false);
-  const candidatos = (res.ok ? res.data : [])
-    .filter((r) => r.trato_id !== miTratoId)
-    .map((r) => ({ trato_id: r.trato_id, nombre: r.nombre_grupo }));
+  // Scouting (directiva §5 retos): el leaderboard YA trae racha/clase/top_stat
+  // de cada dúo — antes se tiraban. Cada candidato es una mini-carta de juego.
+  const rows = (res.ok ? res.data : []).filter((r) => r.trato_id !== miTratoId);
+  const h2hs = await Promise.all(rows.map((r) => getHeadToHead(miTratoId, r.trato_id)));
+  const candidatos = rows.map((r, i) => ({
+    trato_id: r.trato_id,
+    nombre: r.nombre_grupo,
+    racha: r.racha_duo,
+    clase: r.top_clase,
+    topStat: r.top_stat,
+    h2h: h2hs[i],
+  }));
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-4xl mx-auto">

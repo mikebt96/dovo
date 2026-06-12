@@ -394,6 +394,21 @@
     "planTitle": "your week",
     "today": "today",
     "restLabel": "rest",
+    "preEyebrow": "before you train",
+    "preQuestion": "how are you arriving today?",
+    "preBien": "feeling good",
+    "preAviso": "ok — go easy on anything loading that area. marked exercises say «take care today»: drop weight or swap the movement, you're in charge.",
+    "recupTitle": "today's recovery",
+    "cuidate": "take care today",
+    "zona": {
+      "rodilla": "knee",
+      "hombro": "shoulder",
+      "espalda_baja": "lower back",
+      "muneca": "wrist",
+      "tobillo": "ankle",
+      "cadera": "hip",
+      "cuello": "neck"
+    },
     "lastTime": "last time",
     "suggested": "today try",
     "logCta": "log it",
@@ -540,7 +555,8 @@
     "h2h": "all-time: {yo}–{rival}",
     "rematch": "rematch",
     "rematchSent": "rematch sent — waiting on the rival",
-    "duelClose": "close"
+    "duelClose": "close",
+    "scoutRacha": "{n} wk"
   },
   "boosts": {
     "title": "boosts",

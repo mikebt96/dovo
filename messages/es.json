@@ -394,6 +394,21 @@
     "planTitle": "tu semana",
     "today": "hoy",
     "restLabel": "descanso",
+    "preEyebrow": "antes de entrenar",
+    "preQuestion": "¿cómo llegas hoy?",
+    "preBien": "llego bien",
+    "preAviso": "ok — tómatela suave con lo que cargue esa zona. los ejercicios marcados llevan «cuídate hoy»: baja peso o cambia el movimiento, tú mandas.",
+    "recupTitle": "recuperación de hoy",
+    "cuidate": "cuídate hoy",
+    "zona": {
+      "rodilla": "rodilla",
+      "hombro": "hombro",
+      "espalda_baja": "espalda baja",
+      "muneca": "muñeca",
+      "tobillo": "tobillo",
+      "cadera": "cadera",
+      "cuello": "cuello"
+    },
     "lastTime": "la vez pasada",
     "suggested": "hoy intenta",
     "logCta": "registrar",
@@ -540,7 +555,8 @@
     "h2h": "historial: van {yo}–{rival}",
     "rematch": "revancha",
     "rematchSent": "reto de revancha enviado — esperando al rival",
-    "duelClose": "cerrar"
+    "duelClose": "cerrar",
+    "scoutRacha": "{n} sem"
   },
   "boosts": {
     "title": "boosts",
