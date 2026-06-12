@@ -9,6 +9,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { isAdminEmail } from "@/lib/admin";
 import { logAppError } from "@/lib/observability/log";
+import {
+  clasificarPremio,
+  LABEL_CATEGORIA,
+  type CategoriaPremio,
+} from "@/lib/analytics/premios";
+import type { ApuestaRow } from "@/lib/actions/apuestas";
 
 export type AppError = {
   id: string;
@@ -132,6 +138,167 @@ export async function getAdminData(): Promise<AdminData | null> {
     errors: (errRows ?? []) as AppError[],
     crons: (cronRows ?? []) as CronHealth[],
     dbOk,
+  };
+}
+
+// ── Inteligencia de premios (mandato 2026-06-12): qué se juegan los dúos,
+// agregado y anónimo — el activo para negociar descuentos con marcas. ──
+
+export type PremioCategoriaAgg = {
+  categoria: CategoriaPremio;
+  label: string;
+  selladas: number; // apuestas selladas con premio de esta categoría
+  vivas: number; // semana en curso, aún sin Veredicto — no cuentan al %
+  ganadas: number; // el dúo cumplió la semana: el premio se disfrutó
+  duos: number; // dúos únicos que apostaron esto
+};
+
+export type InteligenciaPremios = {
+  categorias: PremioCategoriaAgg[]; // orden: más selladas primero
+  totales: {
+    selladas: number;
+    vivas: number;
+    ganadas: number;
+    duos: number; // dúos únicos en el agregado
+    excluidosOptOut: number; // dúos fuera por opt-out de pulse (transparencia)
+  };
+};
+
+// PostgREST capa TODA respuesta a max_rows (1000 en config.toml) sin marcar
+// error — un .limit(5000) devuelve 1000 en silencio. Por eso se pagina con
+// .range(); al tope, "fallar" aborta (gates de privacidad: fail-closed) y
+// "avisar" entrega agregado parcial con warn.
+const PAGINA = 1000;
+async function paginar<T>(
+  etiqueta: string,
+  maxFilas: number,
+  alTope: "fallar" | "avisar",
+  query: (desde: number, hasta: number) => PromiseLike<{
+    data: T[] | null;
+    error: { message: string } | null;
+  }>,
+): Promise<T[] | null> {
+  const filas: T[] = [];
+  for (let desde = 0; desde < maxFilas; desde += PAGINA) {
+    const { data, error } = await query(desde, Math.min(desde + PAGINA, maxFilas) - 1);
+    if (error) {
+      console.error(`[admin] inteligencia ${etiqueta}:`, error.message);
+      return null;
+    }
+    const lote = data ?? [];
+    filas.push(...lote);
+    if (lote.length < PAGINA) return filas; // última página real
+  }
+  if (alTope === "fallar") {
+    console.error(`[admin] inteligencia ${etiqueta}: >${maxFilas} filas — abortando (fail-closed)`);
+    return null;
+  }
+  console.warn(`[admin] inteligencia ${etiqueta}: tope de ${maxFilas} filas — agregado parcial`);
+  return filas;
+}
+
+export async function getInteligenciaPremios(): Promise<InteligenciaPremios | null> {
+  const gate = await requireAdmin();
+  if (!gate.ok) return null;
+
+  const svc = createServiceClient();
+
+  // Regla conservadora: si CUALQUIER miembro del dúo se salió de pulse, el
+  // dúo ENTERO queda fuera del agregado — la apuesta es un dato de los dos.
+  // Los dos gates van fail-closed: truncado silencioso = abortar, jamás
+  // dejar entrar a un dúo con opt-out.
+  // Limitación conocida (para la limpieza): la exclusión usa la membresía
+  // ACTUAL — si el miembro opted-out deja el dúo, su histórico reingresa.
+  // El fix real es un flag pegajoso a nivel trato (SQL, post-Veredicto).
+  const optOuts = await paginar<{ id: string }>("opt-outs", 50_000, "fallar", (d, h) =>
+    svc
+      .schema("core")
+      .from("users")
+      .select("id")
+      .eq("pulse_opt_out", true)
+      .order("id")
+      .range(d, h),
+  );
+  if (!optOuts) return null;
+
+  let tratosExcluidos = new Set<string>();
+  if (optOuts.length > 0) {
+    const tm = await paginar<{ trato_id: string }>("miembros opt-out", 50_000, "fallar", (d, h) =>
+      svc
+        .schema("core")
+        .from("trato_miembros")
+        .select("trato_id")
+        .in(
+          "user_id",
+          optOuts.map((o) => o.id),
+        )
+        .order("id")
+        .range(d, h),
+    );
+    if (!tm) return null;
+    tratosExcluidos = new Set(tm.map((r) => r.trato_id));
+  }
+
+  // Apuestas más recientes primero; si algún día rebasan el tope, el agregado
+  // es parcial CON aviso (jamás silencioso).
+  const rows = await paginar<Pick<ApuestaRow, "trato_id" | "premio_text" | "estado">>(
+    "apuestas",
+    5000,
+    "avisar",
+    (d, h) =>
+      svc
+        .schema("core")
+        .from("apuestas")
+        .select("trato_id, premio_text, estado")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(d, h),
+  );
+  if (!rows) return null;
+
+  const porCategoria = new Map<
+    CategoriaPremio,
+    { selladas: number; vivas: number; ganadas: number; duos: Set<string> }
+  >();
+  const duosIncluidos = new Set<string>();
+  const duosFuera = new Set<string>();
+
+  for (const r of rows) {
+    if (tratosExcluidos.has(r.trato_id)) {
+      duosFuera.add(r.trato_id);
+      continue;
+    }
+    duosIncluidos.add(r.trato_id);
+    const cat = clasificarPremio(r.premio_text);
+    const agg =
+      porCategoria.get(cat) ?? { selladas: 0, vivas: 0, ganadas: 0, duos: new Set<string>() };
+    agg.selladas += 1;
+    if (r.estado === "viva") agg.vivas += 1;
+    if (r.estado === "ganada") agg.ganadas += 1;
+    agg.duos.add(r.trato_id);
+    porCategoria.set(cat, agg);
+  }
+
+  const categorias: PremioCategoriaAgg[] = [...porCategoria.entries()]
+    .map(([categoria, a]) => ({
+      categoria,
+      label: LABEL_CATEGORIA[categoria],
+      selladas: a.selladas,
+      vivas: a.vivas,
+      ganadas: a.ganadas,
+      duos: a.duos.size,
+    }))
+    .sort((a, b) => b.selladas - a.selladas);
+
+  return {
+    categorias,
+    totales: {
+      selladas: categorias.reduce((s, c) => s + c.selladas, 0),
+      vivas: categorias.reduce((s, c) => s + c.vivas, 0),
+      ganadas: categorias.reduce((s, c) => s + c.ganadas, 0),
+      duos: duosIncluidos.size,
+      excluidosOptOut: duosFuera.size,
+    },
   };
 }
 

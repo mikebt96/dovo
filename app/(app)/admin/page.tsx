@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import { isAdminEmail } from "@/lib/admin";
-import { getAdminData } from "@/lib/actions/admin";
+import { getAdminData, getInteligenciaPremios } from "@/lib/actions/admin";
 import AdminTools from "./_components/AdminTools";
 
 export const dynamic = "force-dynamic";
@@ -18,10 +18,11 @@ export default async function AdminPage() {
   if (!user) redirect("/sign-in");
   if (!isAdminEmail(user.email)) notFound();
 
-  const data = await getAdminData();
+  const [data, intel] = await Promise.all([getAdminData(), getInteligenciaPremios()]);
   if (!data) notFound();
 
   const liveFlags = data.flags.filter((f) => f.on).length;
+  const maxSelladas = intel?.categorias[0]?.selladas ?? 0;
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-3xl mx-auto">
@@ -60,6 +61,72 @@ export default async function AdminPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Inteligencia de premios: qué se juegan los dúos, agregado y anónimo —
+          el activo para negociar descuentos con marcas (cine, restaurantes…) */}
+      <section className="mb-10">
+        <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-70 mb-1">
+          inteligencia de premios · qué se juegan los dúos
+        </h2>
+        <p className="text-xs opacity-50 mb-4">
+          para negociar con marcas: cuántos dúos apuestan cine, comida, viajes…
+        </p>
+        {!intel ? (
+          /* null = falló una query (jamás disfrazar un error de estado vacío) */
+          <p className="text-sm text-rival-deep">
+            no se pudo cargar el agregado — revisa los logs del server.
+          </p>
+        ) : intel.totales.selladas > 0 ? (
+          <>
+            <div className="grid gap-2">
+              {intel.categorias.map((c) => {
+                // % solo sobre apuestas YA juzgadas por el Veredicto: las
+                // vivas (semana en curso) no son incumplimiento todavía
+                const resueltas = c.selladas - c.vivas;
+                return (
+                  <div key={c.categoria} className="rounded-xl border border-ink/10 px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-sm font-medium">{c.label}</span>
+                      <span className="text-[10px] mono opacity-50 tabular-nums">
+                        {c.duos} {c.duos === 1 ? "dúo" : "dúos"}
+                      </span>
+                      <span className="ml-auto text-[10px] mono uppercase tracking-widest opacity-60 tabular-nums">
+                        {c.selladas} selladas
+                        {c.vivas > 0 && ` · ${c.vivas} en juego`}
+                        {resueltas > 0 &&
+                          ` · ${c.ganadas} cumplidas · ${Math.round((c.ganadas / resueltas) * 100)}%`}
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1 rounded-full bg-ink/10 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-signal"
+                        style={{
+                          width: `${maxSelladas > 0 ? Math.max(4, Math.round((c.selladas / maxSelladas) * 100)) : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-[10px] mono uppercase tracking-[0.14em] opacity-40 tabular-nums">
+              {intel.totales.selladas} apuestas
+              {intel.totales.vivas > 0 && ` · ${intel.totales.vivas} en juego`} ·{" "}
+              {intel.totales.duos} dúos · agregado y anónimo
+              {intel.totales.excluidosOptOut > 0 &&
+                ` · ${intel.totales.excluidosOptOut} fuera por opt-out`}
+            </p>
+            <p className="mt-1 text-[10px] mono uppercase tracking-[0.14em] opacity-40">
+              ⚠ con marcas solo compartir categorías con ≥100 dúos — k-anonimato del aviso de
+              privacidad
+            </p>
+          </>
+        ) : (
+          <p className="text-sm opacity-50">
+            aún no hay apuestas selladas — la inteligencia nace cuando los dúos apuestan.
+          </p>
+        )}
       </section>
 
       {/* Crons: el Veredicto y el cierre de duelos NO pueden caerse en silencio */}
