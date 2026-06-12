@@ -1,0 +1,45 @@
+[alta/dup] Mapas StatKey→label/color/clase duplicados en 8+ archivos (el canónico ya existe en lib/leveling/display.ts)
+[alta/dup] type Result<T> copy-pasteado idéntico en 19 archivos de lib/actions/ (+1 variante)
+[alta/dup] 5 copias inline del panel oscuro que NO migraron a .card-game (viola regla explícita de globals.css y de la directiva)
+[media/dup] Literales de color hardcodeados que ya tienen token (o piden uno fijo para superficies siempre-oscuras)
+[media/dup] hoyCDMX() re-implementado 4 veces pese a existir en lib/workout/fecha.ts; ademas dos 'lunes de semana' con semánticas TZ distintas
+[media/dup] El 'halo' decorativo del panel oscuro copy-pasteado 8 veces
+[baja/dup] Patrón de chip repetido 11 veces con clases largas idénticas; el token --radius-chip existe y nadie lo usa
+[baja/dup] Patrones de háptica duplicados — la directiva ya pide lib/juice.ts y no existe
+[alta/bugs] logFood no fija fecha y el default de DB es current_date (UTC): el log de comida desaparece después de las 18:00 CDMX
+[alta/bugs] cerrar_apuestas: la comparación `last_cumplido_week = p_week` da NULL para tratos que nunca han cumplido → la apuesta queda 'viva' para siempre
+[alta/bugs] weekStartISO usa el reloj UTC del server: la semana del meal plan y el gate semanal de IA cambian el domingo a las 18:00 CDMX
+[media/bugs] lib/utils/periodo.ts calcula la semana/mes del leaderboard con el reloj UTC del server: el ranking semanal «resetea» el domingo a las 18:00 CDMX
+[alta/bugs] retos.ts: hoyISO() en UTC desplaza la ventana del duelo un día — los check-ins del día en que aceptas (después de las 18:00) no cuentan
+[media/bugs] DuelScoreboard interpreta periodo_fin como medianoche UTC: «esperando cierre» y el botón de cerrar aparecen 6 horas antes
+[media/bugs] unirseAGrupo no limita a 2 miembros: el invite token vive para siempre y un 3er miembro rompe todos los supuestos de dúo
+[media/bugs] BannerAtaque: useEffect con deps [] — un ataque nuevo tras router.refresh nunca re-evalúa localStorage y el banner no aparece
+[media/bugs] ApuestaSheet: estado inicializado del prop `inicial` sin sync tras router.refresh — puede pisar la edición del compa con texto viejo
+[media/bugs] Errores de Supabase tragados sin log en las superficies F13-F22 (viola la regla del repo); en home/retos/grupo el error transitorio se disfraza de «no tienes dúo» / 404
+[media/bugs] setTimeout sin cleanup al desmontar: CheckinRow y AttackPanel acumulan ids en un ref `timers` que nunca se limpia; ComidaInteractiva tiene un timeout suelto
+[media/bugs] Textos de producto hardcodeados en español que esquivan next-intl: errores de server actions pintados crudos en la UI en inglés, fallbacks, pushes y catálogo de apuestas
+[baja/bugs] VeredictoDialog (y SelloDelPacto) cierran con cualquier click DENTRO del card — falta el guard e.target que sí tienen ApuestaSheet y DuelResultDialog
+[baja/bugs] MisionesHoy toma el meal_plan con week_start más reciente sin filtrar la semana actual
+[baja/bugs] vetarComida: el fallback de candidatos puede meter un platillo repetido en el día → keys de React duplicadas en DiaAccordion
+[alta/diseno] Emojis 🥊/❄️/🛡️ siguen vivos en el feed del duelo (superficie de juego núcleo)
+[alta/diseno] Colores de recurso (freeze cyan, ammo lima) usados como texto/icono sobre papel claro sin variante -deep — contraste 1.2–1.9:1
+[media/diseno] var(--c-signal)/text-signal (token reactivo) como texto pequeño sobre paneles .card-game siempre-oscuros — mismo patrón del bug de racha ya corregido
+[media/diseno] #ffb454/#f0c75a/#4adfb2/#9aa0ae/#b8860b esparcidos en 8 archivos — el patrón 'brillante fijo sobre panel oscuro' es correcto pero merece constante compartida documentada
+[media/diseno] 4 copias inline del panel oscuro siguen sin migrar a .card-game (mandato P0-2 de la directiva)
+[media/diseno] La racha se renderiza SIN el token ámbar en leaderboard, champion y showcase (arbitraje #1: «la racha SIEMPRE del mismo token, en toda la app»)
+[media/diseno] Con prefers-reduced-motion el «+N pts» del check-in no aparece jamás — feedback informativo que desaparece del todo (regla §8.21)
+[media/diseno] Emojis residuales: 📸 (cámara), ✦ (destello IA) y los 🎁 sembrados en DB de recompensas
+[baja/diseno] anim-shake en el banner de golpe CONECTADO (evento positivo del atacante) en vez del DuelScoreboard
+[baja/diseno] Transiciones inline sin gate de reduced-motion en la barra de ventaja del duelo (+ animate-pulse en ScanFlow)
+[baja/diseno] Violeta de la casa usado para el macro Proteína en nutrición (léxico: violeta = identidad/nav/XP/nivel, no categorías de datos)
+[baja/diseno] Errores con rojos Tailwind crudos (red-300/red-600) en vez del token rival-deep/rival del sistema
+[alta/muerto] lib/supabase/types.ts es un stub del modelo MVP dropeado — mandato P0-4 de la directiva sin cumplir
+[media/muerto] lib/email.ts + las 4 plantillas de email (invite/accepted/closed/_shared) no tienen ni un solo llamador
+[media/muerto] Pipeline Pulse muerto del lado emisor: lib/pulse.ts y lib/utils/pulse-buckets.ts sin llamadores en producción
+[media/muerto] StatBar.tsx (el viejo, pre-StatBarLive) es código muerto: cero imports
+[media/muerto] 14 claves i18n huérfanas tras el BottomHUD y MisionesHoy: home.nav*/hero*/level/streak/todayTitle + showcase.navDemo (en es.json Y en.json)
+[baja/muerto] globals.css: `.anim-press` y `.anim-tier-flash` (+ keyframes y var --flash-color) sin un solo consumidor
+[media/muerto] BRAND.md contradice el código actual: paleta, tipografía, pricing y una API de componentes que no existe
+[baja/muerto] Mapa DAY_KEY (días con acento → clave i18n) copiado-pegado en 3 archivos
+[baja/muerto] AppNav: el tipo NavKey conserva 8 valores de la nav vieja pero solo 'ajustes' tiene efecto
+[baja/muerto] i18n: namespaces casi duplicados nutricion.tipo y nutricion.tipos con copy divergente (colación vs snack)

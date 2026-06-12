@@ -1,3 +1,6 @@
+// TODO(directiva §4.15): el email de aceptación del trato nunca se cableó —
+// esta pieza se CONSERVA para cuando se decida; los templates muertos se
+// borraron en la limpieza F23 (G1). Ver docs/specs/2026-06-12-limpieza-plan.md.
 import "server-only";
 import { Resend } from "resend";
 

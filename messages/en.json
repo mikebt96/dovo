@@ -199,24 +199,11 @@
     "vit": "Vitality"
   },
   "home": {
-    "navProfile": "Profile",
     "navSettings": "Settings",
-    "navTrain": "train",
-    "navLeaderboard": "board",
-    "navRetos": "duels",
     "navNutrition": "food",
-    "navRewards": "rewards",
-    "heroEyebrow": "today's session",
-    "heroRest": "rest day",
-    "heroRestBody": "recover — the streak is won by the week, not the day.",
     "heroNext": "next session: {dia} · {titulo}",
-    "heroCta": "start →",
-    "heroVerSemana": "see my week →",
     "boostActive": "boost from {nombre} active ✦",
     "boostActiveEnergia": "energy +50% ready for your next check-in",
-    "level": "level {n} · {clase}",
-    "streak": "streak {n} wk",
-    "todayTitle": "today",
     "quickLogTitle": "quick log",
     "missionsTitle": "today's missions",
     "missionTrain": "mission · train",
@@ -325,7 +312,11 @@
     "moreData": "+ more data for better personalization",
     "saving": "saving…",
     "next": "next",
-    "gender": { "masculino": "male", "femenino": "female", "otro": "other" },
+    "gender": {
+      "masculino": "male",
+      "femenino": "female",
+      "otro": "other"
+    },
     "nivel": {
       "sedentario": "Sedentary",
       "ligero": "Light (1–3 days/wk)",
@@ -355,8 +346,16 @@
     "invitePlaceholder": "https://dovofit.com/invite/...",
     "joining": "joining…",
     "join": "join",
-    "tipo": { "pareja": "Pair", "pequeno": "Small group", "grande": "Large group" },
-    "tipoHint": { "pareja": "2 people", "pequeno": "3–6 people", "grande": "7+ people" }
+    "tipo": {
+      "pareja": "Pair",
+      "pequeno": "Small group",
+      "grande": "Large group"
+    },
+    "tipoHint": {
+      "pareja": "2 people",
+      "pequeno": "3–6 people",
+      "grande": "7+ people"
+    }
   },
   "grupo": {
     "eyebrow": "{tipo} group",
@@ -604,7 +603,6 @@
     "noGroupCta": "build your duo →"
   },
   "showcase": {
-    "navDemo": "see demo",
     "navEnter": "enter",
     "heroEyebrow": "live",
     "heroTitle": "duos training\nright now",
@@ -703,7 +701,11 @@
       "sin_mariscos": "no seafood"
     },
     "formPresupuesto": "budget",
-    "presupuesto": { "bajo": "low", "medio": "medium", "alto": "high" },
+    "presupuesto": {
+      "bajo": "low",
+      "medio": "medium",
+      "alto": "high"
+    },
     "formComidas": "meals per day",
     "formMenus": "how many distinct menus do you want?",
     "formMenusHint": "fewer menus = shorter, cheaper grocery list · more = more variety. they rotate across your week.",
@@ -724,7 +726,12 @@
     "dislike": "not for me",
     "comoPreparar": "how to make it",
     "dosisCompa": "{nombre}: ~{kcal} kcal — same dish, their dose",
-    "tipo": { "desayuno": "breakfast", "comida": "lunch", "cena": "dinner", "snack": "snack" },
+    "tipo": {
+      "desayuno": "breakfast",
+      "comida": "lunch",
+      "cena": "dinner",
+      "snack": "snack"
+    },
     "aiRegen": "personalize with AI",
     "aiWorking": "generating…",
     "aiSoon": "AI coming soon",
@@ -737,12 +744,6 @@
       "viernes": "friday",
       "sabado": "saturday",
       "domingo": "sunday"
-    },
-    "tipos": {
-      "desayuno": "breakfast",
-      "comida": "lunch",
-      "cena": "dinner",
-      "snack": "snack"
     },
     "superTitle": "grocery list",
     "logTitle": "today I ate",
@@ -777,7 +778,11 @@
     "fat": "fat",
     "muscle": "muscle",
     "confidence": "confidence",
-    "conf": { "baja": "low", "media": "medium", "alta": "high" },
+    "conf": {
+      "baja": "low",
+      "media": "medium",
+      "alta": "high"
+    },
     "again": "scan again",
     "historyTitle": "history",
     "disclaimer": "orientative estimate, not a diagnosis. not medical advice and no substitute for a health professional.",

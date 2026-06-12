@@ -38,8 +38,8 @@
   --color-lana-light: var(--c-signal-deep);
   --color-signal: var(--c-signal);
   --color-signal-deep: var(--c-signal-deep);
-  /* 6-stat color system (docs/specs/DESIGN.md §3). Used by StatBar / character
-     sheet / leaderboard. Theme-reactive via the vars below. */
+  /* 6-stat color system (docs/specs/DESIGN.md §3). Used by StatBarLive /
+     DuoLeaderRow / character sheet. Theme-reactive via the vars below. */
   --color-stat-fue: var(--stat-fue);
   --color-stat-res: var(--stat-res);
   --color-stat-flex: var(--stat-flex);
@@ -307,11 +307,6 @@ dialog.dlg-game::backdrop {
   opacity: 0;
 }
 
-/* Las barras se llenan desde 0 hasta su width/height inline (game-feel F12).
-   Server-component friendly: el "to" implícito es el estilo inline. */
-@keyframes anim-bar-w { from { width: 0%; } }
-@keyframes anim-bar-h { from { height: 0%; } }
-
 /* ── Mesa Nocturna · keyframes de juego (directiva §3-§4) ── */
 /* Clímax de ceremonia: el número nuevo entra scale(3)→1 con overshoot. */
 @keyframes anim-slam {
@@ -330,12 +325,6 @@ dialog.dlg-game::backdrop {
   0% { transform: scale(0.85); opacity: 0; }
   60% { transform: scale(1.04); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
-}
-/* Flash de tier-up: anillo del color del stat que respira una vez (capa M). */
-@keyframes anim-tier-flash {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--flash-color, var(--c-signal)) 0%, transparent); }
-  35% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--flash-color, var(--c-signal)) 40%, transparent); }
-  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--flash-color, var(--c-signal)) 0%, transparent); }
 }
 /* Tensión del revelado (§4.6 — la slot machine ética): wobble 350ms ×2 = 700ms. */
 @keyframes anim-wobble {
@@ -401,10 +390,6 @@ dialog.dlg-game::backdrop {
   .anim-lift:hover { transform: translateY(-2px); }
   /* press feedback de juego: el tap se siente (F12) */
   .anim-lift:active { transform: translateY(0) scale(0.98); }
-  .anim-press { transition: transform 0.12s ease; }
-  .anim-press:active { transform: scale(0.96); }
-  .anim-bar-w { animation: anim-bar-w 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
-  .anim-bar-h { animation: anim-bar-h 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
   /* Cascada para listas (F12): los hijos entran escalonados sin tocar el JSX. */
   .anim-stagger > * {
     opacity: 0;
@@ -431,7 +416,6 @@ dialog.dlg-game::backdrop {
   }
   .anim-risk { animation: anim-risk-pulse 2.4s ease-in-out infinite; }
   .anim-particle { animation: anim-particle 800ms var(--ease-out) forwards; }
-  .anim-tier-flash { animation: anim-tier-flash 600ms ease-out; }
   .chip-delta {
     opacity: 0;
     animation: anim-chip-in 0.4s var(--ease-out) forwards;

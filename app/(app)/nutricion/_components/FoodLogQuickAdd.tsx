@@ -36,7 +36,7 @@ export default function FoodLogQuickAdd({
               className="flex items-center gap-3 rounded-xl border border-ink/10 px-4 py-3"
             >
               <span className="text-[10px] mono uppercase tracking-widest text-signal shrink-0 w-20">
-                {t(`tipos.${l.tipo}`)}
+                {t(`tipo.${l.tipo}`)}
               </span>
               <span className="text-sm flex-1 min-w-0 truncate">{l.descripcion}</span>
               <button
@@ -60,7 +60,7 @@ export default function FoodLogQuickAdd({
         >
           {["desayuno", "comida", "cena", "snack"].map((tp) => (
             <option key={tp} value={tp}>
-              {t(`tipos.${tp}`)}
+              {t(`tipo.${tp}`)}
             </option>
           ))}
         </select>

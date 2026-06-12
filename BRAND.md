@@ -2,6 +2,13 @@
 
 Documento corto de decisiones de marca. Si está aquí, ya se decidió. Si no está aquí, conversa con Miguel antes de improvisar.
 
+> ⚠️ **ADDENDUM GOBERNANTE (2026-06-10): "Mesa Nocturna".** Para superficies de
+> JUEGO de la app, manda [`docs/specs/2026-06-10-game-design-directive.md`](docs/specs/2026-06-10-game-design-directive.md)
+> (tokens de modos emocionales, motion S/M/L, HUD, ceremonias). Los tokens
+> vigentes viven en `app/globals.css` — esa es la fuente de verdad de color y
+> tipografía, no las tablas históricas de este documento. La voz, el naming y
+> las reglas del lockup de aquí siguen siendo ley.
+
 ---
 
 ## Qué es dovo
@@ -144,43 +151,21 @@ CSS vars: `--font-syne` · `--font-space-mono` · `--font-newsreader`.
 
 ## Component API
 
-Importar desde `@/app/components/brand`:
-
-```tsx
-import { Mark, Wordmark, Logo } from "@/app/components/brand";
-
-// Solo wordmark
-<Wordmark size="md" />                  // 1.05rem - default headers
-
-// Solo mark
-<Mark size={20} />                      // solid, currentColor
-<Mark size={20} variant="outline" />    // linework
-
-// Lockup
-<Logo />                                // mark + wordmark horizontal
-<Logo layout="stacked" />               // vertical
-<Logo suffix="juntos" />                // mark + wordmark · juntos
-<Logo layout="mark-only" />             // solo el mark
-```
-
-Tamaños (Wordmark):
-- `sm` → 0.95rem (captions, footer)
-- `md` → 1.05rem (headers, nav)
-- `lg` → 1.5rem (intros)
-- `xl` → clamp(3rem, 9vw, 5.5rem) (hero)
+> Limpieza 2026-06-12: la librería `@/app/components/brand` descrita aquí nunca
+> se construyó. El wordmark vive como texto con la clase `.syne` (AppNav) y el
+> mark se dibuja inline donde se usa (GameIcon `duelo`, discos del TratoHUD).
+> Si se construye la librería, recuperar la API de este doc desde el historial.
 
 ---
 
 ## Asset registry
 
-| Path | Qué genera | Resolución |
-|---|---|---|
-| `app/icon.svg` | favicon (browser tab) | vector, light/dark aware |
-| `app/apple-icon.tsx` | iOS home screen | 180×180 PNG |
-| `app/opengraph-image.tsx` | preview WhatsApp / Twitter / Slack | 1200×630 PNG con Syne real |
-| `app/manifest.ts` | PWA manifest | "Add to Home Screen" en iOS + Android |
-
-Todos auto-detectados por Next 15. No requieren registro manual en `<head>`.
+| Path | Qué genera |
+|---|---|
+| `scripts/gen-icons.mjs` | genera los PNG de iconos antes del deploy |
+| `public/apple-touch-icon.png` | iOS home screen (linkeado en app/layout.tsx) |
+| `app/opengraph-image.tsx` | preview WhatsApp / Twitter / Slack (1200×630, estilos inline por Satori — excepción documentada) |
+| `app/manifest.ts` | PWA manifest ("Add to Home Screen") |
 
 ---
 
@@ -259,7 +244,7 @@ Para:
 
 Diferenciadores duros:
 1. Lenguaje español MX-first (todos los demás en inglés clinical)
-2. Pricing per-dúo ($99 MXN/mes), no per-user
+2. Pricing per-dúo ($139 MXN/mes), no per-user
 3. Rivalry/enemy framing como caso de uso explícito
 4. Multi-deporte (gym, ballet, pilates, running, swimming, cycling, etc.)
 5. Castigos catalog consensuado (no solo financial stakes)
@@ -293,4 +278,4 @@ Diferenciadores duros:
 
 ---
 
-*Última actualización: 2026-05-16. Si algo de aquí ya no aplica, edita el archivo y commit.*
+*Última actualización: 2026-06-16. Si algo de aquí ya no aplica, edita el archivo y commit.*

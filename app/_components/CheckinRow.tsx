@@ -55,8 +55,8 @@ const HOY = () =>
     new Date(),
   );
 
-// Mapa estático por StatKey (Tailwind no puede purgar clases dinámicas — patrón
-// BAR_CLASS de StatBar). Dot del color del stat + tinte de fondo; el texto va en
+// Mapa estático por StatKey (Tailwind no puede purgar clases dinámicas — mismo patrón
+// estático que DuoChampion). Dot del color del stat + tinte de fondo; el texto va en
 // ink (AA sobre papel claro — regla 22: los colores de stat no son texto plano).
 const STAT_LABEL: Record<StatKey, string> = {
   fue: "FUE",
