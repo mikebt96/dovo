@@ -26,6 +26,10 @@
 
   /* superficie de juego canónica (directiva §2 — F23·G9 la materializa) */
   --surface-game: radial-gradient(130% 150% at 12% 0%, var(--night-1) 0%, var(--night-2) 55%, var(--night-3) 100%);
+
+  /* violeta legible sobre TODO el rango del gradiente .card-game (5.1–5.7:1).
+     NO usar #8262ff: falla AA en la esquina clara del radial. Fijo, no reactivo. */
+  --color-signal-on-game: #8f70ff;
 }
 
 /* Map the legacy semantic tokens to theme-reactive CSS vars. `inline` keeps
@@ -62,6 +66,10 @@
   --color-ammo: var(--stat-vit); /* lima · munición (= check-in de hoy) */
   --color-shield: var(--mode-coop); /* escudo (regalo del pacto) */
   --color-freeze: var(--stat-vel); /* cyan · congelamiento */
+  /* variantes -deep para TEXTO chico de recursos sobre papel claro (AA ≥4.5:1);
+     en dark vuelven al tono brillante (F23·G11) */
+  --color-freeze-deep: var(--freeze-deep);
+  --color-ammo-deep: var(--ammo-deep);
 }
 
 /* ---- Ultraviolet · light (default) ---- */
@@ -87,6 +95,19 @@
   --mode-rival-deep: #c2103a;
   --mode-gold: #f0c75a; /* ceremonia: level-up, milestone (solo sobre oscuro) */
   --mode-racha: #8f5a00; /* racha del trato — ámbar AA sobre claro */
+  /* panel de juego siempre oscuro ⇒ valor fijo, no reactivo; ver bug de racha
+     en recompensas/page.tsx:65. Espejo JS en lib/ui/game-colors.ts. */
+  --game-racha: #ffb454; /* ámbar brillante sobre .card-game */
+  --game-coop: #4adfb2; /* teal brillante sobre .card-game */
+  --game-muted: #9aa0ae; /* gris apagado de ceremonia rota/perdida */
+  /* léxico §2: macros nutricionales P/C/G — hues no reclamados (violeta = la
+     casa, prohibido en recursos) */
+  --macro-p: #ff8a5c;
+  --macro-c: #f5a623;
+  --macro-g: #8ecae6;
+  /* texto chico de recursos sobre papel claro (AA ≥4.5:1) — F23·G11 */
+  --freeze-deep: #0c6d7c;
+  --ammo-deep: #4a7000;
   /* la noche de la Mesa (F23·G9): los 3 stops del panel de juego — fijos, el
      panel es siempre-oscuro en ambos temas */
   --night-1: #16132a;
@@ -117,6 +138,8 @@
     --mode-rival-deep: #ff8094;
     --mode-gold: #f0c75a;
     --mode-racha: #ffb454;
+    --freeze-deep: var(--stat-vel);
+    --ammo-deep: var(--stat-vit);
     color-scheme: dark;
   }
 }
@@ -142,6 +165,8 @@
   --mode-rival-deep: #ff8094;
   --mode-gold: #f0c75a;
   --mode-racha: #ffb454;
+  --freeze-deep: var(--stat-vel);
+  --ammo-deep: var(--stat-vit);
   color-scheme: dark;
 }
 
@@ -214,7 +239,10 @@ body {
 
 /* La superficie de juego canónica — reemplaza las copias inline del panel
    oscuro (CharacterCard, DuelScoreboard, héroe de home, recompensas...).
-   ÚNICA excepción: opengraph-image.tsx (el renderer OG exige inline). */
+   ÚNICA excepción: opengraph-image.tsx (el renderer OG exige inline).
+   Contraste: sobre .card-game usar los tokens *-on-game / --game-* (fijos,
+   brillantes), NUNCA el token reactivo (--c-signal, --mode-racha…) — en tema
+   claro esos tokens son oscuros y desaparecen sobre la noche del panel. */
 @utility card-game {
   background: var(--surface-game);
   box-shadow: var(--shadow-game);
@@ -235,6 +263,23 @@ body {
     box-shadow: 0 1px 0 color-mix(in srgb, var(--btn-color, var(--c-signal)), black 35%);
     transition: translate 80ms ease-out, box-shadow 80ms ease-out;
   }
+}
+
+/* Chip de recurso/estado (F23·G13): la píldora mono-uppercase de los recibos
+   de check-in, tier-ups y misiones. Color dinámico vía --chip-color (fallback
+   transparent ⇒ chips outline sin bg). La animación de entrada es chip-delta,
+   clase aparte — no mezclarlas. */
+@utility chip-game {
+  border-radius: var(--radius-chip);
+  padding: 0.25rem 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: color-mix(in srgb, var(--chip-color, transparent) 14%, transparent);
 }
 
 /* Cinta de peligro a 45°: deuda y superficies de ataque. Nada rival está a 90°. */
@@ -431,6 +476,9 @@ dialog.dlg-game::backdrop {
   }
   .bar-fill { transition: transform 450ms var(--ease-back); }
   .bar-ghost { transition: transform 800ms linear 400ms; }
+  /* barra de ventaja del duelo (DuelScoreboard §4.7): con reduced-motion el
+     scaleX salta al valor final sin transición — dato intacto, movimiento no */
+  .bar-advantage { transition: transform 700ms var(--ease-snap); }
 
   /* Entrada de ceremonia L: backdrop sube + dialog escala desde 0.85.
      transition-behavior allow-discrete para display/overlay (top layer). */

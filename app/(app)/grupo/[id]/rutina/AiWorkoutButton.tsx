@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { regenerateWorkoutAi } from "@/lib/actions/workout";
 import { EQUIPOS, type Equipo } from "@/lib/workout/catalog";
 import type { WorkoutPrefs } from "@/lib/workout/types";
+import GameIcon from "@/app/_components/GameIcon";
 
 // F9 · "Personalizar con IA" (Pro). Fail-soft de F5: sin flag, chip "ia próximamente";
 // sin tier, link a /suscripcion. Con acceso: panel compacto de prefs (equipo + lesiones)
@@ -33,7 +34,8 @@ export default function AiWorkoutButton({
   if (!aiLive) {
     return (
       <span className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-4 py-2 text-[10px] mono uppercase tracking-[0.16em] opacity-50">
-        ✦ {t("aiSoon")}
+        <GameIcon name="chispa" size={11} className="inline -mt-px" />
+        {t("aiSoon")}
       </span>
     );
   }
@@ -44,7 +46,8 @@ export default function AiWorkoutButton({
         href="/suscripcion"
         className="inline-flex items-center gap-2 rounded-full border border-signal/40 text-signal px-4 py-2 text-[10px] mono uppercase tracking-[0.16em] hover:bg-signal hover:text-white transition-colors"
       >
-        ✦ {t("aiPro")}
+        <GameIcon name="chispa" size={11} className="inline -mt-px" />
+        {t("aiPro")}
       </Link>
     );
   }
@@ -76,7 +79,8 @@ export default function AiWorkoutButton({
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-2 rounded-full bg-signal text-white px-4 py-2 text-[10px] mono uppercase tracking-[0.16em] hover:bg-[#5a37e0] transition-colors"
         >
-          ✦ {t("aiBtn")}
+          <GameIcon name="chispa" size={11} className="inline -mt-px" />
+          {t("aiBtn")}
         </button>
         {msg && (
           <span className="text-[10px] mono uppercase tracking-wider text-rival-deep">{msg}</span>
@@ -134,7 +138,8 @@ export default function AiWorkoutButton({
           disabled={pending}
           className="inline-flex items-center gap-2 rounded-full bg-signal text-white px-5 py-2 text-[10px] mono uppercase tracking-[0.16em] hover:bg-[#5a37e0] transition-colors disabled:opacity-60"
         >
-          ✦ {pending ? t("aiWorking") : t("aiGenerate")}
+          <GameIcon name="chispa" size={11} className="inline -mt-px" />
+          {pending ? t("aiWorking") : t("aiGenerate")}
         </button>
       </div>
       {msg && <p className="text-[11px] text-rival-deep">{msg}</p>}

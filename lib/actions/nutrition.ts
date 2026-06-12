@@ -58,13 +58,14 @@ type DuoInfo = {
 async function getDuoInfo(userId: string): Promise<DuoInfo> {
   const vacio: DuoInfo = { ctx: null, compa: null };
   const supabase = await createClient();
-  const { data: miembro } = await supabase
+  const { data: miembro, error: memErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("trato_id")
     .eq("user_id", userId)
     .limit(1)
     .maybeSingle<{ trato_id: string }>();
+  if (memErr) console.error("[nutrition] trato_miembros:", memErr.message);
   if (!miembro) return vacio;
 
   const { data: filas, error } = await supabase
@@ -286,12 +287,17 @@ export async function vetarComida(input: {
   if (!user) return { ok: false, error: "sin sesión" };
 
   const fisico = await getFisico(user.id);
-  const { data: perfil } = await supabase
+  const { data: perfil, error: perfErr } = await supabase
     .schema("core")
     .from("nutrition_profiles")
     .select("restricciones, presupuesto, comidas_por_dia, preferencias, menus_distintos, vetos, favoritos")
     .eq("user_id", user.id)
     .maybeSingle<NutritionProfile>();
+  // F25·G20: error de red ≠ "sin perfil" — no mandar a onboarding por un fallo transitorio.
+  if (perfErr) {
+    console.error("[nutrition] vetar perfil:", perfErr.message);
+    return { ok: false, error: "error de red, intenta de nuevo" };
+  }
   if (!fisico || !perfil) return { ok: false, error: "completa tu perfil primero" };
 
   const week = lunesSemanaCDMX();
@@ -365,12 +371,17 @@ export async function marcarFavorito(nombre: string): Promise<Result<{ favorito:
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sin sesión" };
 
-  const { data: perfil } = await supabase
+  const { data: perfil, error: perfErr } = await supabase
     .schema("core")
     .from("nutrition_profiles")
     .select("favoritos")
     .eq("user_id", user.id)
     .maybeSingle<{ favoritos: string[] }>();
+  // F25·G20: error de red ≠ "sin perfil" — no mandar a onboarding por un fallo transitorio.
+  if (perfErr) {
+    console.error("[nutrition] favorito perfil:", perfErr.message);
+    return { ok: false, error: "error de red, intenta de nuevo" };
+  }
   if (!perfil) return { ok: false, error: "completa tu perfil primero" };
 
   const ya = perfil.favoritos.includes(limpio);

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { StatKey } from "@/lib/scoring/types";
 import type { TierUp } from "@/lib/actions/checkins";
+import CardHalo from "./CardHalo";
 
 // Ceremonia L (directiva del consejo §4.3): level-up y tier-up toman la pantalla
 // UNA vez, con la anatomía de §3 (anticipación → hit-stop → clímax → settle) en
@@ -73,13 +74,7 @@ export default function LevelUpDialog({
     >
       <div className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center">
         {/* halo de ceremonia */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-50 blur-3xl"
-          style={{
-            background: `radial-gradient(circle, color-mix(in srgb, ${accent} 55%, transparent), transparent 70%)`,
-          }}
-        />
+        <CardHalo position="center" color={accent} opacity={0.5} />
 
         <p className="relative text-[11px] mono uppercase tracking-[0.26em] text-white/50">
           {isLevelUp ? t("eyebrow") : t("tierEyebrow")}
@@ -136,10 +131,10 @@ export default function LevelUpDialog({
             {data.tierUps.map((tu, i) => (
               <li
                 key={tu.stat}
-                className="chip-delta inline-flex items-center gap-2 mx-1 rounded-[10px] px-3 py-1.5 text-[11px] mono uppercase tracking-[0.14em]"
+                className="chip-delta chip-game mx-1"
                 style={
                   {
-                    background: `color-mix(in srgb, ${STAT_VAR[tu.stat]} 16%, transparent)`,
+                    "--chip-color": STAT_VAR[tu.stat],
                     "--anim-delay": `${500 + i * 90}ms`,
                   } as React.CSSProperties
                 }

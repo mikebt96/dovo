@@ -3,6 +3,7 @@ import { STAT_KEYS, type StatKey } from "@/lib/scoring/types";
 import { barHeight, STAT_SHORT, STAT_VAR } from "@/lib/leveling/display";
 import { statDisplay } from "@/lib/leveling";
 import StatBarLive from "./StatBarLive";
+import CardHalo from "./CardHalo";
 
 // derivado de los mapas canónicos (F23·G5)
 const STATS = STAT_KEYS.map((key) => ({
@@ -45,17 +46,13 @@ export default async function CharacterCard({
   return (
     <div className="card-game relative overflow-hidden p-7 sm:p-9 text-white">
       {/* grano/halo sutil */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(109,74,255,0.5), transparent 70%)" }}
-      />
+      <CardHalo />
 
       <div className="relative flex items-center justify-between text-[11px] mono uppercase tracking-[0.22em] text-white/45">
         <span>{t("eyebrow")}</span>
         {racha !== undefined && (
           /* card siempre oscura → ámbar brillante fijo, no el token reactivo */
-          <span className="tabular-nums" style={{ color: "#ffb454" }}>
+          <span className="tabular-nums" style={{ color: "var(--game-racha)" }}>
             {t("yourStreak", { n: racha })}
           </span>
         )}

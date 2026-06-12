@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { marcarVeredictoVisto, type Veredicto } from "@/lib/actions/trato";
 import { useCountUp } from "@/lib/hooks/useCountUp";
+import CardHalo from "./CardHalo";
 
 // El Veredicto del Domingo (directiva §4.14 v1 · signature move §6.4): el
 // domingo 23:59 CDMX el cron juzga el trato; al PRIMER open de la semana, la
@@ -47,15 +48,10 @@ export default function VeredictoDialog({
     >
       <div className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center">
         {/* halo de ceremonia — dorado si selló, apagado si se rompió */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl"
-          style={{
-            opacity: sellada ? 0.45 : 0.15,
-            background: `radial-gradient(circle, color-mix(in srgb, ${
-              sellada ? "#f0c75a" : "#9aa0ae"
-            } 55%, transparent), transparent 70%)`,
-          }}
+        <CardHalo
+          position="center"
+          color={sellada ? "var(--mode-gold)" : "var(--game-muted)"}
+          opacity={sellada ? 0.45 : 0.15}
         />
 
         <p className="relative text-[11px] mono uppercase tracking-[0.26em] text-white/50">
@@ -74,7 +70,7 @@ export default function VeredictoDialog({
                 className="block w-8 h-8 rounded-full"
                 style={
                   sellada
-                    ? { background: "#f0c75a", boxShadow: "0 0 24px rgba(240,199,90,0.45)" }
+                    ? { background: "var(--mode-gold)", boxShadow: "0 0 24px rgba(240,199,90,0.45)" }
                     : { border: "2px solid rgba(255,255,255,0.25)", filter: "grayscale(1)" }
                 }
               />
@@ -87,8 +83,8 @@ export default function VeredictoDialog({
             <div
               className="anim-slam relative mt-4 display font-extrabold leading-none tabular-nums text-[clamp(4.5rem,24vw,7rem)]"
               style={{
-                color: "#ffb454",
-                textShadow: "0 0 44px color-mix(in srgb, #ffb454 50%, transparent)",
+                color: "var(--game-racha)",
+                textShadow: "0 0 44px color-mix(in srgb, var(--game-racha) 50%, transparent)",
               }}
             >
               {racha}
@@ -112,7 +108,8 @@ export default function VeredictoDialog({
               className="relative mt-3 display font-extrabold tabular-nums text-4xl"
               style={{ color: "rgba(255,255,255,0.55)" }}
             >
-              {veredicto.record} <span className="text-base font-bold">sem</span>
+              {veredicto.record}{" "}
+              <span className="text-base font-bold">{t("recordUnit")}</span>
             </p>
             <p className="relative mt-1 text-[11px] mono uppercase tracking-[0.18em] text-white/45">
               {t("brokenSub")}
@@ -130,7 +127,7 @@ export default function VeredictoDialog({
                 </p>
                 <p
                   className="display font-bold lowercase text-lg mt-0.5"
-                  style={{ color: "#f0c75a" }}
+                  style={{ color: "var(--mode-gold)" }}
                 >
                   {veredicto.apuesta.premio}
                 </p>

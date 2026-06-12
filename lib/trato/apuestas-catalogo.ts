@@ -3,6 +3,8 @@
 // se los ganaron. Jamás impone: el texto final siempre es del dúo (campo
 // libre). Voz MX, cualquier dúo (parejas, amigos, rivales — BRAND.md).
 // Mock-first: con key, la IA propondrá premios personalizados al historial.
+// es-only deliberado (BRAND.md §español MX-first); por-locale requiere
+// persistir idioma del receptor (schema).
 
 export type TierPremio = {
   id: string;

@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { runBodyScan, type BodyScan } from "@/lib/actions/bodyscan";
+import GameIcon from "@/app/_components/GameIcon";
 
 // Flujo del análisis corporal (F6), client. Dos modos:
 //  · live=false (sin key): SIN foto — botón directo a la estimación antropométrica
@@ -58,11 +59,18 @@ export default function ScanFlow({ live }: { live: boolean }) {
         className="card-game  relative overflow-hidden p-7 sm:p-9 text-white"
       >
         <p className="text-[11px] mono uppercase tracking-[0.22em] text-white/50 mb-6">
-          {result.source === "ai" ? `✦ ${t("resultAi")}` : t("resultSample")}
+          {result.source === "ai" ? (
+            <span className="inline-flex items-center gap-1.5">
+              <GameIcon name="chispa" size={11} className="inline -mt-px" />
+              {t("resultAi")}
+            </span>
+          ) : (
+            t("resultSample")
+          )}
         </p>
         <div className="flex gap-10">
-          <Big label={t("fat")} value={result.grasa_pct} color="#c44aff" />
-          <Big label={t("muscle")} value={result.musculo_pct} color="#aef03c" />
+          <Big label={t("fat")} value={result.grasa_pct} color="var(--stat-flex)" />
+          <Big label={t("muscle")} value={result.musculo_pct} color="var(--stat-vit)" />
         </div>
         <p className="text-[11px] mono uppercase tracking-widest text-white/70 mt-4">
           {t("confidence")}: {t(`conf.${result.confianza}`)}
@@ -90,8 +98,9 @@ export default function ScanFlow({ live }: { live: boolean }) {
     return (
       <div className="rounded-2xl border border-ink/10 p-6">
         <p className="text-sm opacity-70 leading-relaxed max-w-md mb-2">{t("samplePitch")}</p>
-        <p className="text-[10px] mono uppercase tracking-[0.16em] text-signal mb-6">
-          ✦ {t("sampleAiSoon")}
+        <p className="text-[10px] mono uppercase tracking-[0.16em] text-signal mb-6 inline-flex items-center gap-1.5">
+          <GameIcon name="chispa" size={11} className="inline -mt-px" />
+          {t("sampleAiSoon")}
         </p>
         <button
           type="button"
@@ -164,7 +173,7 @@ export default function ScanFlow({ live }: { live: boolean }) {
             onClick={() => inputRef.current?.click()}
             className="w-full rounded-xl border border-dashed border-ink/25 py-10 text-center hover:border-signal/60 transition-colors"
           >
-            <span className="block text-3xl mb-2">📸</span>
+            <GameIcon name="camara" size={28} className="block mx-auto mb-2" />
             <span className="text-sm opacity-70">{t("pickPhoto")}</span>
             <span className="block text-[10px] mono uppercase tracking-widest opacity-40 mt-2">
               {t("pickHint")}
@@ -174,7 +183,7 @@ export default function ScanFlow({ live }: { live: boolean }) {
       </div>
 
       {pending && (
-        <p className="text-[11px] mono uppercase tracking-[0.16em] text-signal animate-pulse">
+        <p className="text-[11px] mono uppercase tracking-[0.16em] text-signal motion-safe:animate-pulse">
           {t("privacyCountdown")}
         </p>
       )}
@@ -198,7 +207,7 @@ function Consent({
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-1 h-4 w-4 accent-[#6d4aff]"
+        className="mt-1 h-4 w-4 accent-signal"
       />
       <span className="text-sm opacity-75 leading-relaxed">{label}</span>
     </label>
@@ -210,7 +219,7 @@ function Big({ label, value, color }: { label: string; value: number; color: str
     <div>
       <div
         className="display font-extrabold leading-[0.85] text-5xl sm:text-6xl tabular-nums"
-        style={{ color, textShadow: `0 0 40px ${color}55` }}
+        style={{ color, textShadow: `0 0 40px color-mix(in srgb, ${color} 33%, transparent)` }}
       >
         {value}%
       </div>

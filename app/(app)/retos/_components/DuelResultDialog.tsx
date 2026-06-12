@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { crearReto, type HeadToHead, type Marcador } from "@/lib/actions/retos";
 import { useCountUp } from "@/lib/hooks/useCountUp";
+import { GAME_COLORS } from "@/lib/ui/game-colors";
+import CardHalo from "@/app/_components/CardHalo";
 
 // Ceremonia W/L del duelo (directiva §4.8): nadie gana una guerra de 7 días
 // con un router.refresh(). Al primer open tras el cierre (visto por reto_id en
@@ -71,7 +73,8 @@ export default function DuelResultDialog({
           spread: 75,
           startVelocity: 38,
           origin: { y: 0.6 },
-          colors: ["#f0c75a", "#6d4aff", "#aef03c", "#ffffff"],
+          // GAME_COLORS.gold: confetti pinta en canvas — no resuelve var(--mode-gold)
+          colors: [GAME_COLORS.gold, "#6d4aff", "#aef03c", "#ffffff"],
           disableForReducedMotion: true,
         });
       });
@@ -109,15 +112,10 @@ export default function DuelResultDialog({
         className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center"
         style={result === "lost" ? { filter: "grayscale(0.6)" } : undefined}
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full blur-3xl"
-          style={{
-            opacity: result === "won" ? 0.5 : 0.15,
-            background: `radial-gradient(circle, color-mix(in srgb, ${
-              result === "won" ? "#f0c75a" : "#9aa0ae"
-            } 55%, transparent), transparent 70%)`,
-          }}
+        <CardHalo
+          position="center"
+          color={result === "won" ? "var(--mode-gold)" : "var(--game-muted)"}
+          opacity={result === "won" ? 0.5 : 0.15}
         />
 
         <p className="relative text-[11px] mono uppercase tracking-[0.26em] text-white/50">
@@ -130,7 +128,7 @@ export default function DuelResultDialog({
             className="anim-slam display font-black lowercase leading-none text-[clamp(3rem,16vw,4.5rem)]"
             style={
               result === "won"
-                ? { color: "#f0c75a", textShadow: "0 0 44px rgba(240,199,90,0.5)" }
+                ? { color: "var(--mode-gold)", textShadow: "0 0 44px rgba(240,199,90,0.5)" }
                 : { color: "rgba(255,255,255,0.85)" }
             }
           >
@@ -141,8 +139,8 @@ export default function DuelResultDialog({
               className="chip-delta absolute -top-2 right-2 inline-flex items-center justify-center w-10 h-10 rounded-[10px] display font-black text-xl"
               style={
                 {
-                  background: "color-mix(in srgb, #f0c75a 22%, transparent)",
-                  color: "#f0c75a",
+                  background: "color-mix(in srgb, var(--mode-gold) 22%, transparent)",
+                  color: "var(--mode-gold)",
                   transform: "rotate(8deg)",
                   "--anim-delay": "450ms",
                 } as React.CSSProperties
@@ -174,7 +172,7 @@ export default function DuelResultDialog({
         )}
 
         {rematch === "sent" ? (
-          <p className="relative mt-7 text-[12px] mono uppercase tracking-[0.16em] text-signal">
+          <p className="relative mt-7 text-[12px] mono uppercase tracking-[0.16em] text-signal-on-game">
             {t("rematchSent")}
           </p>
         ) : (

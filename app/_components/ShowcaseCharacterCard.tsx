@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import type { DemoRow } from "@/lib/actions/leaderboard";
 import type { StatKey } from "@/lib/scoring/types";
 import { STAT_FROM_LABEL, STAT_TEXT_CLASS } from "@/lib/leveling/display";
+import GameIcon from "./GameIcon";
 
 // Tarjeta oscura on-brand de un dúo destacado. Diseñada para screenshot (share).
 export default async function ShowcaseCharacterCard({ row }: { row: DemoRow }) {
@@ -41,9 +42,22 @@ export default async function ShowcaseCharacterCard({ row }: { row: DemoRow }) {
           <div className="text-sm text-white/70 mt-0.5">{row.top_clase}</div>
         )}
         <div className="flex items-center gap-4 mt-3 text-[11px] mono uppercase tracking-wider text-white/60">
-          <span>{t("streak", { n: row.racha_duo })}</span>
+          {/* panel siempre-oscuro → ámbar brillante fijo, opacidad plena */}
+          <span
+            className="flex items-center gap-1 tabular-nums"
+            style={{ color: "var(--game-racha)" }}
+          >
+            <GameIcon name="eslabones" size={11} />
+            {t("streak", { n: row.racha_duo })}
+          </span>
           {top && (
-            <span className={`flex items-center gap-1.5 ${STAT_TEXT_CLASS[top]}`}>
+            /* fue = violeta reactivo: sobre el panel siempre-oscuro usa la
+               variante on-game (AA); el resto de stats brillan solos */
+            <span
+              className={`flex items-center gap-1.5 ${
+                top === "fue" ? "text-signal-on-game" : STAT_TEXT_CLASS[top]
+              }`}
+            >
               <span
                 className="w-2 h-2 rounded-full"
                 style={{ background: "currentColor" }}

@@ -39,7 +39,7 @@ export default async function ShowcasePage() {
 
         <div className="max-w-5xl mx-auto mt-20">
           <p className="text-xs mono uppercase tracking-[0.2em] text-signal mb-4 flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-signal animate-pulse" />
+            <span className="inline-block w-2 h-2 rounded-full bg-signal motion-safe:animate-pulse" />
             {t("heroEyebrow")}
           </p>
           <h1 className="display font-extrabold tracking-tight leading-[0.95] text-5xl sm:text-7xl lowercase">

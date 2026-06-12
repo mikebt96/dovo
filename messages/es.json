@@ -227,7 +227,8 @@
     "proUpsellEyebrow": "pro",
     "proUpsellTitle": "lleva a tu dúo a pro",
     "proUpsellBody": "planes de comida con IA, análisis corporal y descuentos premium. una sola suscripción para los dos.",
-    "proUpsellCta": "ver planes →"
+    "proUpsellCta": "ver planes →",
+    "duoFallback": "tu dúo"
   },
   "duoProof": {
     "eyebrow": "por qué en dúo",
@@ -317,6 +318,8 @@
     "labelWeight": "Peso (kg)",
     "labelHeight": "Altura (cm)",
     "labelAge": "Edad",
+    "consentSalud": "acepto que dovo trate mis datos de salud (peso, altura, edad, lesiones) para generar mis planes, validar mi actividad y mostrar mi progreso. son datos sensibles: solo yo los veo, jamás se venden ni entran a estadísticas. puedo revocar esto cuando quiera desde ajustes.",
+    "consentSaludLink": "aviso de privacidad →",
     "labelGender": "Género",
     "labelActivity": "Nivel de actividad",
     "labelGoal": "Objetivo",
@@ -472,6 +475,7 @@
     "logDetailed": "registrar con métricas",
     "saving": "guardando…",
     "done": "✓ hecho",
+    "ptsChip": "+{pts} pts",
     "boostTag": "+50% boost · solo personaje",
     "boostCta": "dale un boost →",
     "selloChip": "sello del lugar",
@@ -574,7 +578,14 @@
     "rematch": "revancha",
     "rematchSent": "reto de revancha enviado — esperando al rival",
     "duelClose": "cerrar",
-    "scoutRacha": "{n} sem"
+    "scoutRacha": "{n} sem",
+    "err": {
+      "reto_no_existe": "reto no existe",
+      "reto_no_autorizado": "no autorizado",
+      "duelo_no_termina": "el duelo aún no termina",
+      "ataque_tipo_invalido": "tipo inválido",
+      "ataque_no_enviado": "no se pudo lanzar el ataque — intenta de nuevo"
+    }
   },
   "boosts": {
     "title": "boosts",
@@ -833,7 +844,8 @@
     "apuestaPagasTu": "tú pagas {apuesta} — la próxima semana aprietas",
     "apuestaPagaOtro": "{nombre} paga {apuesta}",
     "apuestaEmpate": "empate digno — {apuesta} va a medias",
-    "apuestaPerdida": "{premio} se queda en la mesa — se gana cumpliendo"
+    "apuestaPerdida": "{premio} se queda en la mesa — se gana cumpliendo",
+    "recordUnit": "sem"
   },
   "sello": {
     "title": "trato hecho.",
@@ -867,7 +879,14 @@
     "debesTu": "te toca pagar: {apuesta} — lo prometido es deuda",
     "debeOtro": "{nombre} debe: {apuesta}",
     "saldarCta": "ya pagó",
-    "saldarConfirm": "¿confirmas?"
+    "saldarConfirm": "¿confirmas?",
+    "compaFallback": "tu compa",
+    "err": {
+      "apuesta_campos": "premio y apuesta — los dos",
+      "apuesta_cerrada": "la apuesta de esta semana ya se cerró",
+      "saldar_nada": "nada que saldar",
+      "saldar_no_deudor": "el que debe no se absuelve solo, compa"
+    }
   },
   "levelup": {
     "eyebrow": "nivel nuevo",

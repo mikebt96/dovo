@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lanzarAtaque, type AtaqueRow, type AtaqueTipo, type MiembroReto } from "@/lib/actions/ataques";
+import { KNOWN_ERROR_CODES } from "@/lib/i18n/action-errors";
 import GameIcon from "@/app/_components/GameIcon";
 
 // F10→v2 · Consola de combate (directiva §4.6). El revelado del escudo es la
@@ -96,7 +97,9 @@ export default function AttackPanel({
         <span>{t("atkBlocked")}</span>
       </div>
     ) : resultado.tipo === "golpe" ? (
-      <div className="anim-shake rounded-2xl border border-rival/40 px-4 py-3 text-sm relative overflow-visible flex items-center gap-2"
+      /* TU golpe conectó = evento positivo ⇒ pop, jamás shake (§3: shake SOLO
+         impactos recibidos) — F23·G15 */
+      <div className="anim-pop rounded-2xl border border-rival/40 px-4 py-3 text-sm relative overflow-visible flex items-center gap-2"
         style={{ background: "color-mix(in srgb, var(--mode-rival) 10%, transparent)" }}
       >
         <GameIcon name="golpe" size={18} filled className="shrink-0 text-rival-deep" />
@@ -116,7 +119,7 @@ export default function AttackPanel({
       <div className="anim-pop rounded-2xl border border-freeze/40 px-4 py-3 text-sm flex items-center gap-2"
         style={{ background: "color-mix(in srgb, var(--stat-vel) 10%, transparent)" }}
       >
-        <GameIcon name="hielo" size={18} className="shrink-0 text-freeze" />
+        <GameIcon name="hielo" size={18} className="shrink-0 text-freeze-deep" />
         <span>{t("atkHitFreeze")}</span>
       </div>
     ));
@@ -163,7 +166,7 @@ export default function AttackPanel({
       {banner}
       {/* slot de munición: el recurso como objeto (disco lima, léxico §2) */}
       <p className="flex items-center gap-1.5 text-[10px] mono uppercase tracking-[0.18em]">
-        <span style={{ color: "var(--stat-vit)" }} className="inline-flex">
+        <span style={{ color: "var(--ammo-deep)" }} className="inline-flex">
           <GameIcon name="municion" size={14} filled />
         </span>
         <span className="opacity-70">{t("atkAmmoSlot")}</span>
@@ -209,7 +212,7 @@ export default function AttackPanel({
                 type="button"
                 disabled={pending}
                 onClick={() => lanzar("congelamiento", r.user_id)}
-                className="rounded-full border border-ink/20 px-3 py-1.5 text-sm lowercase hover:border-freeze hover:text-freeze transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="rounded-full border border-ink/20 px-3 py-1.5 text-sm lowercase hover:border-freeze-deep hover:text-freeze-deep transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 <GameIcon name="hielo" size={13} />
                 {r.nombre}
@@ -219,7 +222,12 @@ export default function AttackPanel({
         </div>
       )}
 
-      {err && <p className="text-xs text-rival-deep">{err}</p>}
+      {/* código conocido → i18n; lo demás (P0001 del RPC) tal cual — jamás t() con clave desconocida */}
+      {err && (
+        <p className="text-xs text-rival-deep">
+          {KNOWN_ERROR_CODES.has(err) ? t(`err.${err}`) : err}
+        </p>
+      )}
     </div>
   );
 }

@@ -15,6 +15,8 @@ import FoodLogQuickAdd from "./_components/FoodLogQuickAdd";
 import FoodFab from "./_components/FoodFab";
 import AiRegenButton from "./_components/AiRegenButton";
 import ComidaInteractiva from "./_components/ComidaInteractiva";
+import CardHalo from "@/app/_components/CardHalo";
+import GameIcon from "@/app/_components/GameIcon";
 
 export const dynamic = "force-dynamic";
 // La action de IA (regenerateWithAi) puede tardar: extiende el límite de la ruta.
@@ -90,11 +92,7 @@ export default async function NutricionPage() {
         <>
           {/* Header de macros — superficie de juego (Mesa Nocturna) */}
           <section className="card-game relative overflow-hidden p-7 sm:p-9 text-white mb-8">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
-              style={{ background: "radial-gradient(circle, rgba(109,74,255,0.5), transparent 70%)" }}
-            />
+            <CardHalo />
             <div className="relative flex flex-wrap items-end justify-between gap-6">
               <div className="flex items-end gap-4">
                 <div
@@ -108,9 +106,11 @@ export default async function NutricionPage() {
                 </div>
               </div>
               <div className="flex gap-6 text-center">
-                <Macro label="P" value={plan.plan.macros.prot} color="#6d4aff" />
-                <Macro label="C" value={plan.plan.macros.carb} color="#3a86ff" />
-                <Macro label="G" value={plan.plan.macros.grasa} color="#aef03c" />
+                {/* léxico §2: macros con hues propios (--macro-*) — el violeta es
+                    la casa y los --stat-* ya tienen dueño; ver globals.css */}
+                <Macro label="P" value={plan.plan.macros.prot} color="var(--macro-p)" />
+                <Macro label="C" value={plan.plan.macros.carb} color="var(--macro-c)" />
+                <Macro label="G" value={plan.plan.macros.grasa} color="var(--macro-g)" />
               </div>
             </div>
             <div className="relative mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -122,15 +122,22 @@ export default async function NutricionPage() {
                       : "bg-white/10 text-white/70"
                   }`}
                 >
-                  {plan.source === "ai" ? `✦ ${t("badgeAi")}` : t("badgeSample")}
+                  {plan.source === "ai" ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <GameIcon name="chispa" size={11} className="inline -mt-px" />
+                      {t("badgeAi")}
+                    </span>
+                  ) : (
+                    t("badgeSample")
+                  )}
                 </span>
                 {/* plan de dúo: mismos platillos, tu dosis (regla de oro) */}
                 {plan.plan.duo && (
                   <span
                     className="text-[10px] mono uppercase tracking-[0.18em] rounded-full px-3 py-1.5"
                     style={{
-                      color: "#4adfb2",
-                      background: "color-mix(in srgb, #4adfb2 14%, transparent)",
+                      color: "var(--game-coop)",
+                      background: "color-mix(in srgb, var(--game-coop) 14%, transparent)",
                     }}
                   >
                     {t("badgeDuo")}

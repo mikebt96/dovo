@@ -16,6 +16,7 @@ import LogExerciseButton from "./LogExerciseButton";
 import AiWorkoutButton from "./AiWorkoutButton";
 import PreEntreno from "./PreEntreno";
 import CheckinRow from "@/app/_components/CheckinRow";
+import GameIcon from "@/app/_components/GameIcon";
 
 export const dynamic = "force-dynamic";
 // La action de IA (regenerateWorkoutAi) puede tardar: extiende el límite de la ruta.
@@ -157,7 +158,14 @@ export default async function RutinaPage({
                   : "border-ink/15 opacity-60"
               }`}
             >
-              {plan.source === "ai" ? `✦ ${t("badgeAi")}` : t("badgeSample")}
+              {plan.source === "ai" ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <GameIcon name="chispa" size={11} className="inline -mt-px" />
+                  {t("badgeAi")}
+                </span>
+              ) : (
+                t("badgeSample")
+              )}
             </span>
             <span className="flex-1" />
             <AiWorkoutButton

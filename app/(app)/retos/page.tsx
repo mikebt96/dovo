@@ -27,13 +27,15 @@ export default async function RetosPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: miembro } = await supabase
+  const { data: miembro, error: miembroErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("trato_id")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle<{ trato_id: string }>();
+  // F25·G20: un fallo transitorio NO es "sin dúo" — al error boundary, no al empty-state.
+  if (miembroErr) throw miembroErr;
 
   if (!miembro) {
     return (

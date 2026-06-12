@@ -6,6 +6,7 @@ import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import ProBadge from "@/app/_components/ProBadge";
 import Paywall from "@/app/_components/Paywall";
+import GameIcon, { type GameIconName } from "@/app/_components/GameIcon";
 import { getDuoTier } from "@/lib/billing/tier";
 import PlanGrid from "./_components/PlanGrid";
 import ManageButton from "./_components/ManageButton";
@@ -93,13 +94,13 @@ export default async function SuscripcionPage() {
             feature="nutrition"
             title={t("nutritionTitle")}
             blurb={t("nutritionBlurb")}
-            preview={<ProPreviewCard icon="🥗" title={t("nutritionTitle")} body={t("nutritionBlurb")} />}
+            preview={<ProPreviewCard icon="plato" title={t("nutritionTitle")} body={t("nutritionBlurb")} />}
           />
           <Paywall
             feature="body_scan"
             title={t("bodyScanTitle")}
             blurb={t("bodyScanBlurb")}
-            preview={<ProPreviewCard icon="📸" title={t("bodyScanTitle")} body={t("bodyScanBlurb")} />}
+            preview={<ProPreviewCard icon="camara" title={t("bodyScanTitle")} body={t("bodyScanBlurb")} />}
           />
         </div>
       </section>
@@ -114,13 +115,15 @@ function ProPreviewCard({
   title,
   body,
 }: {
-  icon: string;
+  icon: GameIconName;
   title: string;
   body: string;
 }) {
   return (
     <div className="p-6">
-      <div className="text-3xl mb-3">{icon}</div>
+      <div className="mb-3">
+        <GameIcon name={icon} size={28} />
+      </div>
       <div className="flex items-center gap-2">
         <span className="display font-semibold lowercase">{title}</span>
         <ProBadge tier="pro" />

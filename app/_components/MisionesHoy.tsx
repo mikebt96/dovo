@@ -29,15 +29,16 @@ export default async function MisionesHoy({
   const hoy = hoyCDMX();
 
   // ── misión entrenar: ¿ya hay check-in HOY? (misma regla que la munición) ──
-  const { data: miembros } = await supabase
+  const { data: miembros, error: memErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("id")
     .eq("user_id", user.id);
+  if (memErr) console.error("[misiones] trato_miembros:", memErr.message);
   const ids = (miembros ?? []).map((m) => (m as { id: string }).id);
   let trainDone = false;
   if (ids.length) {
-    const { data: c } = await supabase
+    const { data: c, error: chkErr } = await supabase
       .schema("core")
       .from("checkins")
       .select("id")
@@ -45,21 +46,23 @@ export default async function MisionesHoy({
       .eq("fecha", hoy)
       .limit(1)
       .maybeSingle<{ id: string }>();
+    if (chkErr) console.error("[misiones] checkins hoy:", chkErr.message);
     trainDone = !!c;
   }
 
   // ── misión comer: el menú de HOY del plan semanal + ¿registró comida hoy? ──
-  const { data: planRow } = await supabase
+  const { data: planRow, error: planErr } = await supabase
     .schema("core")
     .from("meal_plans")
     .select("id, week_start, source, plan")
     .eq("user_id", user.id)
     .eq("week_start", lunesSemanaCDMX())
     .maybeSingle<MealPlanRow>();
+  if (planErr) console.error("[misiones] meal_plans:", planErr.message);
   const diaHoy =
     planRow?.plan?.dias?.find((d) => d.dia === diaSemanaCDMX()) ?? null;
 
-  const { data: logHoy } = await supabase
+  const { data: logHoy, error: logErr } = await supabase
     .schema("core")
     .from("food_logs")
     .select("id")
@@ -67,16 +70,19 @@ export default async function MisionesHoy({
     .eq("fecha", hoy)
     .limit(1)
     .maybeSingle<{ id: string }>();
+  if (logErr) console.error("[misiones] food_logs:", logErr.message);
   const eatDone = !!logHoy;
 
   const Chip = ({ done }: { done: boolean }) =>
     done ? (
       <span
-        className="shrink-0 inline-flex items-center gap-1 rounded-[10px] px-2 py-1 text-[10px] mono uppercase tracking-[0.14em]"
-        style={{
-          color: "#4adfb2",
-          background: "color-mix(in srgb, #4adfb2 14%, transparent)",
-        }}
+        className="shrink-0 chip-game"
+        style={
+          {
+            color: "var(--game-coop)",
+            "--chip-color": "var(--game-coop)",
+          } as React.CSSProperties
+        }
       >
         ✓ {t("missionDone")}
       </span>
@@ -98,7 +104,7 @@ export default async function MisionesHoy({
           className="card-game anim-lift group relative overflow-hidden p-5 text-white block"
         >
           <div className="flex items-start justify-between gap-3">
-            <p className="text-[10px] mono uppercase tracking-[0.22em] text-signal flex items-center gap-1.5">
+            <p className="text-[10px] mono uppercase tracking-[0.22em] text-signal-on-game flex items-center gap-1.5">
               <GameIcon name="nivel" size={13} />
               {t("missionTrain")}
             </p>
@@ -113,7 +119,7 @@ export default async function MisionesHoy({
             <p className="mt-1 text-xs text-white/50">{proximaTitulo}</p>
           )}
           {!trainDone && (
-            <span className="mt-3 inline-flex items-center text-[11px] mono uppercase tracking-[0.16em] text-signal group-hover:translate-x-1 transition-transform">
+            <span className="mt-3 inline-flex items-center text-[11px] mono uppercase tracking-[0.16em] text-signal-on-game group-hover:translate-x-1 transition-transform">
               {t("missionGo")}
             </span>
           )}
@@ -126,7 +132,7 @@ export default async function MisionesHoy({
         >
           <div className="flex items-start justify-between gap-3">
             <p className="text-[10px] mono uppercase tracking-[0.22em] flex items-center gap-1.5"
-              style={{ color: "#4adfb2" }}
+              style={{ color: "var(--game-coop)" }}
             >
               <GameIcon name="chispa" size={13} />
               {t("missionEat")}
@@ -152,7 +158,7 @@ export default async function MisionesHoy({
           )}
           {!eatDone && (
             <span className="mt-3 inline-flex items-center text-[11px] mono uppercase tracking-[0.16em] group-hover:translate-x-1 transition-transform"
-              style={{ color: "#4adfb2" }}
+              style={{ color: "var(--game-coop)" }}
             >
               {diaHoy ? t("missionMenu") : t("missionMenuSetup")}
             </span>

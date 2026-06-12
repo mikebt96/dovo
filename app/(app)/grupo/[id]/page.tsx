@@ -42,20 +42,23 @@ export default async function GrupoPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const { data: grupo } = await supabase
+  const { data: grupo, error: grupoErr } = await supabase
     .schema("core")
     .from("tratos")
     .select("id, nombre_grupo, tipo_grupo, invite_token, created_by")
     .eq("id", id)
     .maybeSingle<Grupo>();
+  // F25·G20: un fallo transitorio NO es 404 — al error boundary, no a notFound.
+  if (grupoErr) throw grupoErr;
 
   if (!grupo) notFound();
 
-  const { data: miembrosRaw } = await supabase
+  const { data: miembrosRaw, error: miembrosErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("user_id, role, users!inner(nombre)")
     .eq("trato_id", id);
+  if (miembrosErr) throw miembrosErr;
 
   const miembros = (miembrosRaw as unknown as Miembro[] | null) ?? [];
   const soyMiembro = miembros.some((m) => m.user_id === user.id);

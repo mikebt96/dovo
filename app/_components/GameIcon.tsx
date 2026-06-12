@@ -18,7 +18,9 @@ export type GameIconName =
   | "corona"
   | "tabla"
   | "perfil"
-  | "pin";
+  | "pin"
+  | "camara"
+  | "plato";
 
 const PATHS: Record<GameIconName, (filled: boolean) => React.ReactNode> = {
   // impacto: rombo central + ticks radiales a 90°
@@ -104,6 +106,23 @@ const PATHS: Record<GameIconName, (filled: boolean) => React.ReactNode> = {
     <>
       <circle cx="12" cy="8" r="4" fill={f ? "currentColor" : "none"} />
       <path d="M4.5 20.5c.8-3.7 3.9-5.5 7.5-5.5s6.7 1.8 7.5 5.5" />
+    </>
+  ),
+  // cámara del body scan: cuerpo con visor + lente
+  camara: (f) => (
+    <>
+      <path
+        d="M3 7.5h4.5l2-2.5h5l2 2.5H21V19H3z"
+        fill={f ? "currentColor" : "none"}
+      />
+      <circle cx="12" cy="13" r="3.2" fill={f ? "var(--c-paper, #fff)" : "none"} />
+    </>
+  ),
+  // plato servido: bowl en perfil + vapor
+  plato: (f) => (
+    <>
+      <path d="M3.5 11a8.5 8.5 0 0017 0z" fill={f ? "currentColor" : "none"} />
+      <path d="M8 7V4.5M12 7V3.5M16 7V4.5" />
     </>
   ),
   // sello del lugar: pin geométrico

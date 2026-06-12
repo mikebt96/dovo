@@ -6,9 +6,23 @@ import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import WishlistColumn from "@/app/_components/WishlistColumn";
 import CopyCode from "@/app/_components/CopyCode";
+import CardHalo from "@/app/_components/CardHalo";
+import GameIcon, { type GameIconName } from "@/app/_components/GameIcon";
 import { getRewardsData, getWishlist } from "@/lib/actions/rewards";
 
 export const dynamic = "force-dynamic";
+
+// Los iconos de rewards/partners viven en DB como emoji (seed F4) — en UI se
+// renderizan como sprites (§4.9, F23·G14). Match semántico con el catálogo de
+// GameIcon; todo lo demás cae al glifo de premio. Claves en escape unicode
+// para que el grep de cierre de emojis quede en cero.
+const ICONO_GLIFO: Record<string, GameIconName> = {
+  "\u{1F3C6}": "corona", // trofeo
+  "\u{1F957}": "plato", // ensalada
+  "\u{1F381}": "premio", // regalo (default de core.rewards.icono)
+  "\u{1F3F7}\u{FE0F}": "premio", // etiqueta (default de partner_discounts.icono)
+};
+const glifoDe = (emoji: string): GameIconName => ICONO_GLIFO[emoji] ?? "premio";
 
 export default async function RecompensasPage() {
   const t = await getTranslations("recompensas");
@@ -50,22 +64,15 @@ export default async function RecompensasPage() {
 
       {/* Racha del dúo — gatillo emocional. Racha SIEMPRE en ámbar (léxico §2). */}
       <section className="card-game relative overflow-hidden p-7 sm:p-9 text-white mb-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full opacity-40 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(109,74,255,0.5), transparent 70%)",
-          }}
-        />
+        <CardHalo />
         <div className="relative flex items-end gap-4">
           <div
             className="display font-extrabold leading-[0.8] text-6xl sm:text-7xl tabular-nums"
             style={{
               // panel SIEMPRE oscuro → ámbar brillante fijo (el token reactivo
               // daría #8f5a00 sobre negro en tema claro — ilegible)
-              color: "#ffb454",
-              textShadow: "0 0 44px color-mix(in srgb, #ffb454 45%, transparent)",
+              color: "var(--game-racha)",
+              textShadow: "0 0 44px color-mix(in srgb, var(--game-racha) 45%, transparent)",
             }}
           >
             {data.racha}
@@ -87,7 +94,9 @@ export default async function RecompensasPage() {
                 key={r.id}
                 className="rounded-xl border border-signal/40 bg-signal/[0.05] p-4"
               >
-                <div className="text-3xl mb-2">{r.icono}</div>
+                <div className="mb-2">
+                  <GameIcon name={glifoDe(r.icono)} size={28} />
+                </div>
                 <div className="display font-semibold lowercase">{r.titulo}</div>
                 <div className="text-xs opacity-60 mt-1 leading-relaxed">
                   {r.descripcion}
@@ -114,7 +123,9 @@ export default async function RecompensasPage() {
                   : 0;
               return (
                 <div key={r.id} className="rounded-xl border border-ink/10 p-4">
-                  <div className="text-3xl mb-2 opacity-50 grayscale">{r.icono}</div>
+                  <div className="mb-2 opacity-50 grayscale">
+                    <GameIcon name={glifoDe(r.icono)} size={28} />
+                  </div>
                   <div className="display font-semibold lowercase">{r.titulo}</div>
                   <div className="text-xs opacity-60 mt-1 leading-relaxed">
                     {r.descripcion}
@@ -163,7 +174,7 @@ export default async function RecompensasPage() {
               key={p.id}
               className="flex items-center gap-3 rounded-xl border border-ink/10 p-4"
             >
-              <span className="text-2xl shrink-0">{p.icono}</span>
+              <GameIcon name={glifoDe(p.icono)} size={24} className="shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="display font-semibold lowercase truncate">
                   {p.titulo}

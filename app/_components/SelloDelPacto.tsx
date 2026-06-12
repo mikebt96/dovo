@@ -4,6 +4,7 @@ import { vibrateJackpot } from "@/lib/juice";
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import CardHalo from "./CardHalo";
 
 // SelloDelPacto (directiva §4.15): crear o aceptar el trato NO termina en un
 // redirect seco — el pico de motivación se ceremonia. Los dos discos del mark
@@ -43,14 +44,7 @@ export default function SelloDelPacto() {
       }}
     >
       <div className="card-game relative overflow-hidden p-8 sm:p-10 text-white text-center">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full opacity-40 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, color-mix(in srgb, var(--c-signal) 55%, transparent), transparent 70%)",
-          }}
-        />
+        <CardHalo position="center" />
 
         {/* los dos discos: entran de lados opuestos, quedan respirando */}
         <div className="relative mt-2 flex items-center justify-center gap-3" aria-hidden>

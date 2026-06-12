@@ -79,6 +79,8 @@ export async function nudgeCompa(tratoId: string): Promise<Result> {
     .eq("id", user.id)
     .maybeSingle<{ nombre: string }>();
 
+  // es-only deliberado (BRAND.md §español MX-first); por-locale requiere
+  // persistir idioma del receptor (schema).
   await sendPushToComembers(tratoId, user.id, "racha_riesgo", {
     title: "dovo",
     body: `${me?.nombre ?? "tu compa"} ya hizo su parte hoy — el trato los necesita a los dos.`,
@@ -118,7 +120,7 @@ export async function getVeredictoPendiente(
 
   const semanaJuzgada = lunesSemanaCDMX(-1);
 
-  const { data: streak } = await supabase
+  const { data: streak, error: stErr } = await supabase
     .schema("core")
     .from("trato_streak")
     .select("current_streak_weeks, max_streak, last_evaluated_week, last_cumplido_week")
@@ -129,10 +131,11 @@ export async function getVeredictoPendiente(
       last_evaluated_week: string | null;
       last_cumplido_week: string | null;
     }>();
+  if (stErr) console.error("[trato] veredicto streak:", stErr.message);
   // el cron aún no juzga esa semana (o el trato no tiene historia) → nada
   if (!streak || streak.last_evaluated_week !== semanaJuzgada) return null;
 
-  const { data: visto } = await supabase
+  const { data: visto, error: vErr } = await supabase
     .schema("core")
     .from("veredictos_vistos")
     .select("week")
@@ -140,10 +143,11 @@ export async function getVeredictoPendiente(
     .eq("trato_id", tratoId)
     .eq("week", semanaJuzgada)
     .maybeSingle<{ week: string }>();
+  if (vErr) console.error("[trato] veredicto visto:", vErr.message);
   if (visto) return null;
 
   // LA APUESTA de la semana juzgada: el premio que se jugaron y quién paga
-  const { data: ap } = await supabase
+  const { data: ap, error: apErr } = await supabase
     .schema("core")
     .from("apuestas")
     .select("premio_text, apuesta_text, estado, perdedor_interno")
@@ -155,6 +159,7 @@ export async function getVeredictoPendiente(
       estado: string;
       perdedor_interno: string | null;
     }>();
+  if (apErr) console.error("[trato] veredicto apuesta:", apErr.message);
 
   let apuesta: Veredicto["apuesta"] = null;
   if (ap && ap.estado !== "viva") {

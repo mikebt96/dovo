@@ -148,8 +148,10 @@ export async function lanzarAtaque(input: {
   tipo: AtaqueTipo;
   paraUser?: string;
 }): Promise<Result<AtaqueRow>> {
+  // Códigos estables (F25·G22): AttackPanel los traduce vía KNOWN_ERROR_CODES
+  // (retos.err.*); los P0001 del RPC son pass-through deliberado (abajo).
   if (input.tipo !== "golpe" && input.tipo !== "congelamiento") {
-    return { ok: false, error: "tipo inválido" };
+    return { ok: false, error: "ataque_tipo_invalido" };
   }
   const supabase = await createClient();
   const {
@@ -167,11 +169,13 @@ export async function lanzarAtaque(input: {
     // Cualquier otro error (permisos, schema cache, timeout) es técnico: genérico + log.
     if (error.code === "P0001") return { ok: false, error: error.message };
     console.error("[ataques] lanzar:", error.code, error.message);
-    return { ok: false, error: "no se pudo lanzar el ataque — intenta de nuevo" };
+    return { ok: false, error: "ataque_no_enviado" };
   }
   const ataque = data as unknown as AtaqueRow;
 
   // Push al dúo rival (pref 'reto'). Fire-safe: jamás rompe el ataque.
+  // es-only deliberado (BRAND.md §español MX-first); por-locale requiere
+  // persistir idioma del receptor (schema).
   const titulo =
     ataque.resultado === "bloqueado"
       ? "🛡️ ¡escudo activado!"

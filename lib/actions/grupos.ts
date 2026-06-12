@@ -104,6 +104,8 @@ export async function unirseAGrupo(
 
   // El creador DEBE enterarse (§4.15): el push complementa al email de
   // aceptación que ya existe. Fail-soft: sin VAPID es no-op.
+  // es-only deliberado (BRAND.md §español MX-first); por-locale requiere
+  // persistir idioma del receptor (schema).
   const { data: me } = await supabase
     .schema("core")
     .from("users")

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import type { LeaderRow } from "@/lib/actions/leaderboard";
 import type { StatKey } from "@/lib/scoring/types";
 import { STAT_FROM_LABEL, STAT_BG_CLASS } from "@/lib/leveling/display";
+import GameIcon from "./GameIcon";
 
 export default async function DuoLeaderRow({
   row,
@@ -43,16 +44,23 @@ export default async function DuoLeaderRow({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-1 text-[11px] mono uppercase tracking-wider opacity-70">
-          <span>{t("streak", { n: row.racha_duo })}</span>
+        {/* racha ámbar a opacidad plena (léxico §2); el resto se atenúa */}
+        <div className="flex items-center gap-3 mt-1 text-[11px] mono uppercase tracking-wider">
+          <span
+            className="flex items-center gap-1 tabular-nums"
+            style={{ color: "var(--mode-racha)" }}
+          >
+            <GameIcon name="eslabones" size={11} />
+            {t("streak", { n: row.racha_duo })}
+          </span>
           {top && (
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 opacity-70">
               <span className={`inline-block w-2 h-2 rounded-full ${STAT_BG_CLASS[top]}`} />
               {row.top_stat}
             </span>
           )}
           {row.top_clase && (
-            <span className="truncate hidden sm:inline">{row.top_clase}</span>
+            <span className="truncate hidden sm:inline opacity-70">{row.top_clase}</span>
           )}
         </div>
       </div>

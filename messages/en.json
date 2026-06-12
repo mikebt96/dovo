@@ -227,7 +227,8 @@
     "proUpsellEyebrow": "pro",
     "proUpsellTitle": "take your duo to pro",
     "proUpsellBody": "AI meal plans, body analysis and premium discounts. one subscription for both of you.",
-    "proUpsellCta": "see plans →"
+    "proUpsellCta": "see plans →",
+    "duoFallback": "your duo"
   },
   "duoProof": {
     "eyebrow": "why in a duo",
@@ -317,6 +318,8 @@
     "labelWeight": "Weight (kg)",
     "labelHeight": "Height (cm)",
     "labelAge": "Age",
+    "consentSalud": "I agree to dovo processing my health data (weight, height, age, injuries) to generate my plans, validate my activity and show my progress. it's sensitive data: only I see it, it's never sold and never enters statistics. I can revoke this anytime from settings.",
+    "consentSaludLink": "privacy notice →",
     "labelGender": "Gender",
     "labelActivity": "Activity level",
     "labelGoal": "Goal",
@@ -472,6 +475,7 @@
     "logDetailed": "log with metrics",
     "saving": "saving…",
     "done": "✓ done",
+    "ptsChip": "+{pts} pts",
     "boostTag": "+50% boost · character only",
     "boostCta": "send a boost →",
     "selloChip": "place seal",
@@ -574,7 +578,14 @@
     "rematch": "rematch",
     "rematchSent": "rematch sent — waiting on the rival",
     "duelClose": "close",
-    "scoutRacha": "{n} wk"
+    "scoutRacha": "{n} wk",
+    "err": {
+      "reto_no_existe": "duel not found",
+      "reto_no_autorizado": "not allowed",
+      "duelo_no_termina": "the duel isn't over yet",
+      "ataque_tipo_invalido": "invalid attack type",
+      "ataque_no_enviado": "couldn't launch the attack — try again"
+    }
   },
   "boosts": {
     "title": "boosts",
@@ -833,7 +844,8 @@
     "apuestaPagasTu": "you cover {apuesta} — next week you push harder",
     "apuestaPagaOtro": "{nombre} covers {apuesta}",
     "apuestaEmpate": "honorable tie — {apuesta} goes halves",
-    "apuestaPerdida": "{premio} stays on the table — it's earned by showing up"
+    "apuestaPerdida": "{premio} stays on the table — it's earned by showing up",
+    "recordUnit": "wks"
   },
   "sello": {
     "title": "it's a deal.",
@@ -867,7 +879,14 @@
     "debesTu": "you owe: {apuesta} — a promise is a debt",
     "debeOtro": "{nombre} owes: {apuesta}",
     "saldarCta": "paid up",
-    "saldarConfirm": "confirm?"
+    "saldarConfirm": "confirm?",
+    "compaFallback": "your buddy",
+    "err": {
+      "apuesta_campos": "prize and wager — you need both",
+      "apuesta_cerrada": "this week's wager is already closed",
+      "saldar_nada": "nothing to settle",
+      "saldar_no_deudor": "whoever owes doesn't get to absolve themselves"
+    }
   },
   "levelup": {
     "eyebrow": "level up",

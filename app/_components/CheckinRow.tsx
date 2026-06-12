@@ -209,15 +209,25 @@ export default function CheckinRow({
       </div>
 
       {/* chips de delta: qué compró tu sudor, stat por stat, en cascada 60ms */}
-      {deltasVisibles.length > 0 && (
+      {(deltasVisibles.length > 0 || (reward && reward.puntos > 0)) && (
         <div className="mt-3 flex flex-wrap gap-1.5">
+          {/* el "+N pts" PERSISTE en el recibo (§8.21): el span flotante de
+              arriba es decorativo y no existe con reduced-motion */}
+          {reward && reward.puntos > 0 && (
+            <span
+              className="chip-delta chip-game tabular-nums"
+              style={{ "--chip-color": "var(--c-signal)" } as React.CSSProperties}
+            >
+              {t("ptsChip", { pts: reward.puntos })}
+            </span>
+          )}
           {deltasVisibles.map((k, i) => (
             <span
               key={k}
-              className="chip-delta inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] tabular-nums"
+              className="chip-delta chip-game tabular-nums"
               style={
                 {
-                  background: `color-mix(in srgb, ${STAT_VAR[k]} 14%, transparent)`,
+                  "--chip-color": STAT_VAR[k],
                   "--anim-delay": `${i * 60}ms`,
                 } as React.CSSProperties
               }
@@ -231,10 +241,10 @@ export default function CheckinRow({
             </span>
           ))}
           {reward?.boostAplicado && (
-            <span className="chip-delta inline-flex items-center rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep"
+            <span className="chip-delta chip-game text-coop-deep"
               style={
                 {
-                  background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)",
+                  "--chip-color": "var(--mode-coop)",
                   "--anim-delay": `${deltasVisibles.length * 60}ms`,
                 } as React.CSSProperties
               }
@@ -245,10 +255,10 @@ export default function CheckinRow({
           {/* el candado del lugar: sello ganado, o la invitación a anclar */}
           {reward?.sello && (
             <span
-              className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep"
+              className="chip-delta chip-game text-coop-deep"
               style={
                 {
-                  background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)",
+                  "--chip-color": "var(--mode-coop)",
                   "--anim-delay": `${(deltasVisibles.length + 1) * 60}ms`,
                 } as React.CSSProperties
               }
@@ -262,7 +272,7 @@ export default function CheckinRow({
               type="button"
               disabled={anclado === "saving"}
               onClick={anclar}
-              className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-signal-deep border border-signal/40 hover:border-signal transition-colors disabled:opacity-50"
+              className="chip-delta chip-game text-signal-deep border border-signal/40 hover:border-signal transition-colors disabled:opacity-50"
               style={{ "--anim-delay": `${(deltasVisibles.length + 1) * 60}ms` } as React.CSSProperties}
             >
               <GameIcon name="pin" size={11} />
@@ -271,12 +281,8 @@ export default function CheckinRow({
           )}
           {anclado === "done" && (
             <span
-              className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep"
-              style={
-                {
-                  background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)",
-                } as React.CSSProperties
-              }
+              className="chip-delta chip-game text-coop-deep"
+              style={{ "--chip-color": "var(--mode-coop)" } as React.CSSProperties}
             >
               <GameIcon name="pin" size={11} filled />
               {t("anchored")}
@@ -291,7 +297,7 @@ export default function CheckinRow({
         <div className="mt-2.5">
           <a
             href={boostHref}
-            className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep border hover:border-coop transition-colors"
+            className="chip-delta chip-game text-coop-deep border hover:border-coop transition-colors"
             style={
               {
                 borderColor: "color-mix(in srgb, var(--mode-coop) 40%, transparent)",

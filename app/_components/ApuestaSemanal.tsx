@@ -42,7 +42,7 @@ export default async function ApuestaSemanal({ tratoId }: { tratoId: string }) {
             {data.pendiente.perdedor_interno === user.id
               ? t("debesTu", { apuesta: data.pendiente.apuesta_text })
               : t("debeOtro", {
-                  nombre: data.pendiente.perdedor_nombre ?? "tu compa",
+                  nombre: data.pendiente.perdedor_nombre ?? t("compaFallback"),
                   apuesta: data.pendiente.apuesta_text,
                 })}
           </p>
@@ -61,7 +61,7 @@ export default async function ApuestaSemanal({ tratoId }: { tratoId: string }) {
             </p>
             <span
               className="text-[9px] mono uppercase tracking-[0.18em] rounded-full px-2 py-0.5"
-              style={{ color: "#ffb454", background: "color-mix(in srgb, #ffb454 14%, transparent)" }}
+              style={{ color: "var(--game-racha)", background: "color-mix(in srgb, var(--game-racha) 14%, transparent)" }}
             >
               {t("viva")}
             </span>
@@ -69,7 +69,7 @@ export default async function ApuestaSemanal({ tratoId }: { tratoId: string }) {
 
           <p
             className="mt-2.5 display font-extrabold lowercase leading-tight text-xl sm:text-2xl"
-            style={{ color: "#f0c75a", textShadow: "0 0 28px rgba(240,199,90,0.35)" }}
+            style={{ color: "var(--mode-gold)", textShadow: "0 0 28px rgba(240,199,90,0.35)" }}
           >
             <GameIcon name="premio" size={18} filled className="inline-block mr-2 -mt-1" />
             {data.actual.premio_text}
@@ -83,7 +83,7 @@ export default async function ApuestaSemanal({ tratoId }: { tratoId: string }) {
             <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-3">
               <p className="text-[11px] mono uppercase tracking-[0.14em] tabular-nums text-white/75">
                 {t("van")}{" "}
-                <span style={{ color: "var(--c-signal)" }}>
+                <span style={{ color: "var(--color-signal-on-game)" }}>
                   {t("tu")} {yo.pts.toLocaleString("es-MX")}
                 </span>
                 {" · "}

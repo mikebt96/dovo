@@ -40,7 +40,11 @@ export default async function AdminPage() {
         <div className="flex items-center gap-3">
           <span
             className={`h-3 w-3 rounded-full ${data.dbOk ? "bg-stat-vit" : "bg-rival"}`}
-            style={{ boxShadow: data.dbOk ? "0 0 16px #aef03c88" : "0 0 16px #ef444488" }}
+            style={{
+              boxShadow: data.dbOk
+                ? "0 0 16px color-mix(in srgb, var(--stat-vit) 53%, transparent)"
+                : "0 0 16px color-mix(in srgb, var(--mode-rival) 53%, transparent)",
+            }}
           />
           <span className="display text-2xl font-bold lowercase">
             {data.dbOk ? "operativa" : "con fallos"}

@@ -86,6 +86,8 @@ export async function crearReto(input: {
 
   // F8 · "los retaron a duelo" — push a los miembros del dúo rival (el actor no es
   // miembro del rival, así que reciben ambos). Fail-soft: no-op sin VAPID.
+  // es-only deliberado (BRAND.md §español MX-first); por-locale requiere
+  // persistir idioma del receptor (schema).
   const { data: miTrato } = await supabase
     .schema("core")
     .from("tratos")
@@ -166,13 +168,24 @@ export async function getMarcador(retoId: string): Promise<Result<Marcador>> {
   return { ok: true, data };
 }
 
+// Códigos estables para los P0001 enumerables de core.cerrar_reto (F25·G22):
+// DuelScoreboard los traduce vía KNOWN_ERROR_CODES (retos.err.*); cualquier
+// mensaje no enumerado pasa tal cual (status quo, sin regresión es).
+const ERRORES_CERRAR_RETO: Record<string, string> = {
+  "reto no existe": "reto_no_existe",
+  "no autorizado": "reto_no_autorizado",
+  "el duelo aún no termina": "duelo_no_termina",
+};
+
 // Cierra el duelo y fija ganador por puntos_base (idempotente en DB).
 export async function cerrarRetoAction(retoId: string): Promise<Result> {
   const supabase = await createClient();
   const { error } = await supabase
     .schema("core")
     .rpc("cerrar_reto", { p_reto_id: retoId });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    return { ok: false, error: ERRORES_CERRAR_RETO[error.message] ?? error.message };
+  }
   revalidatePath("/retos");
   return { ok: true, data: undefined };
 }
@@ -207,7 +220,7 @@ export async function getHeadToHead(
 // Retos del dúo (RLS: el usuario es party). Filas crudas; la UI pide marcador por reto.
 export async function getRetosDeTrato(tratoId: string): Promise<RetoRow[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .schema("core")
     .from("retos")
     .select(
@@ -215,5 +228,6 @@ export async function getRetosDeTrato(tratoId: string): Promise<RetoRow[]> {
     )
     .or(`trato_a.eq.${tratoId},trato_b.eq.${tratoId}`)
     .order("created_at", { ascending: false });
+  if (error) console.error("[retos] retos de trato:", error.message);
   return (data ?? []) as RetoRow[];
 }

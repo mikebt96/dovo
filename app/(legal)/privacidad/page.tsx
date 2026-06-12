@@ -1253,14 +1253,6 @@ export default function PrivacidadPage() {
         solicitarán por separado, en el momento correspondiente, mediante los
         mecanismos descritos en las secciones 3, 5, 6 y 7.
       </p>
-      <p className="text-xs mono opacity-60 mt-6">
-        Aviso de Privacidad Integral de dovo · Versión 1.0 · 12 de junio de
-        2026 ·{" "}
-        <a href="mailto:privacidad@dovofit.com" className="underline">
-          privacidad@dovofit.com
-        </a>
-      </p>
-
       <Footer>
         Aviso de Privacidad Integral · Versión 1.0 · 12 de junio de 2026 ·
         Cualquier duda:{" "}

@@ -6,6 +6,7 @@ import { characterSheet } from "@/lib/leveling";
 import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import CharacterCard from "@/app/_components/CharacterCard";
+import GameIcon from "@/app/_components/GameIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -104,7 +105,7 @@ export default async function PerfilPage() {
           href="/perfil/scan"
           className="group flex items-center gap-4 rounded-2xl border border-signal/30 bg-signal/[0.04] p-5 hover:border-signal/60 transition-colors"
         >
-          <span className="text-2xl">📸</span>
+          <GameIcon name="camara" size={24} className="shrink-0" />
           <span className="flex-1 min-w-0">
             <span className="block display font-semibold lowercase">{t("scanCta")}</span>
             <span className="block text-xs opacity-60 mt-0.5">{t("scanCtaSub")}</span>

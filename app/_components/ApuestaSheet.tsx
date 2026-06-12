@@ -6,6 +6,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { sellarApuesta } from "@/lib/actions/apuestas";
+import { KNOWN_ERROR_CODES } from "@/lib/i18n/action-errors";
 import GameIcon from "./GameIcon";
 
 // Sellar LA APUESTA (el trasfondo de la app): la app PROPONE premios según la
@@ -54,7 +55,7 @@ export default function ApuestaSheet({
   const chip = (activo: boolean) =>
     `rounded-full px-3 py-1.5 text-[11px] mono lowercase border transition-colors ${
       activo
-        ? "border-signal bg-signal/10 text-signal"
+        ? "border-signal bg-signal/10 text-signal-on-game"
         : "border-white/20 text-white/75 hover:border-white/45"
     }`;
 
@@ -63,8 +64,13 @@ export default function ApuestaSheet({
       <button
         type="button"
         onClick={() => ref.current?.showModal()}
-        className="btn-game w-full py-3 text-white display font-semibold lowercase"
-        style={{ "--btn-color": "#b8860b" } as React.CSSProperties}
+        className="btn-game w-full py-3 display font-semibold lowercase"
+        style={
+          {
+            "--btn-color": "var(--mode-gold)",
+            color: "#08070d", // blanco sobre oro falla AA; tinta sí (≈11.8:1)
+          } as React.CSSProperties
+        }
       >
         {inicial ? t("editarCta") : t("sellarCta")}
       </button>
@@ -84,7 +90,7 @@ export default function ApuestaSheet({
           <p className="display font-extrabold lowercase text-2xl mt-1">
             {t("sheetTitle")}
           </p>
-          <p className="mt-1 text-[11px] mono uppercase tracking-[0.14em]" style={{ color: "#ffb454" }}>
+          <p className="mt-1 text-[11px] mono uppercase tracking-[0.14em]" style={{ color: "var(--game-racha)" }}>
             {t("tierLabel", { tier: tierNombre, n: racha })}
           </p>
 
@@ -137,7 +143,12 @@ export default function ApuestaSheet({
             />
           </div>
 
-          {err && <p className="mt-3 text-xs text-rival">{err}</p>}
+          {/* código conocido → i18n; lo demás tal cual (jamás t() con clave desconocida) */}
+          {err && (
+            <p className="mt-3 text-xs text-rival">
+              {KNOWN_ERROR_CODES.has(err) ? t(`err.${err}`) : err}
+            </p>
+          )}
 
           <button
             type="button"

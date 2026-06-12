@@ -49,25 +49,33 @@ export default async function HomeAuthed() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: charRow } = await supabase
+  const { data: charRow, error: charErr } = await supabase
     .schema("core")
     .from("user_character")
     .select("fue, res, flex, vel, equ, vit, nivel, prestige, class_name")
     .eq("user_id", user.id)
     .maybeSingle<Character>();
+  if (charErr) console.error("[home] user_character:", charErr.message);
 
-  const { data: streakRow } = await supabase
+  const { data: streakRow, error: streakErr } = await supabase
     .schema("core")
     .from("user_streak")
     .select("current_streak_weeks")
     .eq("user_id", user.id)
     .maybeSingle<{ current_streak_weeks: number }>();
+  if (streakErr) console.error("[home] user_streak:", streakErr.message);
 
-  const { data: miembros } = await supabase
+  const { data: miembros, error: miembrosErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("id, trato_id, tratos!inner(id, nombre_grupo, tipo_grupo)")
     .eq("user_id", user.id);
+  // Un fallo transitorio aquí JAMÁS debe renderizar "crea tu grupo" (F25·G20):
+  // mejor el error boundary que un empty-state falso.
+  if (miembrosErr) {
+    console.error("[home] trato_miembros:", miembrosErr.message);
+    throw miembrosErr;
+  }
 
   const character: Character = charRow ?? {
     fue: 0,
@@ -178,7 +186,7 @@ export default async function HomeAuthed() {
       {boost && (
         <div className="mb-6 rounded-xl border border-signal/40 bg-signal/5 px-4 py-3">
           <p className="text-xs mono uppercase tracking-widest text-signal">
-            {t("boostActive", { nombre: boost.de_nombre ?? "tu dúo" })}
+            {t("boostActive", { nombre: boost.de_nombre ?? t("duoFallback") })}
           </p>
           {boost.tipo === "energia" && (
             <p className="text-xs opacity-60 mt-1">{t("boostActiveEnergia")}</p>

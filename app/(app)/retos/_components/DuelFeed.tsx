@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import type { AtaqueRow, MiembroReto } from "@/lib/actions/ataques";
+import GameIcon, { type GameIconName } from "@/app/_components/GameIcon";
 
 // F10 · Historial del duelo: cada ataque cuenta una historia corta ("Iván golpeó a
 // Cinco Disciplinas −10"). Server component (sin interactividad); la página es
@@ -57,9 +58,10 @@ export default async function DuelFeed({
           {congelados.map((c) => (
             <span
               key={c.user_id + c.hasta}
-              className="anim-frost inline-flex items-center gap-1.5 rounded-full border border-stat-vel/40 bg-stat-vel/10 px-3 py-1.5 text-[11px] mono uppercase tracking-wider text-stat-vel"
+              className="anim-frost inline-flex items-center gap-1.5 rounded-full border border-stat-vel/40 bg-stat-vel/10 px-3 py-1.5 text-[11px] mono uppercase tracking-wider text-freeze-deep"
             >
-              ❄️ {nombreDe(c.user_id)} · {t("atkFrozenChip")}
+              <GameIcon name="hielo" size={13} />
+              {nombreDe(c.user_id)} · {t("atkFrozenChip")}
             </span>
           ))}
         </div>
@@ -75,16 +77,20 @@ export default async function DuelFeed({
               : a.tipo === "golpe"
                 ? t("atkFeedGolpeHit", { de, duo: duoVictima })
                 : t("atkFeedFreezeHit", { de, para: nombreDe(a.para_user) });
-          const icono = a.resultado === "bloqueado" ? "🛡️" : a.tipo === "golpe" ? "🥊" : "❄️";
+          const icono: GameIconName =
+            a.resultado === "bloqueado" ? "escudo" : a.tipo === "golpe" ? "golpe" : "hielo";
           return (
             <li
               key={a.id}
               className="anim-fade-up flex items-start gap-3"
               style={{ "--anim-delay": `${Math.min(i, 8) * 60}ms` } as React.CSSProperties}
             >
-              <span aria-hidden className="text-base leading-6">
-                {icono}
-              </span>
+              <GameIcon
+                name={icono}
+                size={18}
+                filled={icono !== "hielo"}
+                className="shrink-0 mt-0.5"
+              />
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-snug">{texto}</p>
                 <p className="text-[10px] mono uppercase tracking-wider opacity-40 mt-0.5">

@@ -6,6 +6,7 @@ import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import Paywall from "@/app/_components/Paywall";
 import { getBodyScanContext } from "@/lib/actions/bodyscan";
+import GameIcon from "@/app/_components/GameIcon";
 import ScanFlow from "./_components/ScanFlow";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +60,7 @@ export default async function ScanPage() {
                   })}
                 </span>
                 <span className="text-sm tabular-nums">
-                  <span style={{ color: "#c44aff" }}>{s.grasa_pct}%</span>
+                  <span className="text-stat-flex">{s.grasa_pct}%</span>
                   <span className="opacity-40 mx-1">·</span>
                   <span className="opacity-70">{t("fat")}</span>
                 </span>
@@ -69,8 +70,8 @@ export default async function ScanPage() {
                   <span className="opacity-70">{t("muscle")}</span>
                 </span>
                 {s.source === "ai" && (
-                  <span className="ml-auto text-[9px] mono uppercase tracking-widest text-signal">
-                    ✦
+                  <span className="ml-auto text-signal inline-flex items-center">
+                    <GameIcon name="chispa" size={11} className="inline -mt-px" />
                   </span>
                 )}
               </li>

@@ -68,7 +68,7 @@ export async function crearCheckin(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sin sesión" };
 
-  const { data: actividad } = await supabase
+  const { data: actividad, error: actErr } = await supabase
     .schema("core")
     .from("actividades")
     .select("slug, kcal_por_min, stats_primary, stats_secondary")
@@ -79,14 +79,16 @@ export async function crearCheckin(input: {
       stats_primary: string[];
       stats_secondary: string[];
     }>();
+  if (actErr) console.error("[checkins] actividad:", actErr.message);
   if (!actividad) return { ok: false, error: "actividad inválida" };
 
-  const { data: perfil } = await supabase
+  const { data: perfil, error: perfErr } = await supabase
     .schema("core")
     .from("user_perfil_fisico")
     .select("peso_kg, bmr_calculado")
     .eq("user_id", user.id)
     .maybeSingle<{ peso_kg: number; bmr_calculado: number | null }>();
+  if (perfErr) console.error("[checkins] perfil físico:", perfErr.message);
   if (!perfil?.bmr_calculado) {
     return { ok: false, error: "completa tu perfil físico primero" };
   }
@@ -105,18 +107,19 @@ export async function crearCheckin(input: {
 
   // Estado BEFORE del personaje: la única forma de saber qué cambió (deltas reales,
   // level-up, tier-ups) es comparar contra el AFTER que devuelve el RPC.
-  const { data: beforeRow } = await supabase
+  const { data: beforeRow, error: beforeErr } = await supabase
     .schema("core")
     .from("user_character")
     .select("fue, res, flex, vel, equ, vit, prestige")
     .eq("user_id", user.id)
     .maybeSingle<CharacterRow>();
+  if (beforeErr) console.error("[checkins] character before:", beforeErr.message);
   const before: Stats = beforeRow ?? ZERO_STATS;
   const prestige = beforeRow?.prestige ?? 0;
 
   // Boost energía pendiente: apply_checkin lo consume incondicionalmente si existe,
   // así que su existencia AHORA ⇒ este check-in sale boosteado (+50% a personaje).
-  const { data: boostPendiente } = await supabase
+  const { data: boostPendiente, error: boostErr } = await supabase
     .schema("core")
     .from("boosts")
     .select("id")
@@ -126,18 +129,25 @@ export async function crearCheckin(input: {
     .gt("fecha_expira", new Date().toISOString())
     .limit(1)
     .maybeSingle<{ id: string }>();
+  if (boostErr) console.error("[checkins] boost pendiente:", boostErr.message);
   const boostAplicado = !!boostPendiente;
 
   // Cap diario por miembro: no exceder CAP_PUNTOS_DIA de puntos crudos/día. Si se
   // pasa, se trunca puntos y se escalan los deltas en proporción (consistencia).
   let puntos = score.puntos;
   let deltas: Record<string, number> = score.deltas;
-  const { data: previos } = await supabase
+  const { data: previos, error: prevErr } = await supabase
     .schema("core")
     .from("checkins")
     .select("puntos_base")
     .eq("miembro_id", input.miembroId)
     .eq("fecha", input.fecha);
+  // F25·G20: si la lectura de previos falla, JAMÁS continuar con acumulado=0 —
+  // rompería CAP_PUNTOS_DIA y falsearía municionLista. Mismo trato que el RPC.
+  if (prevErr) {
+    console.error("[checkins] previos:", prevErr.message);
+    return { ok: false, error: prevErr.message };
+  }
   const acumulado = (previos ?? []).reduce(
     (s, r) => s + Number((r as { puntos_base: number | null }).puntos_base ?? 0),
     0,
@@ -226,21 +236,23 @@ export async function crearCheckin(input: {
   ).map((k) => ({ stat: k, de: sheetAntes.tiers[k].name, a: sheetDespues.tiers[k].name }));
 
   // Racha personal post-RPC (apply_checkin ya la recalculó).
-  const { data: streakRow } = await supabase
+  const { data: streakRow, error: streakErr } = await supabase
     .schema("core")
     .from("user_streak")
     .select("current_streak_weeks")
     .eq("user_id", user.id)
     .maybeSingle<{ current_streak_weeks: number }>();
+  if (streakErr) console.error("[checkins] user_streak:", streakErr.message);
 
   // F8 · "tu compañero entrenó" — push al resto del dúo. El helper NUNCA lanza y sin
   // VAPID keys es no-op inmediato: jamás afecta el check-in.
-  const { data: miembroRow } = await supabase
+  const { data: miembroRow, error: miembroErr } = await supabase
     .schema("core")
     .from("trato_miembros")
     .select("trato_id, users!inner(nombre)")
     .eq("id", input.miembroId)
     .maybeSingle();
+  if (miembroErr) console.error("[checkins] miembro push:", miembroErr.message);
   const miembro = miembroRow as unknown as
     | { trato_id: string; users: { nombre: string } | null }
     | null;

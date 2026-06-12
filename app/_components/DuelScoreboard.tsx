@@ -7,6 +7,7 @@ import {
   cerrarRetoAction,
   type Marcador,
 } from "@/lib/actions/retos";
+import { KNOWN_ERROR_CODES } from "@/lib/i18n/action-errors";
 import { useCountUp } from "@/lib/hooks/useCountUp";
 
 // Marcador v2 (directiva §4.7): dos lados, dos temperaturas — tú en violeta (la
@@ -86,7 +87,7 @@ export default function DuelScoreboard({
           className="text-left"
           style={losing ? { filter: "grayscale(0.5)" } : undefined}
         >
-          <div className="text-[11px] mono uppercase tracking-wider text-signal mb-1">
+          <div className="text-[11px] mono uppercase tracking-wider text-signal-on-game mb-1">
             {t("you")}
           </div>
           <div className="display font-semibold lowercase truncate">{miNombre}</div>
@@ -107,13 +108,13 @@ export default function DuelScoreboard({
             transform: "rotate(-8deg)",
             background:
               diff > 0
-                ? "color-mix(in srgb, var(--c-signal) 28%, transparent)"
+                ? "color-mix(in srgb, var(--color-signal-on-game) 28%, transparent)"
                 : diff < 0
                   ? "color-mix(in srgb, var(--mode-rival) 28%, transparent)"
                   : "rgba(255,255,255,0.12)",
             color:
               diff > 0
-                ? "var(--c-signal)"
+                ? "var(--color-signal-on-game)"
                 : diff < 0
                   ? "var(--mode-rival)"
                   : "rgba(255,255,255,0.6)",
@@ -147,21 +148,19 @@ export default function DuelScoreboard({
       {/* barra de ventaja: dos scaleX enfrentados desde el centro (§4.7) */}
       <div className="relative h-2 mt-5 rounded-full overflow-hidden bg-white/[0.08]">
         <div
-          className="absolute inset-y-0 left-0 w-1/2"
+          className="bar-advantage absolute inset-y-0 left-0 w-1/2"
           style={{
             background: "var(--c-signal)",
             transform: `scaleX(${share * 2})`,
             transformOrigin: "left",
-            transition: "transform 700ms var(--ease-snap)",
           }}
         />
         <div
-          className="absolute inset-y-0 right-0 w-1/2"
+          className="bar-advantage absolute inset-y-0 right-0 w-1/2"
           style={{
             background: "var(--mode-rival)",
             transform: `scaleX(${(1 - share) * 2})`,
             transformOrigin: "right",
-            transition: "transform 700ms var(--ease-snap)",
           }}
         />
       </div>
@@ -207,7 +206,12 @@ export default function DuelScoreboard({
         </button>
       )}
 
-      {err && <p className="text-xs text-rival mt-3">{err}</p>}
+      {/* código conocido → i18n; lo demás tal cual (jamás t() con clave desconocida) */}
+      {err && (
+        <p className="text-xs text-rival mt-3">
+          {KNOWN_ERROR_CODES.has(err) ? t(`err.${err}`) : err}
+        </p>
+      )}
     </div>
   );
 }

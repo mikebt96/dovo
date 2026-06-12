@@ -48,8 +48,11 @@ export async function getApuestaSemana(tratoId: string): Promise<ApuestaSemana |
   const semana = lunesSemanaCDMX();
   const pasada = lunesSemanaCDMX(-1);
 
-  const [{ data: filas, error: apErr }, { data: miembros }, { data: streak }] =
-    await Promise.all([
+  const [
+    { data: filas, error: apErr },
+    { data: miembros, error: memErr },
+    { data: streak, error: stErr },
+  ] = await Promise.all([
       supabase
         .schema("core")
         .from("apuestas")
@@ -74,6 +77,8 @@ export async function getApuestaSemana(tratoId: string): Promise<ApuestaSemana |
     console.error("[apuestas] semana:", apErr.message);
     return null;
   }
+  if (memErr) console.error("[apuestas] miembros:", memErr.message);
+  if (stErr) console.error("[apuestas] streak:", stErr.message);
 
   const rows = (filas ?? []) as ApuestaRow[];
   const actual = rows.find((r) => r.week_start === semana) ?? null;
@@ -144,7 +149,9 @@ export async function sellarApuesta(input: {
 }): Promise<Result> {
   const premio = input.premio.trim().slice(0, 140);
   const apuesta = input.apuesta.trim().slice(0, 140);
-  if (!premio || !apuesta) return { ok: false, error: "premio y apuesta — los dos" };
+  // Códigos estables (F25·G22): ApuestaSheet los traduce vía KNOWN_ERROR_CODES
+  // (apuesta.err.*); lo no-enumerable (error.message) pasa tal cual.
+  if (!premio || !apuesta) return { ok: false, error: "apuesta_campos" };
 
   const supabase = await createClient();
   const {
@@ -155,15 +162,16 @@ export async function sellarApuesta(input: {
   const semana = lunesSemanaCDMX();
 
   // si ya cerró (ganada/perdida) no se reescribe la historia
-  const { data: existente } = await supabase
+  const { data: existente, error: exErr } = await supabase
     .schema("core")
     .from("apuestas")
     .select("id, estado")
     .eq("trato_id", input.tratoId)
     .eq("week_start", semana)
     .maybeSingle<{ id: string; estado: string }>();
+  if (exErr) console.error("[apuestas] existente:", exErr.message);
   if (existente && existente.estado !== "viva") {
-    return { ok: false, error: "la apuesta de esta semana ya se cerró" };
+    return { ok: false, error: "apuesta_cerrada" };
   }
 
   const { error } = existente
@@ -182,12 +190,15 @@ export async function sellarApuesta(input: {
   if (error) return { ok: false, error: error.message };
 
   // el compa se entera: la apuesta es de los DOS
-  const { data: me } = await supabase
+  const { data: me, error: meErr } = await supabase
     .schema("core")
     .from("users")
     .select("nombre")
     .eq("id", user.id)
     .maybeSingle<{ nombre: string }>();
+  if (meErr) console.error("[apuestas] me:", meErr.message);
+  // es-only deliberado (BRAND.md §español MX-first); por-locale requiere
+  // persistir idioma del receptor (schema).
   await sendPushToComembers(input.tratoId, user.id, "recompensa", {
     title: "dovo · la apuesta",
     body: `${me?.nombre ?? "tu compa"} selló la apuesta: ${premio}. Que gane el trato.`,
@@ -215,9 +226,11 @@ export async function marcarApuestaSaldada(apuestaId: string): Promise<Result> {
     .eq("id", apuestaId)
     .maybeSingle<{ id: string; estado: string; perdedor_interno: string | null; saldada: boolean }>();
   if (!row) return { ok: false, error: "apuesta no encontrada" };
-  if (row.estado !== "ganada" || row.saldada) return { ok: false, error: "nada que saldar" };
+  // códigos estables (F25·G22) — hoy ApuestaSaldarButton no los pinta, pero ya
+  // tienen clave i18n (apuesta.err.*) para cuando lo haga
+  if (row.estado !== "ganada" || row.saldada) return { ok: false, error: "saldar_nada" };
   if (row.perdedor_interno === user.id) {
-    return { ok: false, error: "el que debe no se absuelve solo, compa" };
+    return { ok: false, error: "saldar_no_deudor" };
   }
 
   const { error } = await supabase
