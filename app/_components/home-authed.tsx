@@ -5,6 +5,7 @@ import AppNav from "./AppNav";
 import Grain from "./Grain";
 import BottomHUDServer from "./BottomHUDServer";
 import TratoHUD from "./TratoHUD";
+import ApuestaSemanal from "./ApuestaSemanal";
 import MisionesHoy from "./MisionesHoy";
 import VeredictoDialog from "./VeredictoDialog";
 import { getVeredictoPendiente } from "@/lib/actions/trato";
@@ -189,6 +190,10 @@ export default async function HomeAuthed() {
 
       {/* El estado del trato abre el lobby (directiva §4.5): SIEMPRE son dos. */}
       {primerGrupoId && <TratoHUD tratoId={primerGrupoId} />}
+
+      {/* LA APUESTA — el trasfondo de la app (founder): el compromiso entre
+          ambos para ser mejores y en conjunto ir ganando cosas. */}
+      {primerGrupoId && <ApuestaSemanal tratoId={primerGrupoId} />}
 
       {/* Las MISIONES DE HOY mandan en el lobby (mandato de Miguel): dieta y
           ejercicio como las dos misiones diarias — el detalle de la sesión

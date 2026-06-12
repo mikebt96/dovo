@@ -116,6 +116,39 @@ export default function VeredictoDialog({
           </>
         )}
 
+        {/* LA APUESTA de la semana: el premio ganado juntos + quién paga */}
+        {veredicto.apuesta && (
+          <div className="relative mt-5 rounded-xl border border-white/10 px-4 py-3 text-left">
+            {sellada ? (
+              <>
+                <p className="text-[10px] mono uppercase tracking-[0.18em] text-white/45">
+                  {t("apuestaGanadaEyebrow")}
+                </p>
+                <p
+                  className="display font-bold lowercase text-lg mt-0.5"
+                  style={{ color: "#f0c75a" }}
+                >
+                  {veredicto.apuesta.premio}
+                </p>
+                <p className="mt-1 text-[11px] mono lowercase tracking-[0.04em] text-white/60">
+                  {veredicto.apuesta.perdedorNombre
+                    ? veredicto.apuesta.soyElPerdedor
+                      ? t("apuestaPagasTu", { apuesta: veredicto.apuesta.apuesta })
+                      : t("apuestaPagaOtro", {
+                          nombre: veredicto.apuesta.perdedorNombre,
+                          apuesta: veredicto.apuesta.apuesta,
+                        })
+                    : t("apuestaEmpate", { apuesta: veredicto.apuesta.apuesta })}
+                </p>
+              </>
+            ) : (
+              <p className="text-[11px] mono lowercase tracking-[0.04em] text-white/55">
+                {t("apuestaPerdida", { premio: veredicto.apuesta.premio })}
+              </p>
+            )}
+          </div>
+        )}
+
         {sellada ? (
           <button
             type="button"

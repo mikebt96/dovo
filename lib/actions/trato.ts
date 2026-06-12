@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToComembers } from "@/lib/push/send";
-import { hoyCDMX } from "@/lib/workout/fecha";
+import { lunesSemanaCDMX } from "@/lib/workout/fecha";
 
 type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -23,15 +23,6 @@ export type RachaTrato = {
   last_evaluated_week: string | null;
   last_cumplido_week: string | null;
 };
-
-// Lunes ISO de la semana CDMX (offset en semanas; -1 = la semana que acaba de
-// cerrar). Mismo cálculo que date_trunc('week', ...) del cron.
-function lunesSemanaCDMX(offsetWeeks = 0): string {
-  const d = new Date(hoyCDMX() + "T00:00:00Z");
-  const dow = (d.getUTCDay() + 6) % 7; // 0 = lunes
-  d.setUTCDate(d.getUTCDate() - dow + offsetWeeks * 7);
-  return d.toISOString().slice(0, 10);
-}
 
 // Estado de TODOS los miembros del trato (RPC definer — la rutina del compa es
 // owner-only por RLS; ver migración estado_trato) + racha del trato.
@@ -104,6 +95,14 @@ export type Veredicto = {
   week: string; // lunes ISO de la semana juzgada
   racha: number; // racha tras el veredicto
   record: number; // max_streak (el récord NUNCA se borra — regla §8.6)
+  // LA APUESTA de esa semana (si la sellaron): el premio que ganaron juntos
+  // y quién paga la apuesta interna. null = no apostaron esa semana.
+  apuesta: {
+    premio: string;
+    apuesta: string;
+    perdedorNombre: string | null; // null + ganada = empate digno (nadie paga)
+    soyElPerdedor: boolean;
+  } | null;
 };
 
 // ¿Hay un veredicto fresco (la semana pasada ya fue juzgada por el cron) que
@@ -143,11 +142,46 @@ export async function getVeredictoPendiente(
     .maybeSingle<{ week: string }>();
   if (visto) return null;
 
+  // LA APUESTA de la semana juzgada: el premio que se jugaron y quién paga
+  const { data: ap } = await supabase
+    .schema("core")
+    .from("apuestas")
+    .select("premio_text, apuesta_text, estado, perdedor_interno")
+    .eq("trato_id", tratoId)
+    .eq("week_start", semanaJuzgada)
+    .maybeSingle<{
+      premio_text: string;
+      apuesta_text: string;
+      estado: string;
+      perdedor_interno: string | null;
+    }>();
+
+  let apuesta: Veredicto["apuesta"] = null;
+  if (ap && ap.estado !== "viva") {
+    let perdedorNombre: string | null = null;
+    if (ap.perdedor_interno) {
+      const { data: p } = await supabase
+        .schema("core")
+        .from("users")
+        .select("nombre")
+        .eq("id", ap.perdedor_interno)
+        .maybeSingle<{ nombre: string }>();
+      perdedorNombre = p?.nombre ?? null;
+    }
+    apuesta = {
+      premio: ap.premio_text,
+      apuesta: ap.apuesta_text,
+      perdedorNombre,
+      soyElPerdedor: ap.perdedor_interno === user.id,
+    };
+  }
+
   return {
     tipo: streak.last_cumplido_week === semanaJuzgada ? "sellada" : "rota",
     week: semanaJuzgada,
     racha: streak.current_streak_weeks,
     record: streak.max_streak,
+    apuesta,
   };
 }
 

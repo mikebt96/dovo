@@ -14,3 +14,12 @@ export function diaSemanaCDMX(): string {
     .format(new Date())
     .toLowerCase();
 }
+
+/** Lunes ISO (YYYY-MM-DD) de la semana CDMX; offset en semanas (-1 = la que
+ *  acaba de cerrar). Mismo cálculo que date_trunc('week', …) de los crons. */
+export function lunesSemanaCDMX(offsetWeeks = 0): string {
+  const d = new Date(hoyCDMX() + "T00:00:00Z");
+  const dow = (d.getUTCDay() + 6) % 7; // 0 = lunes
+  d.setUTCDate(d.getUTCDate() - dow + offsetWeeks * 7);
+  return d.toISOString().slice(0, 10);
+}
