@@ -24,7 +24,9 @@ export const EXPERIENCIAS = [
 export const perfilFisicoSchema = z.object({
   peso_kg: z.number().min(20).max(400),
   altura_cm: z.number().min(80).max(260),
-  edad: z.number().int().min(13).max(120),
+  // 18+: el aviso de privacidad v1.0 fija dovo como servicio para mayores de
+  // edad (datos sensibles de salud sin mecanismo de consentimiento parental)
+  edad: z.number().int().min(18, "dovo es para mayores de 18 años").max(120),
   genero: z.enum(["masculino", "femenino", "otro"]),
   nivel_actividad: z.enum([
     "sedentario",

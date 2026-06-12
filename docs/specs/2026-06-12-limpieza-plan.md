@@ -230,3 +230,20 @@ Ejecutar en orden estricto (G0→G23). Un commit por grupo. Cada grupo tiene gat
 11. **CharacterCard.tsx:80 a signal-on-game** — pasa AA como texto grande; migrar es solo consistencia, opcional.
 12. **Cablear anim-tier-flash (capa M, §4.2)** — el tier-up ya escala a ceremonia L por decisión deliberada (CheckinRow.tsx:81); revivir la capa M es decisión de producto. Se borró el CSS muerto (G1).
 13. **MisionesHoy: omitir chips ante error de query** — Sub-B opcional; con el log (G20-A) ya hay observabilidad y cambiar el render ante errores raros añade estados nuevos sin diseño.
+
+
+---
+
+## Estado de ejecución (corte 2026-06-12, sesión F23/F24/F25)
+
+**Hechos y pusheados:** FASE 1 (G1-G3) `4156f61` · FASE 2 (G4-G8) `8681f50` · FASE 3a (G9+G16) `7b5fe7f` · FASE 4 (G17+G18+G19) `60cf91e` · inteligencia de premios `0df4d5d` · F24+F25 `0484453`.
+
+**Resoluciones del founder que cierran pendientes de este plan:**
+- "NO ARREGLAR" #2 (RLS join sin token): RESUELTO — join SOLO por código (RPC `core.unirse_con_token` con cupo por tipo, migración 20260613110000, aplicada a prod). `miembros_insert_self` ELIMINADA; insert directo solo creador en su trato; UPDATE de tratos revocado a authenticated. **G21 queda absorbido por el RPC** (cap en DB > cap en action).
+- "NO ARREGLAR" #4 (¿Pulse vive?): RESUELTO — Pulse vive como INTELIGENCIA DE PREMIOS (agregados anónimos de premios para negociar con marcas, `lib/analytics/premios.ts` + sección en /admin). El toggle y `pulse_opt_out` SE QUEDAN (gobiernan el agregado) + flag pegajoso `tratos.pulse_excluido` (migración 20260613120000). Los restos del pipeline de EVENTOS (edge fn ingest-pulse-event, issue-pulse-key, schema pulse de eventos) siguen huérfanos — borrarlos sigue pendiente de decisión.
+
+**G23 (regenerar types.ts): BLOQUEADO con razón** — `generate_typescript_types` del MCP solo emite el schema `public` (que aquí es el modelo v0 LEGACY: profiles, meals_log…); todo dovo vive en `core`. El CLI (`supabase gen types --schema core`) requiere `SUPABASE_ACCESS_TOKEN` o el password de la DB, no configurados. types.ts sigue siendo stub deliberado. Para destrabarlo: Miguel genera un access token en supabase.com/dashboard/account/tokens y se corre `npx supabase gen types typescript --project-id chyudsvjllcxdjgjafjo --schema core`.
+
+**Nota nueva (hallazgo de revisión adversarial, aplica a TODO el repo):** PostgREST capa toda respuesta a `max_rows = 1000` (config.toml) SIN marcar error — cualquier `.limit(n>1000)` o query sin límite que crezca se trunca en silencio. Patrón correcto: paginar con `.range()` (helper `paginar` en lib/actions/admin.ts) o contar con `{ count: "exact" }`. Candidato a barrido futuro.
+
+**En curso (esta sesión):** G10-G15 (agente de diseño), aviso de privacidad v1.0 (consejo legal — LFPDPPP 2025 vigente, autoridad SABG, ver memo legal), G20+G22 después del agente de diseño.

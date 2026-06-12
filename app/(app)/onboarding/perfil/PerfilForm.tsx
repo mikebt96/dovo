@@ -30,24 +30,29 @@ export default function PerfilForm() {
     (typeof EXPERIENCIAS)[number]["value"] | ""
   >("");
   const [lesiones, setLesiones] = useState("");
+  // jamás pre-palomeado: consentimiento EXPRESO de datos sensibles (aviso §5)
+  const [consentSalud, setConsentSalud] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   function submit() {
     setError(null);
     start(async () => {
-      const res = await saveProfileFisico({
-        peso_kg: Number(peso),
-        altura_cm: Number(altura),
-        edad: Number(edad),
-        genero,
-        nivel_actividad: nivel,
-        objetivo,
-        experiencia: experiencia || undefined,
-        lesiones: lesiones
-          ? lesiones.split(",").map((s) => s.trim()).filter(Boolean)
-          : undefined,
-      });
+      const res = await saveProfileFisico(
+        {
+          peso_kg: Number(peso),
+          altura_cm: Number(altura),
+          edad: Number(edad),
+          genero,
+          nivel_actividad: nivel,
+          objetivo,
+          experiencia: experiencia || undefined,
+          lesiones: lesiones
+            ? lesiones.split(",").map((s) => s.trim()).filter(Boolean)
+            : undefined,
+        },
+        consentSalud,
+      );
       if (!res.ok) {
         setError(res.error);
         return;
@@ -160,12 +165,32 @@ export default function PerfilForm() {
         </div>
       )}
 
+      {/* consentimiento expreso de salud — gate legal del perfil físico */}
+      <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-ink/15 p-4">
+        <input
+          type="checkbox"
+          checked={consentSalud}
+          onChange={(e) => setConsentSalud(e.target.checked)}
+          className="mt-0.5 h-5 w-5 accent-[var(--c-signal)] shrink-0"
+        />
+        <span className="text-xs leading-relaxed opacity-80">
+          {t("consentSalud")}{" "}
+          <a
+            href="/privacidad"
+            target="_blank"
+            className="underline decoration-signal/40 underline-offset-2"
+          >
+            {t("consentSaludLink")}
+          </a>
+        </span>
+      </label>
+
       {error && <p className="text-sm text-rival-deep">{error}</p>}
 
       <button
         type="button"
         onClick={submit}
-        disabled={pending}
+        disabled={pending || !consentSalud}
         className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
         {pending ? t("saving") : t("next")}

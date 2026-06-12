@@ -8,6 +8,7 @@ import {
   perfilFisicoSchema,
   type PerfilFisicoInput,
 } from "@/lib/schemas/perfil-fisico";
+import { AVISO_VERSION } from "@/lib/legal/aviso-version";
 
 // BMR vía Mifflin-St Jeor. Para género "otro" promediamos las dos fórmulas.
 function calcularBMR(input: PerfilFisicoInput): number {
@@ -20,6 +21,7 @@ function calcularBMR(input: PerfilFisicoInput): number {
 
 export async function saveProfileFisico(
   input: PerfilFisicoInput,
+  consentSalud?: boolean,
 ): Promise<Result> {
   const parsed = perfilFisicoSchema.safeParse(input);
   if (!parsed.success) {
@@ -34,6 +36,37 @@ export async function saveProfileFisico(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sin sesión" };
+
+  // El perfil físico es dato SENSIBLE (salud): exige consentimiento expreso
+  // ANTES de recabarse (art. 8 LFPDPPP, aviso §5). Si este usuario aún no
+  // tiene consentimiento de salud vigente, el checkbox del onboarding es
+  // obligatorio y la bitácora se escribe ANTES que el perfil.
+  const { data: cons, error: consErr } = await supabase
+    .schema("core")
+    .from("consentimientos")
+    .select("otorgado")
+    .eq("user_id", user.id)
+    .eq("tipo", "salud")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ otorgado: boolean }>();
+  if (consErr) return { ok: false, error: consErr.message };
+
+  if (!cons?.otorgado) {
+    if (!consentSalud) {
+      return { ok: false, error: "falta tu consentimiento de datos de salud" };
+    }
+    const { error: insErr } = await supabase
+      .schema("core")
+      .from("consentimientos")
+      .insert({
+        user_id: user.id,
+        tipo: "salud",
+        otorgado: true,
+        version_aviso: AVISO_VERSION,
+      });
+    if (insErr) return { ok: false, error: insErr.message };
+  }
 
   const bmr = calcularBMR(parsed.data);
 

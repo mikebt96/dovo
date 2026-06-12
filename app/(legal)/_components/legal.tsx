@@ -57,12 +57,16 @@ export function Ul({ children }: { children: React.ReactNode }) {
   return <ul className="space-y-2 pl-5 list-disc marker:opacity-50">{children}</ul>;
 }
 
-export function Footer() {
+export function Footer({ children }: { children?: React.ReactNode }) {
   return (
     <footer className="mt-16 pt-6 border-t border-ink/20 text-xs opacity-60">
       <p>
-        Borrador 0.1. Sujeto a revisión por abogado de privacidad antes del
-        soft launch. No publicar como definitivo sin esa revisión.
+        {children ?? (
+          <>
+            Borrador 0.1. Sujeto a revisión por abogado de privacidad antes del
+            soft launch. No publicar como definitivo sin esa revisión.
+          </>
+        )}
       </p>
     </footer>
   );
