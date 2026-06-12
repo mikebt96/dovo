@@ -229,6 +229,10 @@
     "missionMenu": "ver mi menú →",
     "missionMenuSetup": "armar mi plan →",
     "missionEatSetup": "tu plan de comida te espera",
+    "atkBannerGolpe": "te metieron un golpe — el marcador del duelo lo resintió.",
+    "atkBannerFreeze": "los congelaron — 12h sin sumar al duelo.",
+    "atkBannerCta": "cóbratela",
+    "atkBannerDismiss": "cerrar aviso",
     "todayNoGroup": "únete a un grupo para empezar a registrar tu actividad.",
     "buildRoutine": "arma tu rutina →",
     "groupsTitle": "tus grupos",
@@ -456,6 +460,7 @@
     "saving": "guardando…",
     "done": "✓ hecho",
     "boostTag": "+50% boost · solo personaje",
+    "boostCta": "dale un boost →",
     "selloChip": "sello del lugar",
     "anchorCta": "anclar este lugar",
     "anchoring": "anclando…",
@@ -718,6 +723,7 @@
     "liked": "favorito",
     "dislike": "no me gustó",
     "comoPreparar": "cómo prepararlo",
+    "dosisCompa": "{nombre}: ~{kcal} kcal — mismo platillo, su dosis",
     "tipo": { "desayuno": "desayuno", "comida": "comida", "cena": "cena", "snack": "colación" },
     "aiRegen": "personalizar con IA",
     "aiWorking": "generando…",
@@ -809,6 +815,12 @@
     "apuestaPagaOtro": "{nombre} paga {apuesta}",
     "apuestaEmpate": "empate digno — {apuesta} va a medias",
     "apuestaPerdida": "{premio} se queda en la mesa — se gana cumpliendo"
+  },
+  "sello": {
+    "title": "trato hecho.",
+    "juramento": "lo prometido es deuda",
+    "body": "dos personas, una promesa. desde hoy, cada quien cumple su parte — o paga.",
+    "cta": "empezar"
   },
   "apuesta": {
     "eyebrow": "la apuesta",

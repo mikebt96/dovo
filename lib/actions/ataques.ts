@@ -197,3 +197,29 @@ export async function lanzarAtaque(input: {
   revalidatePath("/retos");
   return { ok: true, data: ataque };
 }
+
+// El ataque recibido DUELE en la home (directiva §5 home-1): el último impacto
+// de las últimas 24h contra MI dúo, para el banner del lobby. "Visto" vive en
+// localStorage del cliente (sin tabla — directiva §4.4) — aquí solo datos.
+export async function getAtaqueRecienteRecibido(
+  tratoId: string,
+): Promise<{ id: string; tipo: AtaqueTipo; created_at: string } | null> {
+  const supabase = await createClient();
+  const hace24h = new Date(Date.now() - 24 * 3600_000).toISOString();
+  const { data, error } = await supabase
+    .schema("core")
+    .from("ataques")
+    .select("id, tipo, created_at")
+    .eq("para_trato", tratoId)
+    .eq("resultado", "impacto")
+    .neq("de_trato", tratoId)
+    .gt("created_at", hace24h)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ id: string; tipo: AtaqueTipo; created_at: string }>();
+  if (error) {
+    console.error("[ataques] reciente:", error.message);
+    return null;
+  }
+  return data ?? null;
+}

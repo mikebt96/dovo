@@ -60,7 +60,8 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
         setError(res.error);
         return;
       }
-      router.push("/");
+      // el pico de motivación se ceremonia: SelloDelPacto en el lobby (§4.15)
+      router.push("/?sello=1");
     });
   }
 

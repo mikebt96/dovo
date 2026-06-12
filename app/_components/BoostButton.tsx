@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { darBoost, type BoostTipo } from "@/lib/actions/boosts";
+import GameIcon from "./GameIcon";
 
 // Regala un boost a tu partner. Intra-dúo, SIEMPRE positivo (lenguaje cálido, no rojo).
 // state lo calcula el server: "gate" (racha insuficiente) | "cooldown" | "ok".
@@ -26,7 +27,15 @@ export default function BoostButton({
   const [pending, start] = useTransition();
 
   if (done) {
-    return <p className="text-xs mono uppercase tracking-widest text-signal">{t("sent")}</p>;
+    return (
+      <p
+        className="anim-pop inline-flex items-center gap-1.5 text-xs mono uppercase tracking-widest rounded-full px-3 py-1.5 text-coop-deep"
+        style={{ background: "color-mix(in srgb, var(--mode-coop) 14%, transparent)" }}
+      >
+        <GameIcon name="chispa" size={13} filled />
+        {t("sent")}
+      </p>
+    );
   }
   if (state === "gate") {
     return (
@@ -55,9 +64,11 @@ export default function BoostButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs mono uppercase tracking-widest text-signal hover:opacity-80 transition-opacity"
+        className="inline-flex items-center gap-1.5 text-xs mono uppercase tracking-widest rounded-full px-3 py-1.5 border text-coop-deep hover:border-coop transition-colors"
+        style={{ borderColor: "color-mix(in srgb, var(--mode-coop) 40%, transparent)" }}
       >
-        ✦ {t("giveTo", { nombre: paraNombre })}
+        <GameIcon name="chispa" size={13} />
+        {t("giveTo", { nombre: paraNombre })}
       </button>
     );
   }
@@ -68,23 +79,32 @@ export default function BoostButton({
         {t("choose")}
       </p>
       <div className="flex gap-2">
+        {/* ritual coop (§4.13): teal, iconos del juego — los emojis se retiran */}
         <button
           type="button"
           disabled={pending}
           onClick={() => give("energia")}
-          className="flex-1 border border-ink/15 rounded-lg p-3 text-left hover:border-signal transition-colors disabled:opacity-50"
+          className="flex-1 border rounded-xl p-3 text-left transition-colors disabled:opacity-50 hover:border-coop"
+          style={{ borderColor: "color-mix(in srgb, var(--mode-coop) 30%, transparent)" }}
         >
-          <span className="display font-semibold lowercase block">{t("energia")}</span>
-          <span className="text-[11px] opacity-60">{t("hintEnergia")}</span>
+          <span className="flex items-center gap-1.5 display font-semibold lowercase">
+            <span className="text-coop-deep"><GameIcon name="rayo" size={14} filled /></span>
+            {t("energia")}
+          </span>
+          <span className="block text-[11px] opacity-60 mt-0.5">{t("hintEnergia")}</span>
         </button>
         <button
           type="button"
           disabled={pending}
           onClick={() => give("escudo")}
-          className="flex-1 border border-ink/15 rounded-lg p-3 text-left hover:border-signal transition-colors disabled:opacity-50"
+          className="flex-1 border rounded-xl p-3 text-left transition-colors disabled:opacity-50 hover:border-coop"
+          style={{ borderColor: "color-mix(in srgb, var(--mode-coop) 30%, transparent)" }}
         >
-          <span className="display font-semibold lowercase block">{t("escudo")}</span>
-          <span className="text-[11px] opacity-60">{t("hintEscudo")}</span>
+          <span className="flex items-center gap-1.5 display font-semibold lowercase">
+            <span className="text-coop-deep"><GameIcon name="escudo" size={14} filled /></span>
+            {t("escudo")}
+          </span>
+          <span className="block text-[11px] opacity-60 mt-0.5">{t("hintEscudo")}</span>
         </button>
       </div>
       {pending && <p className="text-xs opacity-60 mt-2">{t("sending")}</p>}

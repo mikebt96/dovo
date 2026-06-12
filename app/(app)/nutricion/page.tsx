@@ -167,6 +167,14 @@ export default async function NutricionPage() {
                   dayLabel={t(`dias.${DAY_KEY[d.dia] ?? "lunes"}`)}
                   hoyLabel={t("hoyChip")}
                   favoritos={favoritos}
+                  dosisCompa={
+                    data.dosisCompa
+                      ? {
+                          nombre: data.dosisCompa.nombre,
+                          ratio: data.dosisCompa.kcal / Math.max(1, plan.plan.kcal_objetivo),
+                        }
+                      : null
+                  }
                 />
               ))}
             </div>
@@ -239,6 +247,7 @@ function DiaAccordion({
   dayLabel,
   hoyLabel,
   favoritos,
+  dosisCompa,
 }: {
   dia: DiaPlan;
   diaIdx: number;
@@ -246,6 +255,7 @@ function DiaAccordion({
   dayLabel: string;
   hoyLabel: string;
   favoritos: string[];
+  dosisCompa: { nombre: string; ratio: number } | null;
 }) {
   const kcalDia = dia.comidas.reduce((s, c) => s + c.kcal, 0);
   return (
@@ -288,6 +298,7 @@ function DiaAccordion({
             comidaIdx={ci}
             comida={c}
             esFavorito={favoritos.includes(c.nombre)}
+            dosisCompa={dosisCompa}
           />
         ))}
       </div>

@@ -19,7 +19,8 @@ export default function JoinButton({ token }: { token: string }) {
         setError(res.error);
         return;
       }
-      router.push("/");
+      // aceptar el trato también se ceremonia (SelloDelPacto §4.15)
+      router.push("/?sello=1");
     });
   }
 

@@ -229,6 +229,10 @@
     "missionMenu": "see my menu →",
     "missionMenuSetup": "build my plan →",
     "missionEatSetup": "your meal plan is waiting",
+    "atkBannerGolpe": "you took a hit — the duel score felt it.",
+    "atkBannerFreeze": "you got frozen — 12h without scoring in the duel.",
+    "atkBannerCta": "get them back",
+    "atkBannerDismiss": "dismiss",
     "todayNoGroup": "join a group to start logging your activity.",
     "buildRoutine": "build your routine →",
     "groupsTitle": "your groups",
@@ -456,6 +460,7 @@
     "saving": "saving…",
     "done": "✓ done",
     "boostTag": "+50% boost · character only",
+    "boostCta": "send a boost →",
     "selloChip": "place seal",
     "anchorCta": "anchor this place",
     "anchoring": "anchoring…",
@@ -718,6 +723,7 @@
     "liked": "favorite",
     "dislike": "not for me",
     "comoPreparar": "how to make it",
+    "dosisCompa": "{nombre}: ~{kcal} kcal — same dish, their dose",
     "tipo": { "desayuno": "breakfast", "comida": "lunch", "cena": "dinner", "snack": "snack" },
     "aiRegen": "personalize with AI",
     "aiWorking": "generating…",
@@ -809,6 +815,12 @@
     "apuestaPagaOtro": "{nombre} covers {apuesta}",
     "apuestaEmpate": "honorable tie — {apuesta} goes halves",
     "apuestaPerdida": "{premio} stays on the table — it's earned by showing up"
+  },
+  "sello": {
+    "title": "it's a deal.",
+    "juramento": "a promise is a debt",
+    "body": "two people, one promise. from today, each one delivers — or pays.",
+    "cta": "let's go"
   },
   "apuesta": {
     "eyebrow": "the wager",

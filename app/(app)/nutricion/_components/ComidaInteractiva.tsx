@@ -17,11 +17,14 @@ export default function ComidaInteractiva({
   comidaIdx,
   comida,
   esFavorito,
+  dosisCompa = null,
 }: {
   diaIdx: number;
   comidaIdx: number;
   comida: Comida;
   esFavorito: boolean;
+  // plan de dúo: mismo platillo, SU dosis (ratio = sus kcal / las tuyas)
+  dosisCompa?: { nombre: string; ratio: number } | null;
 }) {
   const t = useTranslations("nutricion");
   const router = useRouter();
@@ -86,6 +89,15 @@ export default function ComidaInteractiva({
         <p className="text-[10px] mono opacity-45 mt-1 tabular-nums">
           {comida.prot}p · {comida.carb}c · {comida.grasa}g
         </p>
+        {/* mismos platillos, su dosis — el juego cooperativo en la mesa */}
+        {dosisCompa && (
+          <p className="text-[10px] mono lowercase tracking-[0.04em] mt-1 tabular-nums text-coop-deep">
+            {t("dosisCompa", {
+              nombre: dosisCompa.nombre,
+              kcal: Math.round(comida.kcal * dosisCompa.ratio),
+            })}
+          </p>
+        )}
 
         {/* cómo cocinarlo — el recetario del plan */}
         {comida.preparacion && comida.preparacion.length > 0 && (

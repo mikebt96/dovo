@@ -355,6 +355,16 @@ dialog.dlg-game::backdrop {
   0%, 100% { opacity: 0.75; }
   50% { opacity: 1; }
 }
+/* SelloDelPacto (§4.15): los dos discos entran desde lados opuestos y quedan
+   respirando — dos personas, una promesa, simétrica. */
+@keyframes anim-sello-izq {
+  from { opacity: 0; transform: translateX(-60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes anim-sello-der {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
 
 /* Barra de dos capas (provisional damage §4.2): el fill salta con spring; la
    ghost drena 400ms después. scaleX (compositor), nunca width. Las clases base
@@ -411,6 +421,8 @@ dialog.dlg-game::backdrop {
   .anim-stagger > *:nth-child(n + 9) { animation-delay: 360ms; }
 
   /* ── Mesa Nocturna · solo con motion ── */
+  .anim-sello-izq { animation: anim-sello-izq 600ms var(--ease-back) both; }
+  .anim-sello-der { animation: anim-sello-der 600ms var(--ease-back) both; }
   .anim-wobble { animation: anim-wobble 350ms ease-in-out 2; }
   .anim-slam { animation: anim-slam 500ms var(--ease-back) both; }
   .anim-breathe {

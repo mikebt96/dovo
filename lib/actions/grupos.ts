@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { sendPushToComembers } from "@/lib/push/send";
 import {
   crearGrupoSchema,
   unirseGrupoSchema,
@@ -110,6 +111,21 @@ export async function unirseAGrupo(
     }
     return { ok: false, error: joinErr.message };
   }
+
+  // El creador DEBE enterarse (§4.15): el push complementa al email de
+  // aceptación que ya existe. Fail-soft: sin VAPID es no-op.
+  const { data: me } = await supabase
+    .schema("core")
+    .from("users")
+    .select("nombre")
+    .eq("id", user.id)
+    .maybeSingle<{ nombre: string }>();
+  await sendPushToComembers(grupo.id as string, user.id, "reto", {
+    title: "dovo · trato sellado",
+    body: `${me?.nombre ?? "Tu compa"} aceptó — el trato quedó sellado. Lo prometido es deuda.`,
+    url: "/",
+    tag: "trato-sellado",
+  });
 
   revalidatePath("/");
   revalidatePath(`/grupo/${grupo.id}`);

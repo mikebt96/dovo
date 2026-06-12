@@ -43,6 +43,9 @@ type Props = {
   // En la home es ruido: "¿peso/reps/sets de GYM?" no significa nada — el
   // registro real por ejercicio vive en /entrenamiento (feedback de Miguel).
   conMetricas?: boolean;
+  // CTA de boost en el momento de máxima motivación (directiva §4.13): tras
+  // TU check-in exitoso → "dale energía a tu compa". Link a donde vive el boost.
+  boostHref?: string;
 };
 
 // Fecha de HOY en CDMX — NO toISOString (UTC): después de las 18:00 CDMX el
@@ -83,6 +86,7 @@ export default function CheckinRow({
   metricasRequeridas,
   duracionDefault,
   conMetricas = false,
+  boostHref,
 }: Props) {
   const t = useTranslations("checkin");
   const router = useRouter();
@@ -286,6 +290,26 @@ export default function CheckinRow({
               {t("anchored")}
             </span>
           )}
+        </div>
+      )}
+
+      {/* el ritual cooperativo en el momento de máxima motivación (§4.13):
+          independiente de los deltas — con cap diario alcanzado también aplica */}
+      {done && boostHref && (
+        <div className="mt-2.5">
+          <a
+            href={boostHref}
+            className="chip-delta inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1 text-[10px] mono uppercase tracking-[0.12em] text-coop-deep border hover:border-coop transition-colors"
+            style={
+              {
+                borderColor: "color-mix(in srgb, var(--mode-coop) 40%, transparent)",
+                "--anim-delay": "240ms",
+              } as React.CSSProperties
+            }
+          >
+            <GameIcon name="chispa" size={11} />
+            {t("boostCta")}
+          </a>
         </div>
       )}
 

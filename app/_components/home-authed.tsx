@@ -8,7 +8,10 @@ import TratoHUD from "./TratoHUD";
 import ApuestaSemanal from "./ApuestaSemanal";
 import MisionesHoy from "./MisionesHoy";
 import VeredictoDialog from "./VeredictoDialog";
+import SelloDelPacto from "./SelloDelPacto";
+import BannerAtaque from "./BannerAtaque";
 import { getVeredictoPendiente } from "@/lib/actions/trato";
+import { getAtaqueRecienteRecibido } from "@/lib/actions/ataques";
 import CheckinRow from "./CheckinRow";
 import DuoProof from "./DuoProof";
 import CharacterCard from "./CharacterCard";
@@ -107,6 +110,11 @@ export default async function HomeAuthed() {
     ? await getVeredictoPendiente(primerGrupoId)
     : null;
 
+  // el ataque recibido duele en la home (visto = localStorage del banner)
+  const ataque = primerGrupoId
+    ? await getAtaqueRecienteRecibido(primerGrupoId)
+    : null;
+
   type RutinaItem = { actividad_id: string; duracion_min: number };
   let rutinaItems: RutinaItem[] = [];
   const actividadMap = new Map<
@@ -188,6 +196,17 @@ export default async function HomeAuthed() {
         </div>
       )}
 
+      {/* sellar o aceptar el trato se ceremonia (se auto-gatea con ?sello=1) */}
+      <SelloDelPacto />
+
+      {/* te metieron un golpe — la home lo dice y te manda a cobrártela */}
+      {ataque && (
+        <BannerAtaque
+          ataqueId={ataque.id}
+          tipo={ataque.tipo === "golpe" ? "golpe" : "congelamiento"}
+        />
+      )}
+
       {/* El estado del trato abre el lobby (directiva §4.5): SIEMPRE son dos. */}
       {primerGrupoId && <TratoHUD tratoId={primerGrupoId} />}
 
@@ -258,6 +277,7 @@ export default async function HomeAuthed() {
                   nombre={a.nombre}
                   metricasRequeridas={a.metricas_requeridas}
                   duracionDefault={i.duracion_min}
+                  boostHref={primerGrupoId ? `/grupo/${primerGrupoId}` : undefined}
                 />
               );
             })}

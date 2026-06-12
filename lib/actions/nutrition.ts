@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isNutritionAiLive } from "@/lib/anthropic";
 import { generateSample, generateWithAi } from "@/lib/nutrition/generate";
-import { weekStartISO } from "@/lib/nutrition/macros";
+import { macrosObjetivo, weekStartISO } from "@/lib/nutrition/macros";
 import { getEntitlement } from "@/lib/billing/tier";
 import type {
   Comida,
@@ -26,6 +26,9 @@ export type NutritionData = {
   plan: MealPlanRow | null;
   logsHoy: Array<{ id: string; tipo: string; descripcion: string }>;
   aiLive: boolean;
+  // plan de dúo: la DOSIS del compa (mismos platillos, sus kcal) — null si no
+  // hay dúo configurado. kcal por la MISMA fórmula (macrosObjetivo).
+  dosisCompa: { nombre: string; kcal: number } | null;
 };
 
 async function getFisico(userId: string): Promise<PerfilFisico | null> {
@@ -46,7 +49,13 @@ async function getFisico(userId: string): Promise<PerfilFisico | null> {
 // Si AMBOS están configurados, el motor genera con la UNIÓN (mismos platillos
 // para los dos; cada quien genera el suyo con kcal personales — el determinismo
 // sincroniza sin coordinación). Si no, plan individual.
-async function getDuoNutricion(userId: string): Promise<DuoNutricion> {
+type DuoInfo = {
+  ctx: DuoNutricion;
+  compa: { nombre: string; kcal: number } | null;
+};
+
+async function getDuoInfo(userId: string): Promise<DuoInfo> {
+  const vacio: DuoInfo = { ctx: null, compa: null };
   const supabase = await createClient();
   const { data: miembro } = await supabase
     .schema("core")
@@ -55,27 +64,34 @@ async function getDuoNutricion(userId: string): Promise<DuoNutricion> {
     .eq("user_id", userId)
     .limit(1)
     .maybeSingle<{ trato_id: string }>();
-  if (!miembro) return null;
+  if (!miembro) return vacio;
 
   const { data: filas, error } = await supabase
     .schema("core")
     .rpc("duo_nutricion", { p_trato_id: miembro.trato_id });
   if (error) {
     console.error("[nutrition] duo_nutricion:", error.message);
-    return null;
+    return vacio;
   }
   const rows = (filas ?? []) as Array<{
     user_id: string;
+    nombre: string;
     objetivo: string | null;
     restricciones: string[];
     vetos: string[];
     menus_distintos: number;
+    peso_kg: number | null;
+    altura_cm: number | null;
+    edad: number | null;
+    genero: string | null;
+    nivel_actividad: string | null;
+    bmr_calculado: number | null;
     listo: boolean;
   }>;
   // dúo real: 2+ miembros y TODOS con perfil físico + nutricional
-  if (rows.length < 2 || rows.some((r) => !r.listo)) return null;
+  if (rows.length < 2 || rows.some((r) => !r.listo)) return vacio;
 
-  return {
+  const ctx: DuoNutricion = {
     objetivos: rows.map((r) => r.objetivo as PerfilFisico["objetivo"]),
     restricciones: Array.from(
       new Set(rows.flatMap((r) => r.restricciones)),
@@ -83,10 +99,29 @@ async function getDuoNutricion(userId: string): Promise<DuoNutricion> {
     vetos: Array.from(new Set(rows.flatMap((r) => r.vetos))),
     menusDistintos: Math.min(...rows.map((r) => r.menus_distintos)),
   };
+
+  // la dosis del compa: sus kcal con la MISMA fórmula que las tuyas
+  const otro = rows.find((r) => r.user_id !== userId);
+  let compa: DuoInfo["compa"] = null;
+  if (otro && otro.peso_kg && otro.altura_cm && otro.edad) {
+    const m = macrosObjetivo({
+      peso_kg: Number(otro.peso_kg),
+      altura_cm: Number(otro.altura_cm),
+      edad: otro.edad,
+      genero: otro.genero ?? "otro",
+      nivel_actividad: (otro.nivel_actividad ??
+        "moderado") as PerfilFisico["nivel_actividad"],
+      objetivo: (otro.objetivo ?? "mantener") as PerfilFisico["objetivo"],
+      bmr_calculado: otro.bmr_calculado ? Number(otro.bmr_calculado) : null,
+    });
+    compa = { nombre: otro.nombre, kcal: m.kcal };
+  }
+
+  return { ctx, compa };
 }
 
 export async function getNutritionData(): Promise<NutritionData> {
-  const empty: NutritionData = { fisico: null, nutricion: null, plan: null, logsHoy: [], aiLive: isNutritionAiLive() };
+  const empty: NutritionData = { fisico: null, nutricion: null, plan: null, logsHoy: [], aiLive: isNutritionAiLive(), dosisCompa: null };
   const supabase = await createClient();
   const {
     data: { user },
@@ -118,9 +153,9 @@ export async function getNutritionData(): Promise<NutritionData> {
 
   // Sin plan esta semana pero con ambos perfiles ⇒ genera el SAMPLE al instante (idempotente
   // por unique(user_id, week_start)). El page load nunca llama a Claude — la IA es botón.
+  const duoInfo = await getDuoInfo(user.id);
   if (!plan && fisico && nutricion) {
-    const duo = await getDuoNutricion(user.id);
-    const generated = generateSample(fisico, nutricion, duo);
+    const generated = generateSample(fisico, nutricion, duoInfo.ctx);
     const { data: inserted, error: insErr } = await supabase
       .schema("core")
       .from("meal_plans")
@@ -150,6 +185,7 @@ export async function getNutritionData(): Promise<NutritionData> {
     plan,
     logsHoy: (logs ?? []) as NutritionData["logsHoy"],
     aiLive: isNutritionAiLive(),
+    dosisCompa: plan?.plan.duo ? duoInfo.compa : null,
   };
 }
 
@@ -206,7 +242,7 @@ export async function saveNutritionProfile(input: {
       .select("restricciones, presupuesto, comidas_por_dia, preferencias, menus_distintos, vetos, favoritos")
       .eq("user_id", user.id)
       .maybeSingle<NutritionProfile>();
-    const duo = await getDuoNutricion(user.id);
+    const duo = (await getDuoInfo(user.id)).ctx;
     const generated = generateSample(
       fisico,
       full ?? {
@@ -275,7 +311,7 @@ export async function vetarComida(input: {
   // el veto se recuerda SIEMPRE (aunque no haya reemplazo disponible)
   const vetos = Array.from(new Set([...perfil.vetos, comida.nombre]));
 
-  const duo = await getDuoNutricion(user.id);
+  const duo = (await getDuoInfo(user.id)).ctx;
   const objetivosDistintos = duo && new Set(duo.objetivos).size > 1;
   const objetivo = objetivosDistintos ? "mantener" : fisico.objetivo;
   const restricciones = duo ? duo.restricciones : perfil.restricciones;
