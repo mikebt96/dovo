@@ -1,5 +1,8 @@
 "use client";
 
+import { vibrateTap } from "@/lib/juice";
+import { STAT_SHORT, STAT_VAR } from "@/lib/leveling/display";
+
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -58,22 +61,6 @@ const HOY = () =>
 // Mapa estático por StatKey (Tailwind no puede purgar clases dinámicas — mismo patrón
 // estático que DuoChampion). Dot del color del stat + tinte de fondo; el texto va en
 // ink (AA sobre papel claro — regla 22: los colores de stat no son texto plano).
-const STAT_LABEL: Record<StatKey, string> = {
-  fue: "FUE",
-  res: "RES",
-  flex: "FLE",
-  vel: "VEL",
-  equ: "EQU",
-  vit: "VIT",
-};
-const STAT_VAR: Record<StatKey, string> = {
-  fue: "var(--stat-fue)",
-  res: "var(--stat-res)",
-  flex: "var(--stat-flex)",
-  vel: "var(--stat-vel)",
-  equ: "var(--stat-equ)",
-  vit: "var(--stat-vit)",
-};
 
 // El tap más importante de la app (directiva del consejo §4.1): hit-stop de 90ms
 // tras el res.ok y DESPUÉS todo el feedback junto — el recibo de esfuerzo:
@@ -128,7 +115,7 @@ export default function CheckinRow({
           setDone(true);
           setReward(r);
           setOpen(false);
-          navigator.vibrate?.(12);
+          vibrateTap();
           // level-up / tier-up escalan a ceremonia L, encadenada tras el recibo
           if (r.nivelDespues > r.nivelAntes || r.tierUps.length > 0) {
             timers.current.push(
@@ -235,7 +222,7 @@ export default function CheckinRow({
                 className="w-1.5 h-1.5 rounded-full"
                 style={{ background: STAT_VAR[k] }}
               />
-              +{Math.round(reward!.deltas[k])} {STAT_LABEL[k]}
+              +{Math.round(reward!.deltas[k])} {STAT_SHORT[k]}
             </span>
           ))}
           {reward?.boostAplicado && (

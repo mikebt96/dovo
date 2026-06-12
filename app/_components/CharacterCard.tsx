@@ -1,17 +1,15 @@
 import { getTranslations } from "next-intl/server";
-import type { StatKey } from "@/lib/scoring/types";
-import { barHeight } from "@/lib/leveling/display";
+import { STAT_KEYS, type StatKey } from "@/lib/scoring/types";
+import { barHeight, STAT_SHORT, STAT_VAR } from "@/lib/leveling/display";
 import { statDisplay } from "@/lib/leveling";
 import StatBarLive from "./StatBarLive";
 
-const STATS: { key: StatKey; label: string; colorVar: string }[] = [
-  { key: "fue", label: "FUE", colorVar: "var(--stat-fue)" },
-  { key: "res", label: "RES", colorVar: "var(--stat-res)" },
-  { key: "flex", label: "FLE", colorVar: "var(--stat-flex)" },
-  { key: "vel", label: "VEL", colorVar: "var(--stat-vel)" },
-  { key: "equ", label: "EQU", colorVar: "var(--stat-equ)" },
-  { key: "vit", label: "VIT", colorVar: "var(--stat-vit)" },
-];
+// derivado de los mapas canónicos (F23·G5)
+const STATS = STAT_KEYS.map((key) => ({
+  key,
+  label: STAT_SHORT[key],
+  colorVar: STAT_VAR[key],
+}));
 
 // Character card v2 (directiva del consejo §4.11): la carta del personaje.
 // Server component (shell) con islands de cliente para lo que se mueve:

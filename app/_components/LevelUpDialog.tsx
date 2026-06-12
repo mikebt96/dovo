@@ -1,5 +1,8 @@
 "use client";
 
+import { vibrateJackpot } from "@/lib/juice";
+import { STAT_SHORT, STAT_VAR } from "@/lib/leveling/display";
+
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { StatKey } from "@/lib/scoring/types";
@@ -15,23 +18,6 @@ export type LevelUpData = {
   nivel: { antes: number; despues: number } | null;
   tierUps: TierUp[];
   xpParaSiguiente: number;
-};
-
-const STAT_LABEL: Record<StatKey, string> = {
-  fue: "FUE",
-  res: "RES",
-  flex: "FLE",
-  vel: "VEL",
-  equ: "EQU",
-  vit: "VIT",
-};
-const STAT_VAR: Record<StatKey, string> = {
-  fue: "var(--stat-fue)",
-  res: "var(--stat-res)",
-  flex: "var(--stat-flex)",
-  vel: "var(--stat-vel)",
-  equ: "var(--stat-equ)",
-  vit: "var(--stat-vit)",
 };
 
 // 18 partículas DOM (≤20, regla M/L) con trayectorias deterministas por índice —
@@ -65,7 +51,7 @@ export default function LevelUpDialog({
     if (!dlg) return;
     dlg.showModal();
     // háptica de jackpot (Android; iOS no vibra — el slam comunica solo)
-    navigator.vibrate?.([40, 40, 90]);
+    vibrateJackpot();
     const close = () => onClose();
     dlg.addEventListener("close", close);
     return () => dlg.removeEventListener("close", close);
@@ -161,7 +147,7 @@ export default function LevelUpDialog({
                   className="w-2 h-2 rounded-full"
                   style={{ background: STAT_VAR[tu.stat] }}
                 />
-                {t("tierLine", { label: STAT_LABEL[tu.stat], tier: tu.a })}
+                {t("tierLine", { label: STAT_SHORT[tu.stat], tier: tu.a })}
               </li>
             ))}
           </ul>

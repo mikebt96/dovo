@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateJackpot } from "@/lib/juice";
+
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -26,7 +28,7 @@ export default function SelloDelPacto() {
   useEffect(() => {
     if (!activo) return;
     ref.current?.showModal();
-    navigator.vibrate?.([40, 40, 90]);
+    vibrateJackpot();
   }, [activo]);
 
   if (!activo) return null;

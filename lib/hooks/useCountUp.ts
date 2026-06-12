@@ -1,5 +1,7 @@
 "use client";
 
+import { prefersReducedMotion } from "@/lib/juice";
+
 import { useEffect, useRef, useState } from "react";
 
 // Count-up de número de juego (directiva §4.10): rAF + ease-out cúbico,
@@ -10,7 +12,7 @@ export function useCountUp(target: number, ms = 800): number {
   const fromRef = useRef(0);
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = prefersReducedMotion();
     const from = fromRef.current;
     fromRef.current = target;
     if (reduced || from === target) {

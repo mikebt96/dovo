@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateTap } from "@/lib/juice";
+
 import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { nudgeCompa } from "@/lib/actions/trato";
@@ -104,7 +106,7 @@ export default function TratoHUDClient({
       if (r.ok) {
         localStorage.setItem(nudgeKey, "1");
         setNudgeState("sent");
-        navigator.vibrate?.(12);
+        vibrateTap();
       } else {
         setNudgeState("idle");
       }

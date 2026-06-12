@@ -2,20 +2,12 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import LanguageToggle from "./LanguageToggle";
 
-type NavKey =
-  | "home"
-  | "entrenar"
-  | "leaderboard"
-  | "retos"
-  | "nutricion"
-  | "recompensas"
-  | "perfil"
-  | "ajustes";
 
 // Top bar adelgazada (directiva §4.4): la navegación vive en el BottomHUD; aquí
 // solo el mark + ajustes + idioma. backdrop-blur-sm, no xl — presupuesto de blur
 // §3: máx dos backdrop-filter fijos y el HUD ya usa el grande.
-export default async function AppNav({ active }: { active?: NavKey }) {
+// active solo distingue /ajustes (oculta su propio link) — F23·G8
+export default async function AppNav({ active }: { active?: "ajustes" }) {
   const t = await getTranslations("home");
   return (
     <header className="sticky top-0 z-40 -mx-6 mb-9 border-b border-ink/10 bg-papel/80 backdrop-blur-sm">

@@ -25,7 +25,7 @@ export default async function ScanPage() {
   if (!ctx.entitled) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        <AppNav active="perfil" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
         <Paywall feature="body_scan" title={t("paywallTitle")} blurb={t("paywallBlurb")} />
       </main>
@@ -34,7 +34,7 @@ export default async function ScanPage() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-      <AppNav active="perfil" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       <section className="mb-10">

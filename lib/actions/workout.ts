@@ -1,5 +1,7 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -23,8 +25,6 @@ import type {
   WorkoutPlanRow,
   WorkoutPrefs,
 } from "@/lib/workout/types";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type WorkoutData = {
   miembroId: string | null;

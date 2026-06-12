@@ -1,11 +1,11 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { optOutSchema, type OptOutInput } from "@/lib/schemas/profile";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export async function updatePulseOptOut(input: OptOutInput): Promise<Result> {
   const parsed = optOutSchema.safeParse(input);

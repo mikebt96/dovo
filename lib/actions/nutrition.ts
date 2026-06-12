@@ -1,5 +1,7 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isNutritionAiLive } from "@/lib/anthropic";
@@ -17,8 +19,6 @@ import type {
 } from "@/lib/nutrition/types";
 import { RESTRICCIONES } from "@/lib/nutrition/types";
 import { candidatosSwap, escalaComida } from "@/lib/nutrition/sample-plans";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type NutritionData = {
   fisico: PerfilFisico | null;

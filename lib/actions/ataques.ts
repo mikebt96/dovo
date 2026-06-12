@@ -1,10 +1,10 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToComembers } from "@/lib/push/send";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type AtaqueTipo = "golpe" | "congelamiento";
 

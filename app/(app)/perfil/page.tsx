@@ -78,7 +78,7 @@ export default async function PerfilPage() {
 
   return (
     <main className="min-h-svh max-w-2xl lg:max-w-5xl mx-auto px-6 py-10 bg-papel text-ink">
-      <AppNav active="perfil" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={meRow?.nombre ?? user.email} />
 
       <div className="lg:grid lg:grid-cols-[1.1fr_1fr] lg:gap-10 lg:items-start">

@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateJackpot } from "@/lib/juice";
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -61,7 +63,7 @@ export default function DuelResultDialog({
     if (seen) return;
     ref.current?.showModal();
     if (result === "won") {
-      navigator.vibrate?.([40, 40, 90]);
+      vibrateJackpot();
       // capa L: confetti canvas, lazy, jamás en derrota ni empate
       void import("canvas-confetti").then(({ default: confetti }) => {
         confetti({

@@ -35,7 +35,7 @@ export default async function LeaderboardPage({
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-4xl mx-auto">
-      <AppNav active="leaderboard" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       <div className="flex gap-1 mb-8 p-1 rounded-full bg-papel-dark/60 w-full sm:w-fit">

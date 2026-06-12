@@ -1,8 +1,8 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import type { Result } from "@/lib/actions/result";
 
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
+import { createClient } from "@/lib/supabase/server";
 
 // Ancla el lugar de una actividad (el candado del lugar). El jugador lo elige
 // EXPLÍCITAMENTE desde el recibo de su check-in — la app jamás guarda ubicación

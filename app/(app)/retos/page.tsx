@@ -38,7 +38,7 @@ export default async function RetosPage() {
   if (!miembro) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        <AppNav active="retos" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("emptyBody")} />
         <Link
           href="/onboarding/grupo"
@@ -83,7 +83,7 @@ export default async function RetosPage() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
-      <AppNav active="retos" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       {activos.length > 0 && (

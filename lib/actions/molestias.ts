@@ -1,11 +1,11 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { hoyCDMX } from "@/lib/workout/fecha";
 import { ZONAS, type Zona } from "@/lib/workout/recuperacion";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 // Pre-entreno: "¿alguna molestia hoy?" — historial honesto por fecha CDMX.
 // El plan del día marca "cuídate hoy" lo que cargue la zona; jamás regaña.

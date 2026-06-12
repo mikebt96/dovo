@@ -1,9 +1,9 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type NotificationPrefs = {
   racha_riesgo: boolean;

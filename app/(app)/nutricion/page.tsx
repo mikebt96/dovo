@@ -9,7 +9,7 @@ import ProBadge from "@/app/_components/ProBadge";
 import { getEntitlement } from "@/lib/billing/tier";
 import { getNutritionData } from "@/lib/actions/nutrition";
 import type { DiaPlan } from "@/lib/nutrition/types";
-import { diaSemanaCDMX } from "@/lib/workout/fecha";
+import { diaSemanaCDMX, DAY_KEY } from "@/lib/workout/fecha";
 import NutritionProfileForm from "./_components/NutritionProfileForm";
 import FoodLogQuickAdd from "./_components/FoodLogQuickAdd";
 import FoodFab from "./_components/FoodFab";
@@ -20,16 +20,6 @@ export const dynamic = "force-dynamic";
 // La action de IA (regenerateWithAi) puede tardar: extiende el límite de la ruta.
 export const maxDuration = 60;
 
-// claves i18n sin acentos para los días del plan (el contenido viene en es).
-const DAY_KEY: Record<string, string> = {
-  lunes: "lunes",
-  martes: "martes",
-  "miércoles": "miercoles",
-  jueves: "jueves",
-  viernes: "viernes",
-  "sábado": "sabado",
-  domingo: "domingo",
-};
 
 export default async function NutricionPage() {
   const t = await getTranslations("nutricion");
@@ -45,7 +35,7 @@ export default async function NutricionPage() {
   if (!entitled) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        <AppNav active="nutricion" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
         <Paywall
           feature="nutrition"
@@ -63,7 +53,7 @@ export default async function NutricionPage() {
   if (!data.fisico) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        <AppNav active="nutricion" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("noFisicoTitle")} subtitle={t("noFisicoBody")} />
         <Link
           href="/onboarding/perfil"
@@ -79,7 +69,7 @@ export default async function NutricionPage() {
   if (!data.nutricion) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        <AppNav active="nutricion" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("setupTitle")} subtitle={t("setupSubtitle")} />
         <NutritionProfileForm />
       </main>
@@ -93,7 +83,7 @@ export default async function NutricionPage() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-6xl mx-auto">
-      <AppNav active="nutricion" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       {plan && (

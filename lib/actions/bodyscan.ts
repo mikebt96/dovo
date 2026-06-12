@@ -1,13 +1,13 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAnthropic, NUTRITION_MODEL } from "@/lib/anthropic";
 import { getEntitlement } from "@/lib/billing/tier";
 import { logAppError } from "@/lib/observability/log";
 import type { PerfilFisico } from "@/lib/nutrition/types";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type BodyScan = {
   id: string;

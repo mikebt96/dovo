@@ -1,12 +1,12 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { isAdminEmail } from "@/lib/admin";
 import { logAppError } from "@/lib/observability/log";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type AppError = {
   id: string;

@@ -6,7 +6,7 @@ import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import { getWorkoutData } from "@/lib/actions/workout";
 import { POR_SLUG } from "@/lib/workout/catalog";
-import { diaSemanaCDMX, hoyCDMX } from "@/lib/workout/fecha";
+import { diaSemanaCDMX, hoyCDMX, DAY_KEY } from "@/lib/workout/fecha";
 import { topeReps } from "@/lib/workout/progresion";
 import { tipDelDia, zonaAfectaGrupo } from "@/lib/workout/recuperacion";
 import { getMolestiasHoy } from "@/lib/actions/molestias";
@@ -28,16 +28,6 @@ type Actividad = {
   metricas_requeridas: string[];
 };
 
-// claves i18n sin acentos para los días (mismo patrón que /nutricion).
-const DAY_KEY: Record<string, string> = {
-  lunes: "lunes",
-  martes: "martes",
-  "miércoles": "miercoles",
-  jueves: "jueves",
-  viernes: "viernes",
-  "sábado": "sabado",
-  domingo: "domingo",
-};
 
 /** "3×10 @ 40 kg" (o "10/9/8 @ 40 kg" si las reps varían). */
 function fmtSeries(series: SerieLog[]): string {
@@ -92,7 +82,7 @@ export default async function RutinaPage({
   if (!rutina) {
     return (
       <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
-        <AppNav active="entrenar" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
         <p className="text-sm opacity-60 mb-6">{t("noPlanHint")}</p>
         <RutinaForm
@@ -111,7 +101,7 @@ export default async function RutinaPage({
   if (!data.fisico) {
     return (
       <main className="min-h-svh max-w-2xl mx-auto px-6 py-10 bg-papel text-ink">
-        <AppNav active="entrenar" />
+        <AppNav />
         <PageHero eyebrow={t("eyebrow")} title={t("noFisicoTitle")} subtitle={t("noFisicoBody")} />
         <Link
           href="/onboarding/perfil"
@@ -150,7 +140,7 @@ export default async function RutinaPage({
 
   return (
     <main className="min-h-svh max-w-2xl lg:max-w-5xl mx-auto px-6 py-10 bg-papel text-ink">
-      <AppNav active="entrenar" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("planSubtitle")} />
 
       {plan && (

@@ -1,13 +1,13 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe, priceIdFor, type BillingInterval } from "@/lib/stripe";
 import { isBillingEnabled } from "@/lib/billing/tier";
 import { publicEnv } from "@/lib/env";
 import type { Tier } from "@/lib/billing/tiers";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 // Sentinel: el cliente distingue "coming_soon" (sandbox) de un error real para mostrar
 // el modal "próximamente" en vez de un toast de error.

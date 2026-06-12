@@ -23,3 +23,14 @@ export function lunesSemanaCDMX(offsetWeeks = 0): string {
   d.setUTCDate(d.getUTCDate() - dow + offsetWeeks * 7);
   return d.toISOString().slice(0, 10);
 }
+
+/** Día con acento (contenido es) → clave i18n sin acento. Único origen (F23·G6). */
+export const DAY_KEY: Record<string, string> = {
+  lunes: "lunes",
+  martes: "martes",
+  "miércoles": "miercoles",
+  jueves: "jueves",
+  viernes: "viernes",
+  "sábado": "sabado",
+  domingo: "domingo",
+};

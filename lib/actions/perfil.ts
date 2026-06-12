@@ -1,13 +1,13 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   perfilFisicoSchema,
   type PerfilFisicoInput,
 } from "@/lib/schemas/perfil-fisico";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 // BMR vía Mifflin-St Jeor. Para género "otro" promediamos las dos fórmulas.
 function calcularBMR(input: PerfilFisicoInput): number {

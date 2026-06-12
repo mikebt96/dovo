@@ -1,5 +1,7 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToComembers } from "@/lib/push/send";
@@ -9,8 +11,6 @@ import {
   type CrearGrupoInput,
   type UnirseGrupoInput,
 } from "@/lib/schemas/grupo";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export async function crearGrupo(
   input: CrearGrupoInput,

@@ -1,5 +1,7 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calcularCheckin, type Metricas } from "@/lib/scoring";
@@ -9,8 +11,6 @@ import { STAT_KEYS } from "@/lib/scoring/types";
 import { characterSheet, type Stats } from "@/lib/leveling";
 import { hoyCDMX } from "@/lib/workout/fecha";
 import { sendPushToComembers } from "@/lib/push/send";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type TierUp = { stat: StatKey; de: string; a: string };
 

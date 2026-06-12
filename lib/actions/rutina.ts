@@ -1,11 +1,11 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { rutinaSchema, type RutinaInput } from "@/lib/schemas/rutina";
 import { logAppError } from "@/lib/observability/log";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export async function guardarRutina(input: RutinaInput): Promise<Result> {
   const parsed = rutinaSchema.safeParse(input);

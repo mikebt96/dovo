@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateTap } from "@/lib/juice";
+
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -43,7 +45,7 @@ export default function ApuestaSheet({
         setErr(r.error);
         return;
       }
-      navigator.vibrate?.(12);
+      vibrateTap();
       ref.current?.close();
       router.refresh();
     });

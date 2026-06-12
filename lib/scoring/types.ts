@@ -13,3 +13,14 @@ export type ActividadScoring = {
 export type PerfilScoring = { peso_kg: number; bmr: number };
 
 export const STAT_KEYS: StatKey[] = ["fue", "res", "flex", "vel", "equ", "vit"];
+
+/** Label de dominio (FUE/RES/FLEX/VEL/EQU/VIT — como llega de DB/RPC) → StatKey.
+ *  Único origen (F23·G5): antes vivía copiado en 4+ archivos. */
+export const STAT_FROM_LABEL: Record<string, StatKey> = {
+  FUE: "fue",
+  RES: "res",
+  FLEX: "flex",
+  VEL: "vel",
+  EQU: "equ",
+  VIT: "vit",
+};

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { crearReto, type HeadToHead } from "@/lib/actions/retos";
 import GameIcon from "@/app/_components/GameIcon";
+import { STAT_FROM_LABEL, STAT_VAR } from "@/lib/leveling/display";
 
 // Scouting de rivales (directiva §5 retos): cada candidato es una mini-carta —
 // clase dominante, top stat en su color, racha del dúo en ámbar y el historial
@@ -16,15 +17,6 @@ type Candidato = {
   clase: string | null;
   topStat: string | null;
   h2h: HeadToHead;
-};
-
-const STAT_VAR: Record<string, string> = {
-  fue: "var(--stat-fue)",
-  res: "var(--stat-res)",
-  flex: "var(--stat-flex)",
-  vel: "var(--stat-vel)",
-  equ: "var(--stat-equ)",
-  vit: "var(--stat-vit)",
 };
 
 export default function RetoNuevoForm({
@@ -66,7 +58,10 @@ export default function RetoNuevoForm({
       <ul className="space-y-2 mb-6 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
         {candidatos.map((c) => {
           const activo = sel === c.trato_id;
-          const statColor = c.topStat ? STAT_VAR[c.topStat] : null;
+          // BUGFIX F23·G5: top_stat llega en MAYÚSCULAS del RPC — el lookup directo
+          // en minúsculas devolvía siempre null (el dot jamás se pintaba)
+          const statKey = c.topStat ? STAT_FROM_LABEL[c.topStat] : undefined;
+          const statColor = statKey ? STAT_VAR[statKey] : null;
           const conHistoria = c.h2h.yo + c.h2h.rival + c.h2h.empates > 0;
           return (
             <li key={c.trato_id}>

@@ -23,7 +23,7 @@ export default async function RecompensasPage() {
   if (!data.tratoId) {
     return (
       <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl mx-auto">
-        <AppNav active="recompensas" />
+        <AppNav />
         <PageHero
           eyebrow={t("eyebrow")}
           title={t("noGroupTitle")}
@@ -45,7 +45,7 @@ export default async function RecompensasPage() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-3xl lg:max-w-5xl mx-auto">
-      <AppNav active="recompensas" />
+      <AppNav />
       <PageHero eyebrow={t("eyebrow")} title={t("title")} subtitle={t("subtitle")} />
 
       {/* Racha del dúo — gatillo emocional. Racha SIEMPRE en ámbar (léxico §2). */}

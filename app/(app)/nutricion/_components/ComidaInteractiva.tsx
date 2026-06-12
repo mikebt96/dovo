@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateTap } from "@/lib/juice";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -49,7 +51,7 @@ export default function ComidaInteractiva({
         setEstado("idle");
         return;
       }
-      navigator.vibrate?.(12);
+      vibrateTap();
       setEstado("swapped");
       router.refresh(); // el platillo nuevo llega del server (jamás inventado)
       setTimeout(() => setEstado("idle"), 1600);

@@ -1,23 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { DemoRow } from "@/lib/actions/leaderboard";
 import type { StatKey } from "@/lib/scoring/types";
-
-const STAT_FROM_LABEL: Record<string, StatKey> = {
-  FUE: "fue",
-  RES: "res",
-  FLEX: "flex",
-  VEL: "vel",
-  EQU: "equ",
-  VIT: "vit",
-};
-const STAT_TEXT: Record<StatKey, string> = {
-  fue: "text-stat-fue",
-  res: "text-stat-res",
-  flex: "text-stat-flex",
-  vel: "text-stat-vel",
-  equ: "text-stat-equ",
-  vit: "text-stat-vit",
-};
+import { STAT_FROM_LABEL, STAT_TEXT_CLASS } from "@/lib/leveling/display";
 
 // Tarjeta oscura on-brand de un dúo destacado. Diseñada para screenshot (share).
 export default async function ShowcaseCharacterCard({ row }: { row: DemoRow }) {
@@ -59,7 +43,7 @@ export default async function ShowcaseCharacterCard({ row }: { row: DemoRow }) {
         <div className="flex items-center gap-4 mt-3 text-[11px] mono uppercase tracking-wider text-white/60">
           <span>{t("streak", { n: row.racha_duo })}</span>
           {top && (
-            <span className={`flex items-center gap-1.5 ${STAT_TEXT[top]}`}>
+            <span className={`flex items-center gap-1.5 ${STAT_TEXT_CLASS[top]}`}>
               <span
                 className="w-2 h-2 rounded-full"
                 style={{ background: "currentColor" }}

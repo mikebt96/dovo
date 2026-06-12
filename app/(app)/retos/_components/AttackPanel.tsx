@@ -1,5 +1,7 @@
 "use client";
 
+import { prefersReducedMotion, vibrateHit } from "@/lib/juice";
+
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -40,9 +42,7 @@ export default function AttackPanel({
     inflight.current = true;
     setErr(null);
     setPicking(false);
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = prefersReducedMotion();
     const t0 = Date.now();
     // hit-stop 90ms + tensión: el wobble arranca tras el silencio
     if (!reduced) timers.current.push(setTimeout(() => setTension(true), 90));
@@ -61,7 +61,7 @@ export default function AttackPanel({
           setTimeout(() => {
             setTension(false);
             setResultado(res.data);
-            navigator.vibrate?.(res.data.resultado === "bloqueado" ? 30 : 15);
+            vibrateHit(res.data.resultado === "bloqueado");
             router.refresh(); // marcador + feed se actualizan con la nueva matemática
           }, wait),
         );

@@ -1,25 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { LeaderRow } from "@/lib/actions/leaderboard";
 import type { StatKey } from "@/lib/scoring/types";
-
-const STAT_FROM_LABEL: Record<string, StatKey> = {
-  FUE: "fue",
-  RES: "res",
-  FLEX: "flex",
-  VEL: "vel",
-  EQU: "equ",
-  VIT: "vit",
-};
-
-// Punto color-codeado del stat top (clases estáticas para que Tailwind no las purgue).
-const STAT_DOT: Record<StatKey, string> = {
-  fue: "bg-stat-fue",
-  res: "bg-stat-res",
-  flex: "bg-stat-flex",
-  vel: "bg-stat-vel",
-  equ: "bg-stat-equ",
-  vit: "bg-stat-vit",
-};
+import { STAT_FROM_LABEL, STAT_BG_CLASS } from "@/lib/leveling/display";
 
 export default async function DuoLeaderRow({
   row,
@@ -65,7 +47,7 @@ export default async function DuoLeaderRow({
           <span>{t("streak", { n: row.racha_duo })}</span>
           {top && (
             <span className="flex items-center gap-1.5">
-              <span className={`inline-block w-2 h-2 rounded-full ${STAT_DOT[top]}`} />
+              <span className={`inline-block w-2 h-2 rounded-full ${STAT_BG_CLASS[top]}`} />
               {row.top_stat}
             </span>
           )}

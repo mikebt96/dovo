@@ -1,10 +1,10 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToComembers } from "@/lib/push/send";
 import { lunesSemanaCDMX } from "@/lib/workout/fecha";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 // ── El party status del juego cooperativo (directiva §4.5 · TratoHUD) ──
 

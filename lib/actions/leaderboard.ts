@@ -1,5 +1,7 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { createClient } from "@/lib/supabase/server";
 import { periodoRange, type Periodo } from "@/lib/utils/periodo";
 
@@ -14,8 +16,6 @@ export type LeaderRow = {
   top_clase: string | null;
   top_stat: string | null;
 };
-
-type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
 // Leaderboard de dúos por puntos normalizados (puntos_base) del periodo.
 // SECURITY DEFINER en DB → devuelve el ranking completo (es la superficie competitiva),

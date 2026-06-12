@@ -18,7 +18,7 @@ import CharacterCard from "./CharacterCard";
 import { characterSheet } from "@/lib/leveling";
 import { getBoostActivo } from "@/lib/actions/boosts";
 import { getDuoTier } from "@/lib/billing/tier";
-import { diaSemanaCDMX } from "@/lib/workout/fecha";
+import { diaSemanaCDMX, DAY_KEY } from "@/lib/workout/fecha";
 import { DIAS_SEMANA, type WorkoutPlanContent } from "@/lib/workout/types";
 
 type Character = {
@@ -39,16 +39,6 @@ type Grupo = {
   tipo_grupo: string;
 };
 
-// claves i18n sin acentos para los días del plan (mismo patrón que /nutricion y /rutina).
-const DAY_KEY: Record<string, string> = {
-  lunes: "lunes",
-  martes: "martes",
-  "miércoles": "miercoles",
-  jueves: "jueves",
-  viernes: "viernes",
-  "sábado": "sabado",
-  domingo: "domingo",
-};
 
 export default async function HomeAuthed() {
   const t = await getTranslations("home");
@@ -183,7 +173,7 @@ export default async function HomeAuthed() {
 
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
-      <AppNav active="home" />
+      <AppNav />
 
       {boost && (
         <div className="mb-6 rounded-xl border border-signal/40 bg-signal/5 px-4 py-3">

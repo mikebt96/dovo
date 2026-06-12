@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateTap } from "@/lib/juice";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -21,7 +23,7 @@ export default function ApuestaSaldarButton({ apuestaId }: { apuestaId: string }
     start(async () => {
       const r = await marcarApuestaSaldada(apuestaId);
       if (r.ok) {
-        navigator.vibrate?.(12);
+        vibrateTap();
         router.refresh();
       } else {
         setConfirm(false);

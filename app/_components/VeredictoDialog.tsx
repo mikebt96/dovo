@@ -1,5 +1,7 @@
 "use client";
 
+import { vibrateJackpot } from "@/lib/juice";
+
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -30,7 +32,7 @@ export default function VeredictoDialog({
     dlg.showModal();
     // visto AL ABRIR: un refresh no repite la ceremonia (las L son raras §3)
     void marcarVeredictoVisto(tratoId, veredicto.week);
-    if (sellada) navigator.vibrate?.([40, 40, 90]);
+    if (sellada) vibrateJackpot();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -1,11 +1,11 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { RETO_DURACION_DIAS } from "@/lib/scoring/constants";
 import { sendPushToComembers } from "@/lib/push/send";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 export type RetoEstado = "propuesto" | "aceptado" | "activo" | "cerrado" | "rechazado";
 

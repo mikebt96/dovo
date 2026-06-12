@@ -1,11 +1,11 @@
 "use server";
 
+import type { Result } from "@/lib/actions/result";
+
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sendPushToComembers } from "@/lib/push/send";
 import { lunesSemanaCDMX } from "@/lib/workout/fecha";
-
-type Result<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
 // LA APUESTA SEMANAL — el trasfondo de la app: el dúo sella qué se juega esta
 // semana (premio conjunto + apuesta interna del que quede abajo). El cierre lo

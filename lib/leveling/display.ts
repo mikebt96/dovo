@@ -1,6 +1,6 @@
 // Helpers de presentación de stats, compartidos por home / perfil / leaderboard.
 // La lógica de tiers/clases/nivel vive en index.ts; esto es solo visual.
-import { STAT_KEYS, type StatKey } from "@/lib/scoring/types";
+import { STAT_KEYS, STAT_FROM_LABEL, type StatKey } from "@/lib/scoring/types";
 import { statDisplay } from "./index";
 
 // Orden canónico de los 6 stats (FUE, RES, FLEX, VEL, EQU, VIT).
@@ -30,3 +30,34 @@ export function barHeight(v: number): number {
 export function topStat(stats: Record<StatKey, number>): StatKey {
   return STAT_KEYS.reduce((best, k) => (stats[k] > stats[best] ? k : best), "fue");
 }
+
+// Re-export para componentes (el dominio vive en scoring/types).
+export { STAT_FROM_LABEL };
+
+// ── Mapas de presentación canónicos (F23·G5 — antes copiados en 6 componentes).
+// Las clases bg-stat-*/text-stat-* se referencian de forma ESTÁTICA para que
+// Tailwind no las purgue; los var(--stat-*) son theme-reactivos. ──
+export const STAT_VAR: Record<StatKey, string> = {
+  fue: "var(--stat-fue)",
+  res: "var(--stat-res)",
+  flex: "var(--stat-flex)",
+  vel: "var(--stat-vel)",
+  equ: "var(--stat-equ)",
+  vit: "var(--stat-vit)",
+};
+export const STAT_BG_CLASS: Record<StatKey, string> = {
+  fue: "bg-stat-fue",
+  res: "bg-stat-res",
+  flex: "bg-stat-flex",
+  vel: "bg-stat-vel",
+  equ: "bg-stat-equ",
+  vit: "bg-stat-vit",
+};
+export const STAT_TEXT_CLASS: Record<StatKey, string> = {
+  fue: "text-stat-fue",
+  res: "text-stat-res",
+  flex: "text-stat-flex",
+  vel: "text-stat-vel",
+  equ: "text-stat-equ",
+  vit: "text-stat-vit",
+};
