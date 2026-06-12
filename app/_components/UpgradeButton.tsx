@@ -68,7 +68,7 @@ export default function UpgradeButton({
         {pending ? "…" : label}
       </button>
       {err && (
-        <span className="text-[11px] mono uppercase tracking-wider text-red-600/80 text-center">
+        <span className="text-[11px] mono uppercase tracking-wider text-rival-deep text-center">
           {err}
         </span>
       )}

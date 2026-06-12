@@ -55,12 +55,7 @@ export default function ScanFlow({ live }: { live: boolean }) {
   if (result) {
     return (
       <div
-        className="relative overflow-hidden rounded-3xl p-7 sm:p-9 text-white"
-        style={{
-          background:
-            "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
-          boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
-        }}
+        className="card-game  relative overflow-hidden p-7 sm:p-9 text-white"
       >
         <p className="text-[11px] mono uppercase tracking-[0.22em] text-white/50 mb-6">
           {result.source === "ai" ? `✦ ${t("resultAi")}` : t("resultSample")}
@@ -107,7 +102,7 @@ export default function ScanFlow({ live }: { live: boolean }) {
           {pending ? t("working") : t("sampleCta")}
         </button>
         {err && (
-          <p className="text-xs mono uppercase tracking-wider text-red-600/80 mt-3">{err}</p>
+          <p className="text-xs mono uppercase tracking-wider text-rival-deep mt-3">{err}</p>
         )}
       </div>
     );
@@ -183,7 +178,7 @@ export default function ScanFlow({ live }: { live: boolean }) {
           {t("privacyCountdown")}
         </p>
       )}
-      {err && <p className="text-xs mono uppercase tracking-wider text-red-600/80">{err}</p>}
+      {err && <p className="text-xs mono uppercase tracking-wider text-rival-deep">{err}</p>}
     </div>
   );
 }

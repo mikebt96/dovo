@@ -97,7 +97,7 @@ export default function LogExerciseButton({
         >
           {t("removeLog")}
         </button>
-        {error && <span className="text-[10px] text-red-600/80">{error}</span>}
+        {error && <span className="text-[10px] text-rival-deep">{error}</span>}
       </span>
     );
   }
@@ -114,7 +114,7 @@ export default function LogExerciseButton({
         >
           {pending ? "…" : t("logDone")}
         </button>
-        {error && <span className="text-[10px] text-red-600/80">{error}</span>}
+        {error && <span className="text-[10px] text-rival-deep">{error}</span>}
       </span>
     );
   }
@@ -211,7 +211,7 @@ export default function LogExerciseButton({
           {pending ? "…" : t("logSave")}
         </button>
       </div>
-      {error && <p className="text-[11px] text-red-600/80">{error}</p>}
+      {error && <p className="text-[11px] text-rival-deep">{error}</p>}
     </div>
   );
 }

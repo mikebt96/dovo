@@ -17,7 +17,7 @@ export default function ProBadge({
         className={`${base} text-white ${className}`}
         style={{
           background:
-            "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
+            "var(--surface-game)",
           boxShadow: "0 6px 20px -10px rgba(109,74,255,0.7)",
         }}
       >

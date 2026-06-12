@@ -199,7 +199,7 @@ export default function DuelResultDialog({
         >
           {t("duelClose")}
         </button>
-        {err && <p className="relative text-xs text-red-300 mt-2">{err}</p>}
+        {err && <p className="relative text-xs text-rival mt-2">{err}</p>}
       </div>
     </dialog>
   );

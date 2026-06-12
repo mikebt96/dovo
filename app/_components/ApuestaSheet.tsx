@@ -137,7 +137,7 @@ export default function ApuestaSheet({
             />
           </div>
 
-          {err && <p className="mt-3 text-xs text-red-300">{err}</p>}
+          {err && <p className="mt-3 text-xs text-rival">{err}</p>}
 
           <button
             type="button"

@@ -20,7 +20,7 @@ export default async function ShowcasePage() {
         className="text-white px-6 pt-8 pb-20"
         style={{
           background:
-            "radial-gradient(140% 120% at 50% -10%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
+            "radial-gradient(140% 120% at 50% -10%, var(--night-1) 0%, var(--night-2) 55%, #07060d 100%)",
         }}
       >
         <nav className="flex items-center justify-between max-w-5xl mx-auto">

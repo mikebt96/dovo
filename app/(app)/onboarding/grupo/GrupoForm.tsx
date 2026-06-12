@@ -102,7 +102,7 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-rival-deep">{error}</p>}
 
       <button
         type="button"
@@ -150,7 +150,7 @@ function UnirseGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
         />
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-rival-deep">{error}</p>}
 
       <button
         type="button"

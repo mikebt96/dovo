@@ -79,7 +79,7 @@ export default function AiWorkoutButton({
           ✦ {t("aiBtn")}
         </button>
         {msg && (
-          <span className="text-[10px] mono uppercase tracking-wider text-red-600/80">{msg}</span>
+          <span className="text-[10px] mono uppercase tracking-wider text-rival-deep">{msg}</span>
         )}
       </span>
     );
@@ -137,7 +137,7 @@ export default function AiWorkoutButton({
           ✦ {pending ? t("aiWorking") : t("aiGenerate")}
         </button>
       </div>
-      {msg && <p className="text-[11px] text-red-600/80">{msg}</p>}
+      {msg && <p className="text-[11px] text-rival-deep">{msg}</p>}
     </div>
   );
 }

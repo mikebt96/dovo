@@ -49,7 +49,7 @@ export default function PulseOptOutToggle({ initial }: { initial: boolean }) {
           <p className="text-xs opacity-70 mt-1 leading-relaxed">{t("pulseDesc")}</p>
         </div>
       </div>
-      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+      {error && <p className="text-xs text-rival-deep mt-2">{error}</p>}
     </div>
   );
 }

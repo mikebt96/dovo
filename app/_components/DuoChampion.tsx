@@ -17,12 +17,7 @@ export default async function DuoChampion({
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl p-7 sm:p-9 text-white"
-      style={{
-        background:
-          "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
-        boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
-      }}
+      className="card-game  relative overflow-hidden p-7 sm:p-9 text-white"
     >
       <div
         aria-hidden

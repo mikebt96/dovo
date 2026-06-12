@@ -183,7 +183,7 @@ export default function PushSettings({ initialPrefs }: { initialPrefs: Notificat
         </div>
       )}
       {err && (
-        <p className="text-xs mono uppercase tracking-wider text-red-600/80 mt-3">{err}</p>
+        <p className="text-xs mono uppercase tracking-wider text-rival-deep mt-3">{err}</p>
       )}
     </div>
   );

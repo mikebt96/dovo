@@ -38,7 +38,7 @@ export default function DemoLoginButton({
       >
         {pending ? t("demoLoading") : t("demoButton")}
       </button>
-      {err && <span className="text-xs text-red-600">{err}</span>}
+      {err && <span className="text-xs text-rival-deep">{err}</span>}
     </span>
   );
 }

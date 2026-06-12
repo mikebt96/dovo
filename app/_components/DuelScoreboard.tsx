@@ -206,7 +206,7 @@ export default function DuelScoreboard({
         </button>
       )}
 
-      {err && <p className="text-xs text-red-300 mt-3">{err}</p>}
+      {err && <p className="text-xs text-rival mt-3">{err}</p>}
     </div>
   );
 }

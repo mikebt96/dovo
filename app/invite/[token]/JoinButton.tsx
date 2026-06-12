@@ -34,7 +34,7 @@ export default function JoinButton({ token }: { token: string }) {
       >
         {pending ? t("joining") : t("joinGroup")}
       </button>
-      {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+      {error && <p className="text-sm text-rival-deep mt-3">{error}</p>}
     </div>
   );
 }

@@ -108,7 +108,7 @@ export default function BoostButton({
         </button>
       </div>
       {pending && <p className="text-xs opacity-60 mt-2">{t("sending")}</p>}
-      {msg && <p className="text-xs text-red-600 mt-2">{msg}</p>}
+      {msg && <p className="text-xs text-rival-deep mt-2">{msg}</p>}
     </div>
   );
 }

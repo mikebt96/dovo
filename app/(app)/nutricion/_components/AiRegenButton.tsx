@@ -38,7 +38,7 @@ export default function AiRegenButton({ aiLive }: { aiLive: boolean }) {
         ✦ {pending ? t("aiWorking") : t("aiRegen")}
       </button>
       {msg && (
-        <span className="text-[10px] mono uppercase tracking-wider text-red-600/80">{msg}</span>
+        <span className="text-[10px] mono uppercase tracking-wider text-rival-deep">{msg}</span>
       )}
     </span>
   );

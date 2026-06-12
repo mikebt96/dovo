@@ -13,7 +13,7 @@ export default async function ShowcaseCharacterCard({ row }: { row: DemoRow }) {
       className="relative overflow-hidden rounded-[20px] p-6 text-white min-h-[280px] flex flex-col"
       style={{
         background:
-          "radial-gradient(120% 120% at 50% 0%, #16132a 0%, #0b0a14 60%, #07060d 100%)",
+          "radial-gradient(120% 120% at 50% 0%, var(--night-1) 0%, var(--night-2) 60%, #07060d 100%)",
       }}
     >
       <div className="flex items-center justify-between text-[11px] mono uppercase tracking-widest text-white/50">

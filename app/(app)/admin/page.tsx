@@ -34,16 +34,11 @@ export default async function AdminPage() {
 
       {/* Status global — panel oscuro premium */}
       <section
-        className="relative overflow-hidden rounded-3xl p-7 text-white mb-8"
-        style={{
-          background:
-            "radial-gradient(130% 150% at 12% 0%, #16132a 0%, #0b0a14 55%, #07060d 100%)",
-          boxShadow: "0 24px 60px -28px rgba(109,74,255,0.55)",
-        }}
+        className="card-game  relative overflow-hidden p-7 text-white mb-8"
       >
         <div className="flex items-center gap-3">
           <span
-            className={`h-3 w-3 rounded-full ${data.dbOk ? "bg-stat-vit" : "bg-red-500"}`}
+            className={`h-3 w-3 rounded-full ${data.dbOk ? "bg-stat-vit" : "bg-rival"}`}
             style={{ boxShadow: data.dbOk ? "0 0 16px #aef03c88" : "0 0 16px #ef444488" }}
           />
           <span className="display text-2xl font-bold lowercase">
@@ -87,7 +82,7 @@ export default async function AdminPage() {
               c.last_status === "succeeded"
                 ? "bg-stat-vit"
                 : c.last_status === "failed"
-                  ? "bg-red-500"
+                  ? "bg-rival"
                   : "bg-ink/20";
             return (
               <div
@@ -103,7 +98,7 @@ export default async function AdminPage() {
                     ` · ${new Date(c.last_start).toLocaleString("es-MX", { timeZone: "America/Mexico_City", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`}
                 </span>
                 {c.last_status === "failed" && c.last_msg && (
-                  <p className="w-full text-xs text-red-600/80 mono">{c.last_msg}</p>
+                  <p className="w-full text-xs text-rival-deep mono">{c.last_msg}</p>
                 )}
               </div>
             );

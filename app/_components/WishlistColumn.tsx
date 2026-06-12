@@ -102,7 +102,7 @@ export default function WishlistColumn({
               {pending ? t("wishlistAdding") : t("wishlistAdd")}
             </button>
           </div>
-          {err && <p className="text-xs text-red-500 mt-1">{err}</p>}
+          {err && <p className="text-xs text-rival-deep mt-1">{err}</p>}
         </div>
       )}
     </div>

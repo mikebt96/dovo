@@ -55,7 +55,7 @@ export default function AdminTools({ errors }: { errors: AppError[] }) {
   }
 
   const statusDot = (s: string) =>
-    s === "critical" ? "bg-red-500" : s === "warn" ? "bg-amber-400" : "bg-stat-vit";
+    s === "critical" ? "bg-rival" : s === "warn" ? "bg-amber-400" : "bg-stat-vit";
 
   return (
     <div className="space-y-10">
@@ -84,7 +84,7 @@ export default function AdminTools({ errors }: { errors: AppError[] }) {
           </div>
         </div>
         {scanErr && (
-          <p className="text-xs mono uppercase tracking-wider text-red-600/80">{scanErr}</p>
+          <p className="text-xs mono uppercase tracking-wider text-rival-deep">{scanErr}</p>
         )}
         {scan && (
           <div className="rounded-2xl border border-ink/10 divide-y divide-ink/8">

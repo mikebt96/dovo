@@ -158,7 +158,7 @@ export default function NutritionProfileForm({
           {pending ? t("formSaving") : t("formSubmit")}
         </button>
         {err && (
-          <span className="text-xs mono uppercase tracking-wider text-red-600/80">{err}</span>
+          <span className="text-xs mono uppercase tracking-wider text-rival-deep">{err}</span>
         )}
       </div>
     </form>

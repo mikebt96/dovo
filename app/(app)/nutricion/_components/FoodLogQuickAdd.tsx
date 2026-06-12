@@ -80,7 +80,7 @@ export default function FoodLogQuickAdd({
         </button>
       </form>
       {err && (
-        <p className="text-xs mono uppercase tracking-wider text-red-600/80 mt-2">{err}</p>
+        <p className="text-xs mono uppercase tracking-wider text-rival-deep mt-2">{err}</p>
       )}
     </div>
   );

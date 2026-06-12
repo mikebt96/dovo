@@ -31,7 +31,7 @@ export default function GoogleButton() {
       >
         {pending ? t("googleConnecting") : t("google")}
       </button>
-      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+      {error && <p className="text-xs text-rival-deep mt-2">{error}</p>}
     </div>
   );
 }
