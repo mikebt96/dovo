@@ -198,6 +198,13 @@
     "equ": "Equilibrio",
     "vit": "Vitalidad"
   },
+  "aviso": {
+    "eyebrow": "actualizamos nuestro aviso",
+    "body": "actualizamos el aviso de privacidad: ahora explicamos cómo generamos estadísticas anónimas para conseguirte mejores premios con marcas. tus datos de salud nunca se venden. necesitamos tu visto bueno para seguir.",
+    "aceptar": "entendido, acepto",
+    "aceptando": "guardando…",
+    "leer": "leer el aviso →"
+  },
   "home": {
     "navSettings": "ajustes",
     "navNutrition": "comida",

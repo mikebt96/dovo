@@ -10,6 +10,8 @@ import MisionesHoy from "./MisionesHoy";
 import VeredictoDialog from "./VeredictoDialog";
 import SelloDelPacto from "./SelloDelPacto";
 import BannerAtaque from "./BannerAtaque";
+import AvisoReconsentBanner from "./AvisoReconsentBanner";
+import { necesitaAceptarAviso } from "@/lib/actions/salud";
 import { getVeredictoPendiente } from "@/lib/actions/trato";
 import { getAtaqueRecienteRecibido } from "@/lib/actions/ataques";
 import CheckinRow from "./CheckinRow";
@@ -182,9 +184,14 @@ export default async function HomeAuthed({ sinSalud = false }: { sinSalud?: bool
     }
   }
 
+  const debeAceptarAviso = await necesitaAceptarAviso();
+
   return (
     <main className="min-h-svh px-6 py-10 bg-papel text-ink max-w-2xl lg:max-w-5xl mx-auto">
       <AppNav />
+
+      {/* re-consentimiento del aviso v1.0 (usuarios anteriores al cambio material) */}
+      {debeAceptarAviso && <AvisoReconsentBanner />}
 
       {boost && (
         <div className="mb-6 rounded-xl border border-signal/40 bg-signal/5 px-4 py-3">

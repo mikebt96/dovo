@@ -198,6 +198,13 @@
     "equ": "Equilibrium",
     "vit": "Vitality"
   },
+  "aviso": {
+    "eyebrow": "we updated our notice",
+    "body": "we updated our privacy notice: it now explains how we build anonymous statistics to get you better brand rewards. your health data is never sold. we need your okay to continue.",
+    "aceptar": "got it, I accept",
+    "aceptando": "saving…",
+    "leer": "read the notice →"
+  },
   "home": {
     "navSettings": "Settings",
     "navNutrition": "food",

@@ -6,6 +6,58 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { AVISO_VERSION } from "@/lib/legal/aviso-version";
 
+// ── Re-consentimiento del aviso de privacidad (aviso §19: "conservamos el
+// registro de la versión que cada usuario aceptó"). El registro guarda el
+// consentimiento tácito de los usuarios NUEVOS; los ANTERIORES a la v1.0
+// (cambio material: nueva finalidad de monetización) reaceptan vía banner. ──
+
+/** ¿al usuario le falta aceptar la versión VIGENTE del aviso? (para el banner) */
+export async function necesitaAceptarAviso(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data, error } = await supabase
+    .schema("core")
+    .from("consentimientos")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("tipo", "aviso_privacidad")
+    .eq("version_aviso", AVISO_VERSION)
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.error("[salud] necesitaAceptarAviso:", error.message);
+    return false; // ante la duda no acosamos con el banner; el log queda
+  }
+  return !data;
+}
+
+/** registra la aceptación del aviso vigente (banner de re-consentimiento) */
+export async function aceptarAvisoPrivacidad(): Promise<Result> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sin sesión" };
+
+  // idempotente: si ya aceptó esta versión, no duplicar la bitácora
+  if (!(await necesitaAceptarAviso())) return { ok: true, data: undefined };
+
+  const { error } = await supabase.schema("core").from("consentimientos").insert({
+    user_id: user.id,
+    tipo: "aviso_privacidad",
+    otorgado: true,
+    version_aviso: AVISO_VERSION,
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/");
+  return { ok: true, data: undefined };
+}
+
 // F25 · Salud y permisos. Los datos de salud son SENSIBLES: el consentimiento
 // es expreso (toggle dedicado, jamás pre-palomeado), queda en bitácora
 // append-only con la versión del aviso, y los datos viven owner-only — ni el
