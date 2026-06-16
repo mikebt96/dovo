@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { saveProfileFisico } from "@/lib/actions/perfil";
+import { setConsentimiento } from "@/lib/actions/salud";
 import {
   NIVELES_ACTIVIDAD,
   OBJETIVOS,
@@ -194,6 +195,27 @@ export default function PerfilForm() {
         className="w-full bg-ink text-papel py-3 rounded-full display font-semibold lowercase disabled:opacity-50 hover:bg-signal hover:text-white transition-colors"
       >
         {pending ? t("saving") : t("next")}
+      </button>
+
+      {/* declinar es legítimo (aviso §5): la capa social del juego queda viva;
+          se registra en bitácora que se preguntó y dijo no */}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => {
+          setError(null);
+          start(async () => {
+            const res = await setConsentimiento("salud", false);
+            if (!res.ok) {
+              setError(res.error);
+              return;
+            }
+            router.push("/onboarding/grupo");
+          });
+        }}
+        className="w-full text-center text-[11px] mono uppercase tracking-[0.16em] opacity-50 hover:opacity-80 transition-opacity py-1"
+      >
+        {t("skipSalud")}
       </button>
     </div>
   );

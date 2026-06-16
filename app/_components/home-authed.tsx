@@ -40,7 +40,10 @@ type Grupo = {
 };
 
 
-export default async function HomeAuthed() {
+// sinSalud (aviso §5): el usuario declinó compartir datos de salud — la capa
+// social (trato, apuesta, grupos) vive completa; planes, misiones, registro y
+// progreso quedan apagados con una invitación honesta a activarlos.
+export default async function HomeAuthed({ sinSalud = false }: { sinSalud?: boolean }) {
   const t = await getTranslations("home");
   const tDias = await getTranslations("nutricion.dias");
   const supabase = await createClient();
@@ -216,40 +219,64 @@ export default async function HomeAuthed() {
       {/* Las MISIONES DE HOY mandan en el lobby (mandato de Miguel): dieta y
           ejercicio como las dos misiones diarias — el detalle de la sesión
           (bloques, pesos, progresión) vive en /entrenamiento. */}
-      <MisionesHoy
-        sesionHoy={
-          sesionHoy
-            ? { actividad_slug: sesionHoy.actividad_slug, titulo: sesionHoy.titulo }
-            : null
-        }
-        proximaTitulo={
-          !sesionHoy && proxima
-            ? t("heroNext", {
-                dia: tDias(DAY_KEY[proxima.dia] ?? proxima.dia),
-                titulo: proxima.titulo,
-              })
-            : null
-        }
-      />
+      {!sinSalud && (
+        <MisionesHoy
+          sesionHoy={
+            sesionHoy
+              ? { actividad_slug: sesionHoy.actividad_slug, titulo: sesionHoy.titulo }
+              : null
+          }
+          proximaTitulo={
+            !sesionHoy && proxima
+              ? t("heroNext", {
+                  dia: tDias(DAY_KEY[proxima.dia] ?? proxima.dia),
+                  titulo: proxima.titulo,
+                })
+              : null
+          }
+        />
+      )}
+
+      {/* sin datos de salud: invitación honesta (jamás presión) a activarlos */}
+      {sinSalud && (
+        <section className="mb-8 rounded-2xl border border-ink/15 p-5">
+          <p className="text-[10px] mono uppercase tracking-[0.18em] opacity-50">
+            {t("sinSaludEyebrow")}
+          </p>
+          <p className="mt-2 display font-bold lowercase text-lg leading-snug">
+            {t("sinSaludTitle")}
+          </p>
+          <p className="mt-1.5 text-xs opacity-70 leading-relaxed">{t("sinSaludBody")}</p>
+          <Link
+            href="/onboarding/perfil"
+            className="mt-4 inline-block bg-ink text-papel px-5 py-2.5 rounded-full display font-semibold lowercase text-sm hover:bg-signal hover:text-white transition-colors"
+          >
+            {t("sinSaludCta")}
+          </Link>
+        </section>
+      )}
 
       {/* Character card — el ancla de la app (DESIGN.md §6). Con la barra de XP
           de dos capas EN LA HOME (directiva §4.2): cada check-in se ve comprar. */}
-      <section className="mb-8">
-        <CharacterCard
-          nivel={sheet.nivel}
-          className={sheet.className}
-          racha={racha}
-          prestige={character.prestige}
-          stats={character}
-          tiers={sheet.tiers}
-          progresoNivel={sheet.progresoNivel}
-          xpParaSiguiente={sheet.xpParaSiguiente}
-        />
-      </section>
+      {!sinSalud && (
+        <section className="mb-8">
+          <CharacterCard
+            nivel={sheet.nivel}
+            className={sheet.className}
+            racha={racha}
+            prestige={character.prestige}
+            stats={character}
+            tiers={sheet.tiers}
+            progresoNivel={sheet.progresoNivel}
+            xpParaSiguiente={sheet.xpParaSiguiente}
+          />
+        </section>
+      )}
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-10 lg:items-start">
       {/* Registro rápido: un tap por actividad (arcade). Secundario a las
           misiones — la rutina real con ejercicios vive en /entrenamiento. */}
+      {!sinSalud && (
       <section className="mb-8 lg:mb-0">
         <h2 className="text-[11px] mono uppercase tracking-[0.18em] opacity-50 mb-3">
           {t("quickLogTitle")}
@@ -297,6 +324,7 @@ export default async function HomeAuthed() {
           </Link>
         )}
       </section>
+      )}
 
       {/* Grupos */}
       <section>

@@ -228,7 +228,11 @@
     "proUpsellTitle": "lleva a tu dúo a pro",
     "proUpsellBody": "planes de comida con IA, análisis corporal y descuentos premium. una sola suscripción para los dos.",
     "proUpsellCta": "ver planes →",
-    "duoFallback": "tu dúo"
+    "duoFallback": "tu dúo",
+    "sinSaludEyebrow": "capa de salud apagada",
+    "sinSaludTitle": "entrena con privacidad total.",
+    "sinSaludBody": "declinaste compartir tus datos de salud. la capa social (trato, apuestas, grupo, rivales) está disponible, pero tus planes de comida, entrenamientos prescritos y nivel están pausados. puedes activarlos cuando quieras.",
+    "sinSaludCta": "activar datos de salud"
   },
   "duoProof": {
     "eyebrow": "por qué en dúo",
@@ -306,7 +310,12 @@
     "pushPrefRacha": "racha en riesgo",
     "pushPrefCheckin": "mi compañero entrenó",
     "pushPrefReto": "retos y duelos",
-    "pushPrefRecompensa": "recompensas desbloqueadas"
+    "pushPrefRecompensa": "recompensas desbloqueadas",
+    "cancelarCuenta": "cancelar cuenta",
+    "cancelarConfirm": "sí, eliminar cuenta definitivamente",
+    "cancelarNo": "no, conservar",
+    "cancelando": "cancelando…",
+    "cancelarAviso": "esta acción es irreversible. se borrará tu perfil, historial de check-ins, entrenamientos, comidas y tu participación en grupos o duelos de inmediato. tu usuario quedará anónimo para proteger el historial de tus dúos."
   },
   "onboarding": {
     "step1": "paso 1 de 2",
@@ -372,7 +381,8 @@
       "pareja": "2 personas",
       "pequeno": "3-6 personas",
       "grande": "7+ personas"
-    }
+    },
+    "skipSalud": "saltar por ahora (sin datos de salud)"
   },
   "grupo": {
     "eyebrow": "grupo {tipo}",

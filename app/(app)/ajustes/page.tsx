@@ -13,6 +13,7 @@ import PulseOptOutToggle from "./_components/PulseOptOutToggle";
 import PushSettings from "./_components/PushSettings";
 import SaludPermisos from "./_components/SaludPermisos";
 import SignOutButton from "./_components/SignOutButton";
+import CancelarCuentaButton from "./_components/CancelarCuentaButton";
 import { getNotificationPrefs } from "@/lib/actions/push";
 import { getEstadoSalud } from "@/lib/actions/salud";
 import { isAdminEmail } from "@/lib/admin";
@@ -137,6 +138,8 @@ export default async function AjustesPage() {
 
       <section className="pt-8 border-t border-ink/15">
         <SignOutButton />
+        {/* zona de peligro — el aviso §13 promete cancelación desde aquí */}
+        <CancelarCuentaButton />
       </section>
     </main>
   );

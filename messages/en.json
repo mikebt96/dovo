@@ -228,7 +228,11 @@
     "proUpsellTitle": "take your duo to pro",
     "proUpsellBody": "AI meal plans, body analysis and premium discounts. one subscription for both of you.",
     "proUpsellCta": "see plans →",
-    "duoFallback": "your duo"
+    "duoFallback": "your duo",
+    "sinSaludEyebrow": "health layer off",
+    "sinSaludTitle": "train with total privacy.",
+    "sinSaludBody": "you declined to share your health data. the social layer (vow, bets, group, rivals) is available, but your meal plans, prescribed workouts, and level are paused. you can enable them whenever you want.",
+    "sinSaludCta": "enable health data"
   },
   "duoProof": {
     "eyebrow": "why in a duo",
@@ -306,7 +310,12 @@
     "pushPrefRacha": "streak at risk",
     "pushPrefCheckin": "my partner trained",
     "pushPrefReto": "duels & challenges",
-    "pushPrefRecompensa": "rewards unlocked"
+    "pushPrefRecompensa": "rewards unlocked",
+    "cancelarCuenta": "delete account",
+    "cancelarConfirm": "yes, delete account permanently",
+    "cancelarNo": "no, keep it",
+    "cancelando": "deleting…",
+    "cancelarAviso": "this action is irreversible. your profile, check-in history, workouts, meals, and participation in groups or duels will be deleted immediately. your user will be anonymized to protect your duos' history."
   },
   "onboarding": {
     "step1": "step 1 of 2",
@@ -372,7 +381,8 @@
       "pareja": "2 people",
       "pequeno": "3–6 people",
       "grande": "7+ people"
-    }
+    },
+    "skipSalud": "skip for now (without health data)"
   },
   "grupo": {
     "eyebrow": "{tipo} group",
