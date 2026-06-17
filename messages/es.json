@@ -334,6 +334,9 @@
     "labelWeight": "Peso (kg)",
     "labelHeight": "Altura (cm)",
     "labelAge": "Edad",
+    "errWeight": "peso entre 20 y 400 kg",
+    "errHeight": "altura entre 80 y 260 cm",
+    "errAge": "edad entre 18 y 120",
     "consentSalud": "acepto que dovo trate mis datos de salud (peso, altura, edad, lesiones) para generar mis planes, validar mi actividad y mostrar mi progreso. son datos sensibles: solo yo los veo, jamás se venden ni entran a estadísticas. puedo revocar esto cuando quiera desde ajustes.",
     "consentSaludLink": "aviso de privacidad →",
     "labelGender": "Género",
@@ -372,6 +375,8 @@
     "joinGroupTab": "unirme a uno",
     "groupName": "nombre del grupo",
     "groupNamePlaceholder": "Mike & Andy",
+    "errGroupName": "ponle un nombre a tu grupo",
+    "errInvite": "pega el link o código de invitación",
     "size": "tamaño",
     "creating": "creando…",
     "createStart": "crear y empezar",
@@ -403,7 +408,13 @@
     "copied": "copiado ✓",
     "routineTitle": "tu rutina",
     "routineEdit": "editar rutina →",
-    "routineCreate": "armar mi rutina →"
+    "routineCreate": "armar mi rutina →",
+    "leaveGroup": "salir del grupo",
+    "leaveConfirm": "sí, salir del grupo",
+    "leaveNo": "no, quedarme",
+    "leaving": "saliendo…",
+    "leaveAviso": "dejarás de ver el progreso de este dúo y se borrarán tus check-ins de este grupo. tu compa seguirá en el grupo. puedes volver con el código de invitación.",
+    "leaveAvisoUltimo": "eres el único miembro: al salir, el grupo se archiva. tus check-ins de este grupo se borran. esta acción no se puede deshacer."
   },
   "invite": {
     "notFound": "invitación no existe",

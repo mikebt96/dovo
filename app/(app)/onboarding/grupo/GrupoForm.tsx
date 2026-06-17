@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { crearGrupo, unirseAGrupo } from "@/lib/actions/grupos";
@@ -49,13 +49,20 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
   const [tipo, setTipo] = useState<(typeof TIPOS_GRUPO)[number]["value"]>(
     "pareja",
   );
+  const [nombreErr, setNombreErr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const nombreRef = useRef<HTMLInputElement>(null);
   const [pending, start] = useTransition();
 
   function submit() {
     setError(null);
+    if (!nombre.trim()) {
+      setNombreErr(t("errGroupName"));
+      nombreRef.current?.focus();
+      return;
+    }
     start(async () => {
-      const res = await crearGrupo({ nombre_grupo: nombre, tipo_grupo: tipo });
+      const res = await crearGrupo({ nombre_grupo: nombre.trim(), tipo_grupo: tipo });
       if (!res.ok) {
         setError(res.error);
         return;
@@ -68,15 +75,29 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
   return (
     <div className="space-y-6">
       <label className="block">
-        <span className="text-xs uppercase tracking-widest opacity-60 block mb-2">
+        <span
+          className={`text-xs uppercase tracking-widest block mb-2 ${
+            nombreErr ? "text-rival-deep" : "opacity-60"
+          }`}
+        >
           {t("groupName")}
         </span>
         <input
+          ref={nombreRef}
           value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
+          aria-invalid={!!nombreErr}
+          onChange={(e) => {
+            setNombre(e.target.value);
+            if (nombreErr) setNombreErr(null);
+          }}
           placeholder={t("groupNamePlaceholder")}
-          className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
+          className={`w-full bg-transparent border-b pb-2 focus:outline-none ${
+            nombreErr ? "border-rival" : "border-ink/40 focus:border-signal"
+          }`}
         />
+        {nombreErr && (
+          <span className="mt-1.5 block text-[11px] text-rival-deep">{nombreErr}</span>
+        )}
       </label>
 
       <div>
@@ -119,11 +140,18 @@ function CrearGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
 function UnirseGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
   const t = useTranslations("onboarding");
   const [token, setToken] = useState("");
+  const [tokenErr, setTokenErr] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const tokenRef = useRef<HTMLInputElement>(null);
   const [pending, start] = useTransition();
 
   function submit() {
     setError(null);
+    if (!token.trim()) {
+      setTokenErr(t("errInvite"));
+      tokenRef.current?.focus();
+      return;
+    }
     start(async () => {
       // El user puede pegar el link completo o solo el token
       const clean = token.trim().split("/").pop() ?? token.trim();
@@ -139,15 +167,29 @@ function UnirseGrupo({ router }: { router: ReturnType<typeof useRouter> }) {
   return (
     <div className="space-y-6">
       <label className="block">
-        <span className="text-xs uppercase tracking-widest opacity-60 block mb-2">
+        <span
+          className={`text-xs uppercase tracking-widest block mb-2 ${
+            tokenErr ? "text-rival-deep" : "opacity-60"
+          }`}
+        >
           {t("inviteLabel")}
         </span>
         <input
+          ref={tokenRef}
           value={token}
-          onChange={(e) => setToken(e.target.value)}
+          aria-invalid={!!tokenErr}
+          onChange={(e) => {
+            setToken(e.target.value);
+            if (tokenErr) setTokenErr(null);
+          }}
           placeholder={t("invitePlaceholder")}
-          className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
+          className={`w-full bg-transparent border-b pb-2 focus:outline-none ${
+            tokenErr ? "border-rival" : "border-ink/40 focus:border-signal"
+          }`}
         />
+        {tokenErr && (
+          <span className="mt-1.5 block text-[11px] text-rival-deep">{tokenErr}</span>
+        )}
       </label>
 
       {error && <p className="text-sm text-rival-deep">{error}</p>}

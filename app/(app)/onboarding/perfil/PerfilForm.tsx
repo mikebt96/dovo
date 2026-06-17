@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { saveProfileFisico } from "@/lib/actions/perfil";
@@ -34,10 +34,36 @@ export default function PerfilForm() {
   // jamás pre-palomeado: consentimiento EXPRESO de datos sensibles (aviso §5)
   const [consentSalud, setConsentSalud] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // validación por campo: el usuario sabe QUÉ corregir antes de mandar, no
+  // después de un error genérico del server (rangos = los del zod schema)
+  const [errs, setErrs] = useState<{ peso?: string; altura?: string; edad?: string }>({});
+  const refs = {
+    peso: useRef<HTMLInputElement>(null),
+    altura: useRef<HTMLInputElement>(null),
+    edad: useRef<HTMLInputElement>(null),
+  };
   const [pending, start] = useTransition();
+
+  function validar() {
+    const e: typeof errs = {};
+    const p = Number(peso);
+    const a = Number(altura);
+    const ed = Number(edad);
+    if (!peso.trim() || Number.isNaN(p) || p < 20 || p > 400) e.peso = t("errWeight");
+    if (!altura.trim() || Number.isNaN(a) || a < 80 || a > 260) e.altura = t("errHeight");
+    if (!edad.trim() || Number.isNaN(ed) || ed < 18 || ed > 120) e.edad = t("errAge");
+    return e;
+  }
 
   function submit() {
     setError(null);
+    const e = validar();
+    setErrs(e);
+    const primer = (["peso", "altura", "edad"] as const).find((k) => e[k]);
+    if (primer) {
+      refs[primer].current?.focus();
+      return;
+    }
     start(async () => {
       const res = await saveProfileFisico(
         {
@@ -62,34 +88,57 @@ export default function PerfilForm() {
     });
   }
 
+  // borde rojo + limpia el error del campo al editarlo (feedback inmediato)
+  const inputCls = (err?: string) =>
+    `w-full bg-transparent border-b pb-2 focus:outline-none ${
+      err ? "border-rival" : "border-ink/40 focus:border-signal"
+    }`;
+  const limpiar = (k: "peso" | "altura" | "edad") =>
+    setErrs((prev) => (prev[k] ? { ...prev, [k]: undefined } : prev));
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-3">
-        <Field label={t("labelWeight")}>
+      <div className="grid grid-cols-3 gap-3 items-start">
+        <Field label={t("labelWeight")} error={errs.peso}>
           <input
+            ref={refs.peso}
             type="number"
             inputMode="decimal"
             value={peso}
-            onChange={(e) => setPeso(e.target.value)}
-            className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
+            aria-invalid={!!errs.peso}
+            onChange={(e) => {
+              setPeso(e.target.value);
+              limpiar("peso");
+            }}
+            className={inputCls(errs.peso)}
           />
         </Field>
-        <Field label={t("labelHeight")}>
+        <Field label={t("labelHeight")} error={errs.altura}>
           <input
+            ref={refs.altura}
             type="number"
             inputMode="decimal"
             value={altura}
-            onChange={(e) => setAltura(e.target.value)}
-            className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
+            aria-invalid={!!errs.altura}
+            onChange={(e) => {
+              setAltura(e.target.value);
+              limpiar("altura");
+            }}
+            className={inputCls(errs.altura)}
           />
         </Field>
-        <Field label={t("labelAge")}>
+        <Field label={t("labelAge")} error={errs.edad}>
           <input
+            ref={refs.edad}
             type="number"
             inputMode="numeric"
             value={edad}
-            onChange={(e) => setEdad(e.target.value)}
-            className="w-full bg-transparent border-b border-ink/40 pb-2 focus:outline-none focus:border-signal"
+            aria-invalid={!!errs.edad}
+            onChange={(e) => {
+              setEdad(e.target.value);
+              limpiar("edad");
+            }}
+            className={inputCls(errs.edad)}
           />
         </Field>
       </div>
@@ -223,17 +272,24 @@ export default function PerfilForm() {
 
 function Field({
   label,
+  error,
   children,
 }: {
   label: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-widest opacity-60 block mb-2">
+      <span
+        className={`text-xs uppercase tracking-widest block mb-2 ${
+          error ? "text-rival-deep opacity-100" : "opacity-60"
+        }`}
+      >
         {label}
       </span>
       {children}
+      {error && <span className="mt-1.5 block text-[11px] text-rival-deep">{error}</span>}
     </label>
   );
 }

@@ -123,3 +123,30 @@ export async function unirseAGrupo(
   revalidatePath(`/grupo/${grupo.id}`);
   return { ok: true, data: { trato_id: grupo.id as string } };
 }
+
+// F27 · Salir de un grupo. Vía RPC SECURITY DEFINER (salir_del_trato): borra
+// la membresía y archiva el trato si queda vacío.
+const ERRORES_SALIR: Record<string, string> = {
+  NO_MIEMBRO: "ya no perteneces a este grupo",
+  AUTH_REQUERIDA: "sin sesión",
+};
+
+export async function salirDelTrato(tratoId: string): Promise<Result> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sin sesión" };
+
+  const { error } = await supabase
+    .schema("core")
+    .rpc("salir_del_trato", { p_trato_id: tratoId });
+  if (error) {
+    console.error("[grupos] salir:", error.message);
+    return { ok: false, error: ERRORES_SALIR[error.message] ?? "no se pudo salir — intenta de nuevo" };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/grupo/${tratoId}`);
+  return { ok: true, data: undefined };
+}

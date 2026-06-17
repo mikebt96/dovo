@@ -7,6 +7,7 @@ import { BOOST_GATING_RACHAS } from "@/lib/scoring/constants";
 import AppNav from "@/app/_components/AppNav";
 import PageHero from "@/app/_components/PageHero";
 import InviteLink from "./InviteLink";
+import SalirGrupoButton from "./SalirGrupoButton";
 import BoostButton from "@/app/_components/BoostButton";
 
 export const dynamic = "force-dynamic";
@@ -208,6 +209,11 @@ export default async function GrupoPage({
         </h2>
         <p className="text-sm opacity-60 mb-5">{t("inviteSubtitle")}</p>
         <InviteLink url={inviteUrl} />
+      </section>
+
+      {/* zona de peligro: salir del grupo (F27) */}
+      <section className="mt-8 pt-6 border-t border-ink/15">
+        <SalirGrupoButton tratoId={id} ultimo={miembros.length === 1} />
       </section>
     </main>
   );

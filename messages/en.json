@@ -334,6 +334,9 @@
     "labelWeight": "Weight (kg)",
     "labelHeight": "Height (cm)",
     "labelAge": "Age",
+    "errWeight": "weight between 20 and 400 kg",
+    "errHeight": "height between 80 and 260 cm",
+    "errAge": "age between 18 and 120",
     "consentSalud": "I agree to dovo processing my health data (weight, height, age, injuries) to generate my plans, validate my activity and show my progress. it's sensitive data: only I see it, it's never sold and never enters statistics. I can revoke this anytime from settings.",
     "consentSaludLink": "privacy notice →",
     "labelGender": "Gender",
@@ -372,6 +375,8 @@
     "joinGroupTab": "join one",
     "groupName": "group name",
     "groupNamePlaceholder": "Mike & Andy",
+    "errGroupName": "give your group a name",
+    "errInvite": "paste the invite link or code",
     "size": "size",
     "creating": "creating…",
     "createStart": "create & start",
@@ -403,7 +408,13 @@
     "copied": "copied ✓",
     "routineTitle": "your routine",
     "routineEdit": "edit routine →",
-    "routineCreate": "build my routine →"
+    "routineCreate": "build my routine →",
+    "leaveGroup": "leave group",
+    "leaveConfirm": "yes, leave the group",
+    "leaveNo": "no, stay",
+    "leaving": "leaving…",
+    "leaveAviso": "you'll stop seeing this duo's progress and your check-ins for this group will be deleted. your partner stays in the group. you can rejoin with the invite code.",
+    "leaveAvisoUltimo": "you're the only member: leaving archives the group. your check-ins for this group are deleted. this can't be undone."
   },
   "invite": {
     "notFound": "invitation not found",
