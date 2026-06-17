@@ -188,7 +188,22 @@
   "legal": {
     "navPrivacy": "privacidad",
     "navTerms": "términos",
-    "spanishNotice": ""
+    "spanishNotice": "",
+    "delTitle": "eliminar tu cuenta",
+    "delIntro": "Puedes eliminar tu cuenta de dovo y tus datos personales en cualquier momento, sin costo. Aquí te explicamos qué se borra y cómo hacerlo.",
+    "delQueSeBorra": "Qué se elimina de inmediato",
+    "delItemPerfil": "Tu perfil, peso, altura, edad y demás datos físicos y de salud.",
+    "delItemNutri": "Tus datos de nutrición: restricciones, alergias, alimentos vetados y favoritos, presupuesto.",
+    "delItemJuego": "Tus check-ins, entrenamientos, niveles y tu participación en grupos y duelos.",
+    "delItemLogin": "Tu acceso (login) queda inhabilitado y tu nombre y correo se anonimizan.",
+    "delQueSeConserva": "Qué podemos conservar (y por qué)",
+    "delConservaLegal": "Lo que la ley nos obligue a conservar, solo por el plazo que esa obligación exija.",
+    "delConservaDisoc": "Información estadística ya disociada que, por diseño, no te identifica y no es reversible.",
+    "delComoLogueado": "Tu sesión está activa. Puedes eliminar tu cuenta ahora mismo con el botón de abajo (o desde Ajustes → cancelar cuenta).",
+    "delComoNoLogueado": "Para eliminar tu cuenta, inicia sesión y vuelve a esta página, o hazlo desde Ajustes → cancelar cuenta dentro de la app.",
+    "delSinAcceso": "¿No puedes iniciar sesión? Escríbenos a privacidad@dovofit.com desde el correo de tu cuenta y la eliminamos por ti, conforme a nuestro aviso de privacidad.",
+    "delIrLogin": "iniciar sesión →",
+    "delVerAviso": "leer el aviso de privacidad →"
   },
   "stats": {
     "fue": "Fuerza",

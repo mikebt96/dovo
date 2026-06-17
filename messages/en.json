@@ -188,7 +188,22 @@
   "legal": {
     "navPrivacy": "Privacy",
     "navTerms": "Terms",
-    "spanishNotice": "These legal documents are maintained in Spanish for our Mexican jurisdiction. The Spanish version is the authoritative one."
+    "spanishNotice": "These legal documents are maintained in Spanish for our Mexican jurisdiction. The Spanish version is the authoritative one.",
+    "delTitle": "delete your account",
+    "delIntro": "You can delete your dovo account and personal data anytime, free of charge. Here's what gets deleted and how.",
+    "delQueSeBorra": "What is deleted immediately",
+    "delItemPerfil": "Your profile, weight, height, age and other physical and health data.",
+    "delItemNutri": "Your nutrition data: restrictions, allergies, vetoed and favorite foods, budget.",
+    "delItemJuego": "Your check-ins, workouts, levels and your participation in groups and duels.",
+    "delItemLogin": "Your login is disabled and your name and email are anonymized.",
+    "delQueSeConserva": "What we may retain (and why)",
+    "delConservaLegal": "Whatever the law requires us to keep, only for the period that obligation demands.",
+    "delConservaDisoc": "Statistical data already disassociated that, by design, does not identify you and is irreversible.",
+    "delComoLogueado": "Your session is active. You can delete your account right now with the button below (or from Settings → delete account).",
+    "delComoNoLogueado": "To delete your account, sign in and return to this page, or do it from Settings → delete account inside the app.",
+    "delSinAcceso": "Can't sign in? Email privacidad@dovofit.com from your account's address and we'll delete it for you, per our privacy notice.",
+    "delIrLogin": "sign in →",
+    "delVerAviso": "read the privacy notice →"
   },
   "stats": {
     "fue": "Strength",
