@@ -18,7 +18,10 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Sources
+      - path: Sources
+      # explícito como recurso: el privacy manifest debe copiarse al root del .app
+      - path: Sources/PrivacyInfo.xcprivacy
+        buildPhase: resources
     configFiles:
       Debug: Config/Secrets.xcconfig
       Release: Config/Secrets.xcconfig

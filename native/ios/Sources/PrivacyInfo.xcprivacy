@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Privacy Manifest de dovo (requerido para subir a App Store).
+  Solo se declara lo VERIFICADO en vivo (2026-06-17):
+   · NSPrivacyTracking=false: dovo NO rastrea entre apps/empresas (sin ATT).
+   · Required Reason API: UserDefaults (CA92.1) — supabase-swift persiste la
+     sesión ahí; es el ÚNICO required-reason que aplica a nuestro stack
+     (URLSession/Keychain NO son required-reason; no se declaran).
+  La declaración de DATOS RECOLECTADOS (email, salud, user id) vive en la
+  etiqueta de privacidad de App Store Connect — fuente autoritativa — con el
+  texto exacto del checklist docs/specs/2026-06-17-compliance-app-stores.md (6A).
+  Cuando se integre HealthKit (Fase 3) se revisa si hay que sumar algo aquí.
+-->
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>
