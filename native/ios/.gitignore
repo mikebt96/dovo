@@ -1,0 +1,12 @@
+# XcodeGen genera esto — no se versiona
+dovo.xcodeproj/
+
+# secretos reales (se versiona solo el .example)
+Config/Secrets.xcconfig
+
+# Xcode / SPM
+.DS_Store
+xcuserdata/
+*.xcworkspace/xcuserdata/
+.build/
+DerivedData/

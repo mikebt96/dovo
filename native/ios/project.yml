@@ -1,0 +1,47 @@
+# XcodeGen — genera dovo.xcodeproj desde texto (versionable). Miguel corre:
+#   brew install xcodegen && xcodegen generate && open dovo.xcodeproj
+# Versiones del spec docs/specs/2026-06-16-app-nativa-swift-kotlin.md (verificado 2026-06-17).
+name: dovo
+options:
+  bundleIdPrefix: app.dovo
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.48.0"
+
+targets:
+  dovo:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    configFiles:
+      Debug: Config/Secrets.xcconfig
+      Release: Config/Secrets.xcconfig
+    dependencies:
+      - package: Supabase
+        product: Supabase
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.dovo.ios
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.10"
+        GENERATE_INFOPLIST_FILE: YES
+        # las keys fluyen del xcconfig al Info.plist para leerlas en runtime
+        INFOPLIST_KEY_SUPABASE_URL: $(SUPABASE_URL)
+        INFOPLIST_KEY_SUPABASE_PUBLISHABLE_KEY: $(SUPABASE_PUBLISHABLE_KEY)
+    info:
+      path: Sources/App/Info.plist
+      properties:
+        # deep link del callback de auth (magic link / Google)
+        CFBundleURLTypes:
+          - CFBundleURLSchemes: [io.dovo.app]
+        SUPABASE_URL: $(SUPABASE_URL)
+        SUPABASE_PUBLISHABLE_KEY: $(SUPABASE_PUBLISHABLE_KEY)
+        UILaunchScreen:
+          UIColorName: ""
