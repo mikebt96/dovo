@@ -1,0 +1,20 @@
+<!--
+  Mergea esto en tu AndroidManifest.xml generado por Android Studio.
+  El deep link es lo único que Fase 0 necesita (para el magic link).
+  Los permisos de Health Connect y la PermissionsRationaleActivity vienen en
+  Fase 3 (snippet exacto en docs/specs/2026-06-17-compliance-app-stores.md §5).
+-->
+
+<!-- DENTRO de la <activity android:name=".MainActivity"> que ya generó AS,
+     junto al intent-filter LAUNCHER, agrega este intent-filter: -->
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="io.dovo.app" android:host="login-callback" />
+</intent-filter>
+
+<!-- Nota: el scheme/host (io.dovo.app + login-callback) debe coincidir EXACTO
+     con install(Auth){scheme,host} en core/Supabase.kt y con el Redirect URL
+     del dashboard de Supabase (io.dovo.app://login-callback). Los tres iguales
+     o el deep link no regresa. -->
