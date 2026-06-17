@@ -9,15 +9,51 @@ import {
   type ProveedorSalud,
   type TipoConsentimiento,
 } from "@/lib/actions/salud";
+import {
+  iniciarStravaConnect,
+  desconectarStrava,
+  type StravaEstado,
+} from "@/lib/actions/strava";
 
-// F25 · Salud y permisos: consentimiento EXPRESO por toggle dedicado (jamás
-// pre-palomeado — datos sensibles, ley MX). La conexión real a Apple Health /
-// Health Connect llega con la app nativa; aquí se junta la waitlist.
-export default function SaludPermisos({ initial }: { initial: EstadoSalud }) {
+// F25/F28 · Salud y permisos: consentimiento EXPRESO por toggle dedicado
+// (jamás pre-palomeado — datos sensibles, ley MX). Strava SÍ se conecta hoy
+// (OAuth web); Apple Health / Health Connect siguen en waitlist (app nativa).
+export default function SaludPermisos({
+  initial,
+  strava,
+}: {
+  initial: EstadoSalud;
+  strava: StravaEstado;
+}) {
   const t = useTranslations("ajustes");
   const [estado, setEstado] = useState(initial);
+  const [stravaEstado, setStravaEstado] = useState(strava);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+
+  function conectarStrava() {
+    setError(null);
+    start(async () => {
+      const res = await iniciarStravaConnect();
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      window.location.href = res.data.url; // a Strava OAuth
+    });
+  }
+
+  function quitarStrava() {
+    setError(null);
+    start(async () => {
+      const res = await desconectarStrava();
+      if (!res.ok) {
+        setError(t("consentError"));
+        return;
+      }
+      setStravaEstado((s) => ({ ...s, estado: "desconectado" }));
+    });
+  }
 
   function toggle(tipo: TipoConsentimiento) {
     const next = !estado[tipo];
@@ -96,6 +132,37 @@ export default function SaludPermisos({ initial }: { initial: EstadoSalud }) {
                 </button>
               );
             })}
+          </div>
+
+          {/* Strava: conexión REAL en web (F28). conectado / conectar / próximamente */}
+          <div className="mt-4 pt-4 border-t border-ink/10">
+            {stravaEstado.estado === "conectado" ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-[12px] mono lowercase text-signal">
+                  {t("stravaConectado")}
+                </span>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={quitarStrava}
+                  className="text-[11px] mono uppercase tracking-[0.14em] opacity-50 hover:opacity-80 underline decoration-ink/30 disabled:opacity-40"
+                >
+                  {t("stravaDesconectar")}
+                </button>
+              </div>
+            ) : stravaEstado.configured ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={conectarStrava}
+                className="rounded-full px-4 py-2 text-[12px] mono lowercase border border-ink/20 hover:border-signal transition-colors disabled:opacity-70"
+              >
+                {t("stravaConectar")}
+              </button>
+            ) : (
+              <p className="text-[12px] mono lowercase opacity-50">{t("stravaProximamente")}</p>
+            )}
+            <p className="text-[11px] opacity-50 mt-2 leading-relaxed">{t("stravaDesc")}</p>
           </div>
         </div>
       )}

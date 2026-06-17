@@ -195,6 +195,32 @@ Lo único gateado es "personalizar con ia" (equipo disponible, lesiones):
 
 ---
 
+## 🏃 F28 · Strava (opcional — puente de actividad en web mientras llega la app nativa)
+
+Apple Health y Health Connect **solo existen en app nativa** (no hay forma de leerlos desde
+la web). Mientras construimos la app nativa, **Strava** es el puente real: conecta por OAuth
+web y trae carreras/rodadas con distancia, ritmo, FC y resumen — suficiente para validar
+entrenos. Sin tus llaves, la sección de ajustes muestra "strava · próximamente".
+
+1. Entra a **https://www.strava.com/settings/api** y crea una aplicación.
+2. **Authorization Callback Domain** = `dovofit.com` (para dev, una segunda app con
+   `localhost`). Strava solo pide el dominio, no la ruta.
+3. Copia **Client ID** y **Client Secret** y pégalos en Vercel:
+   - `STRAVA_CLIENT_ID=...`
+   - `STRAVA_CLIENT_SECRET=...`
+4. Redeploy. En **Ajustes → salud y permisos** (con el toggle de salud activo) aparecerá
+   **"conectar strava"**. Conéctala con tu cuenta y verifica que quede "strava conectado ✓".
+5. La ruta de callback ya existe (`/auth/strava/callback`) y guarda los tokens en una tabla
+   **service-role-only** (`core.strava_tokens`) — nunca llegan al navegador. Los datos
+   importados son SALUD: van a `core.actividad_metricas` (privados, solo tú) y **jamás a
+   Pulse/inteligencia de premios** (lo prometido en el aviso §6/§8).
+
+> Falta (siguiente iteración, ya con tus llaves probadas): el **sync** que mapea tus
+> actividades de Strava a check-ins automáticos — la lógica de fetch ya está en
+> `lib/strava/client.ts`, falta cablear el botón "sincronizar" / webhook y probarlo en vivo.
+
+---
+
 ## 🔄 Mantener el demo fresco (importante)
 
 Los datos demo se siembran en la **semana actual** (para que el leaderboard "semana" salga

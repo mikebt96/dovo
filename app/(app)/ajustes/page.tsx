@@ -16,6 +16,7 @@ import SignOutButton from "./_components/SignOutButton";
 import CancelarCuentaButton from "./_components/CancelarCuentaButton";
 import { getNotificationPrefs } from "@/lib/actions/push";
 import { getEstadoSalud } from "@/lib/actions/salud";
+import { getStravaEstado } from "@/lib/actions/strava";
 import { isAdminEmail } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,7 @@ export default async function AjustesPage() {
   const duo = await getDuoTier();
   const pushPrefs = await getNotificationPrefs();
   const estadoSalud = (await getEstadoSalud()) ?? { salud: false, ubicacion: false, fuentes: {} };
+  const stravaEstado = await getStravaEstado();
 
   return (
     <main className="min-h-svh max-w-2xl lg:max-w-4xl mx-auto px-6 py-10 bg-papel text-ink">
@@ -82,7 +84,7 @@ export default async function AjustesPage() {
 
       <section className="mb-10">
         <h2 className="display text-xl font-bold lowercase mb-5">{t("saludPermisos")}</h2>
-        <SaludPermisos initial={estadoSalud} />
+        <SaludPermisos initial={estadoSalud} strava={stravaEstado} />
       </section>
 
       <section className="mb-10">

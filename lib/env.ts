@@ -40,6 +40,11 @@ const serverEnvSchema = envSchema.extend({
   VAPID_SUBJECT: z.string().optional(),
   // Consola /admin · emails con acceso, separados por coma (default: Miguel — ver lib/admin.ts).
   ADMIN_EMAILS: z.string().optional(),
+  // F28 Strava · puente de actividad en web (keys-later). Sin CLIENT_ID la UI
+  // muestra "próximamente"; Miguel registra una app en strava.com/settings/api
+  // (callback domain dovofit.com) y pega id/secret en Vercel. Ver SETUP_APIS.
+  STRAVA_CLIENT_ID: z.string().optional(),
+  STRAVA_CLIENT_SECRET: z.string().optional(),
 });
 
 export const publicEnv = envSchema.parse({

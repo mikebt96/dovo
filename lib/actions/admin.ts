@@ -68,6 +68,7 @@ export async function getAdminData(): Promise<AdminData | null> {
     { name: "body scan IA", on: process.env.BODY_SCAN_LIVE === "true" && !!process.env.ANTHROPIC_API_KEY },
     { name: "push (VAPID)", on: !!process.env.VAPID_PUBLIC_KEY && !!process.env.VAPID_PRIVATE_KEY },
     { name: "email (Resend)", on: !!process.env.RESEND_API_KEY },
+    { name: "strava", on: !!process.env.STRAVA_CLIENT_ID && !!process.env.STRAVA_CLIENT_SECRET },
   ];
 
   // Conteos de salud. Cada query checa error (regla del proyecto); un fallo marca dbOk=false.
