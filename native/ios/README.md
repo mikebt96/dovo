@@ -1,7 +1,10 @@
-# dovo iOS — Fase 0 (skeleton + login)
+# dovo iOS — Fase 0 (login) + Fase 1 (lobby)
 
-App nativa SwiftUI. Meta de esta fase: **abre, te logueas con tu cuenta real
-por magic link, y ves tu sesión.** El lobby (trato/apuesta/misiones) es Fase 1.
+App nativa SwiftUI. Tras el login (magic link) entras al **lobby**: tu
+personaje (nivel, racha, los 6 stats), tu dúo y sus miembros, y la apuesta de
+la semana — todo leído en vivo de tu Supabase real (solo lectura; sellar
+apuesta y check-in son fases siguientes). Las columnas se verificaron contra
+el schema antes de escribir los DTOs.
 
 > Recuerda el contrato: **tú compilas y confirmas.** Esta primera compilación
 > casi seguro pide algún ajuste de import/firma que solo se ve en Xcode —
@@ -49,9 +52,10 @@ a la app.
 
 ## Qué dime de vuelta
 
-- ¿Compiló? Si no, pégame el error de Xcode.
-- ¿El login regresó a la app y mostró tu correo?
-- Con eso confirmado, sigo con la **Fase 1 (lobby)** y replico este mismo
-  esqueleto en Android.
+- ¿Compiló? Si no, pégame el error de Xcode (esperable algún ajuste en la
+  primera build — no pude compilar Swift desde mi entorno).
+- ¿El login regresó a la app, y al entrar viste el **lobby** con tu personaje,
+  tu dúo y la apuesta? (con la cuenta demo: demo+ivan@dovofit.com)
+- Con eso confirmado, sigo con check-in + el resto, y replico el lobby en Android.
 
 Versiones y arquitectura: `docs/specs/2026-06-16-app-nativa-swift-kotlin.md`.

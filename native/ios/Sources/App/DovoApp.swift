@@ -13,7 +13,7 @@ struct DovoApp: App {
                         ProgressView().tint(.dvSignal)
                     }
                 } else if supa.session != nil {
-                    HomeView()
+                    LobbyView()
                 } else {
                     SignInView()
                 }
